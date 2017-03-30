@@ -63,7 +63,7 @@ cam_top
    .C_HAS_WE                  (  1                          ),
    .C_MATCH_RESOLUTION_TYPE   (  0                          ),
    .C_MEM_INIT                (  0                          ),
-   .C_MEM_TYPE                (  0                          ),
+   .C_MEM_TYPE                (  1                          ),
    .C_REG_OUTPUTS             (  0                          ),
    .C_TERNARY_MODE            (  1                          ),
    .C_WIDTH                   (  C_TCAM_DATA_WIDTH          )
