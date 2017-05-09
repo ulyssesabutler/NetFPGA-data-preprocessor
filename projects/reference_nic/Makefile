@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2015 Noa Zilberman
+# Modified by Salvator Galea
 # All rights reserved.
 #
 #  File:
@@ -54,6 +55,6 @@ all:    clean
 clean:
 	make -C ${HW} distclean
 	make -C ${SW} distclean
-	rm -rfv vivado*;\
+	rm -rfv vivado*
 
 

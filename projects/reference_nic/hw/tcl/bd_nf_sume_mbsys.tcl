@@ -1,5 +1,7 @@
 #
-# Copyright (c) 2015 University of Cambridge All rights reserved.
+# Copyright (c) 2015 University of Cambridge
+# Modified by Salvator Galea
+# All rights reserved.
 #
 # This software was developed by Stanford University and the University of Cambridge Computer Laboratory 
 # under National Science Foundation under Grant No. CNS-0855268,
@@ -81,7 +83,7 @@ proc create_hier_cell_microblaze_0_local_memory { parentCell nameHier } {
    set ilmb_v10 [ create_bd_cell -type ip -vlnv xilinx.com:ip:lmb_v10:3.0 ilmb_v10 ]
 
    # Create instance: lmb_bram, and set properties
-   set lmb_bram [ create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.2 lmb_bram ]
+   set lmb_bram [ create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.3 lmb_bram ]
    set_property -dict [ list CONFIG.Memory_Type {True_Dual_Port_RAM} CONFIG.use_bram_block {BRAM_Controller}  ] $lmb_bram
 
    # Create interface connections
@@ -148,7 +150,7 @@ proc create_hier_cell_mbsys { parentCell nameHier } {
    set mdm_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:mdm:3.2 mdm_1 ]
 
    # Create instance: microblaze_0, and set properties
-   set microblaze_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:microblaze:9.4 microblaze_0 ]
+   set microblaze_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:microblaze:10.0 microblaze_0 ]
    set_property -dict [ list CONFIG.C_DEBUG_ENABLED {1} CONFIG.C_D_AXI {1} CONFIG.C_D_LMB {1} CONFIG.C_I_LMB {1}  ] $microblaze_0
 
    # Create instance: microblaze_0_axi_intc, and set properties

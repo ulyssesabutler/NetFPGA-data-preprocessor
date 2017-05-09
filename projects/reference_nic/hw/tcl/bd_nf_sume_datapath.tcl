@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2015 University of Cambridge
+# Modified by Salvator Galea
 # All rights reserved.
 #
 # This software was developed by Stanford University and the University of Cambridge Computer Laboratory 
@@ -103,47 +104,46 @@ proc create_hier_cell_nf_sume_datapath { parentCell coreName tdataWidth} {
    set_property -dict [list CONFIG.C_M_AXIS_DATA_WIDTH $tdataWidth] $nic_output_port_lookup_0
    set_property -dict [list CONFIG.C_S_AXIS_DATA_WIDTH $tdataWidth] $nic_output_port_lookup_0
 
-   set output_queues_0 [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:output_queues:1.00 output_queues_0]	
+   set output_queues_0 [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:output_queues:1.00 output_queues_0]
    set_property -dict [list CONFIG.C_M_AXIS_DATA_WIDTH $tdataWidth] $output_queues_0
    set_property -dict [list CONFIG.C_S_AXIS_DATA_WIDTH $tdataWidth] $output_queues_0
  
    # External port connections  
-   # axis	 
+   # axis
    connect_bd_net [get_bd_pins axis_aclk] [get_bd_pins input_arbiter_0/axis_aclk]  
    connect_bd_net [get_bd_pins axis_aclk] [get_bd_pins nic_output_port_lookup_0/axis_aclk]
-   connect_bd_net [get_bd_pins axis_aclk] [get_bd_pins output_queues_0/axis_aclk]	
+   connect_bd_net [get_bd_pins axis_aclk] [get_bd_pins output_queues_0/axis_aclk]
    
    connect_bd_net [get_bd_pins axis_resetn] [get_bd_pins input_arbiter_0/axis_resetn]  
    connect_bd_net [get_bd_pins axis_resetn] [get_bd_pins nic_output_port_lookup_0/axis_resetn]
    connect_bd_net [get_bd_pins axis_resetn] [get_bd_pins output_queues_0/axis_resetn]
 
    # interfaces
-   connect_bd_intf_net [get_bd_intf_pin s_axis_0] [get_bd_intf_pins input_arbiter_0/s_axis_0] 	  
+   connect_bd_intf_net [get_bd_intf_pin s_axis_0] [get_bd_intf_pins input_arbiter_0/s_axis_0]
    connect_bd_intf_net [get_bd_intf_pin s_axis_1] [get_bd_intf_pins input_arbiter_0/s_axis_1] 
    connect_bd_intf_net [get_bd_intf_pin s_axis_2] [get_bd_intf_pins input_arbiter_0/s_axis_2] 
    connect_bd_intf_net [get_bd_intf_pin s_axis_3] [get_bd_intf_pins input_arbiter_0/s_axis_3] 
    connect_bd_intf_net [get_bd_intf_pin s_axis_4] [get_bd_intf_pins input_arbiter_0/s_axis_4] 
 
-   connect_bd_intf_net [get_bd_intf_pin m_axis_0] [get_bd_intf_pins output_queues_0/m_axis_0] 	  
+   connect_bd_intf_net [get_bd_intf_pin m_axis_0] [get_bd_intf_pins output_queues_0/m_axis_0]
    connect_bd_intf_net [get_bd_intf_pin m_axis_1] [get_bd_intf_pins output_queues_0/m_axis_1] 
    connect_bd_intf_net [get_bd_intf_pin m_axis_2] [get_bd_intf_pins output_queues_0/m_axis_2] 
    connect_bd_intf_net [get_bd_intf_pin m_axis_3] [get_bd_intf_pins output_queues_0/m_axis_3] 
    connect_bd_intf_net [get_bd_intf_pin m_axis_4] [get_bd_intf_pins output_queues_0/m_axis_4]  
   
-   # axi-lite 	     
+   # axi-lite
    connect_bd_net [get_bd_pins s_axi_aclk] [get_bd_pins input_arbiter_0/S_AXI_ACLK] 
    connect_bd_net [get_bd_pins s_axi_aclk] [get_bd_pins nic_output_port_lookup_0/S_AXI_ACLK] 
    connect_bd_net [get_bd_pins s_axi_aclk] [get_bd_pins output_queues_0/S_AXI_ACLK] 
- 	
+
    connect_bd_net [get_bd_pins s_axi_aresetn] [get_bd_pins input_arbiter_0/S_AXI_ARESETN]
    connect_bd_net [get_bd_pins s_axi_aresetn] [get_bd_pins nic_output_port_lookup_0/S_AXI_ARESETN]
    connect_bd_net [get_bd_pins s_axi_aresetn] [get_bd_pins output_queues_0/S_AXI_ARESETN]
 
    # interfaces
-   connect_bd_intf_net [get_bd_intf_pins s_axi_lite_0] [get_bd_intf_pins input_arbiter_0/S_AXI] 	  
+   connect_bd_intf_net [get_bd_intf_pins s_axi_lite_0] [get_bd_intf_pins input_arbiter_0/S_AXI]
    connect_bd_intf_net [get_bd_intf_pins s_axi_lite_1] [get_bd_intf_pins nic_output_port_lookup_0/S_AXI] 
    connect_bd_intf_net [get_bd_intf_pins s_axi_lite_2] [get_bd_intf_pins output_queues_0/S_AXI] 
-		
       
    # Internal connection
    connect_bd_intf_net [get_bd_intf_pins input_arbiter_0/m_axis] [get_bd_intf_pins nic_output_port_lookup_0/s_axis]

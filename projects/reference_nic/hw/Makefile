@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2015 Noa Zilberman, Georgina Kalogeridou
+# Modified by Salvator Galea
 # All rights reserved.
 #
 #  File:
@@ -58,45 +59,45 @@ all:
 .PHONY: clean project export_to_sdk load_elf  
 
 project: identifier
-	echo "Create reference project under folder /project";\
-	if test -d project/; then\
+	echo "Create reference project under folder /project"; \
+	@if test -d project/; then \
 		echo "Project already exists"; \
 	else \
-		vivado -mode batch -source tcl/${PROJ}_bd.tcl;\
-		if [ -f patch/${PROJ}.patch ]; then\
-			patch -p1 < patch/${PROJ}.patch;\
-		fi;\
-	fi;\
+		vivado -mode batch -source tcl/${PROJ}_bd.tcl; \
+		if [ -f patch/${PROJ}.patch ]; then \
+			patch -p1 < patch/${PROJ}.patch; \
+		fi; \
+	fi
 
 projectgui:
-	echo "Create reference project under folder /project";\
-	if test -d project/; then\
+	echo "Create reference project under folder /project"; \
+	@if test -d project/; then \
 		echo "Project already exists"; \
 	else \
-		vivado -mode gui -source tcl/${PROJ}_bd.tcl;\
-		if [ -f patch/${PROJ}.patch ]; then\
-			patch -p1 < patch/${PROJ}.patch;\
-		fi;\
-	fi;\
+		vivado -mode gui -source tcl/${PROJ}_bd.tcl; \
+		if [ -f patch/${PROJ}.patch ]; then \
+			patch -p1 < patch/${PROJ}.patch; \
+		fi; \
+	fi
 
 export_to_sdk:
-	if test -d project; then\
-		echo "export ${PROJ} project to SDK"; \
-		vivado -mode tcl -source tcl/export_hardware_bd.tcl -tclargs ${PROJ};\
+	@if test -d project; then \
+		echo "Export ${PROJ} project to SDK"; \
+		vivado -mode tcl -source tcl/export_hardware_bd.tcl -tclargs ${PROJ}; \
 	else \
-		echo "Project ${PROJ} does not exist.";\
-		echo "Please run \"make project\" to create and build the project first";\
-	fi;\
+		echo "Project ${PROJ} does not exist."; \
+		echo "Please run \"make project\" to create and build the project first"; \
+	fi
 
 load_elf:
 	@if [ ! -d ../bitfiles ]; then mkdir ../bitfiles; fi;
-	if test -d project; then\
-		echo "export ${PROJ} project to SDK"; \
-		vivado -mode tcl -source tcl/load_elf_bd.tcl -tclargs ${PROJ};\
+	@if test -d project; then \
+		echo "Export ${PROJ} project to SDK"; \
+		vivado -mode tcl -source tcl/load_elf_bd.tcl -tclargs ${PROJ}; \
 	else \
 		echo "Project ${PROJ} does not exist.";\
-		echo "Please run \"make project\" to create and build the project first";\
-	fi;\
+		echo "Please run \"make project\" to create and build the project first"; \
+	fi
 
 identifier:
 	rm -f ../hw/create_ip/id_rom16x32.coe
@@ -125,14 +126,14 @@ sim: simclean identifier
 	$(SUME_FOLDER)/tools/scripts/nf_sim_reconcile_axi_logs.py
 	$(SUME_FOLDER)/tools/scripts/nf_sim_registers_axi_logs.py
  
-reg: 	
+reg:
 	vivado -mode batch -source $(NF_DESIGN_DIR)/hw/tcl/reference_nic_defines.tcl
-	vivado -mode batch -source $(NF_DESIGN_DIR)/hw/tcl/export_registers.tcl	
+	vivado -mode batch -source $(NF_DESIGN_DIR)/hw/tcl/export_registers.tcl
 	cd ../sw/embedded/src  && cp ../../../../../tools/scripts/xparam2regdefines.py . && python xparam2regdefines.py
 	cd ../sw/embedded/src  && rm -f xparam2regdefines.py && mv reg_defines.h ../
 	cd ../sw/embedded && cp ../../../../tools/scripts/python_parser.py . && python python_parser.py
 	cd ../sw/embedded && rm -f python_parser.py && mv reg_defines.py ../../test/reg_defines_reference_nic.py 
-	
+
 simgui: simclean identifier
 	cp -f $(NF_DESIGN_DIR)/test/reg_defines_reference_nic.py $(NF_DESIGN_DIR)/test/${TESTNAME}/reg_defines_reference_nic.py
 	vivado -mode gui -source ../../../projects/${PROJ}/hw/tcl/reference_nic_sim_bd.tcl -tclargs ${TESTNAME}
@@ -160,18 +161,18 @@ simclean:
 distclean: clean
 
 clean:	simclean
-		rm -rfv project;\
-		rm -rfv ../sw/embedded/project;\
-		rm -rfv vivado*;\
-		rm -rfv *.log;\
-		rm -rfv .Xil;\
-		rm -rfv ..rej;\
-		rm -rfv .srcs;\
-		rm -rfv webtalk*;\
-		rm -rfv *.*~;\
-		rm -rfv ip_repo;\
-		rm -rfv ip_proj;\
-		rm -rfv std;\
-		rm -rfv proj*;\
+	rm -rfv project
+	rm -rfv ../sw/embedded/project
+	rm -rfv vivado*
+	rm -rfv *.log
+	rm -rfv .Xil
+	rm -rfv ..rej
+	rm -rfv .srcs
+	rm -rfv webtalk*
+	rm -rfv *.*~
+	rm -rfv ip_repo
+	rm -rfv ip_proj
+	rm -rfv std
+	rm -rfv proj*
                 
 
