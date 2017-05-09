@@ -35,14 +35,13 @@
 #
 #  Description:
 #        This makefile is used to generate and compile SDK project for NetFPGA reference projects.
-#
+#        The first argument is target
 
-# the first argument is target
 
-SCRIPTS_DIR  = tools/
-LIB_REPO = lib/hw/ip_repo
-LIB_HW_DIR  = lib/hw
-LIB_SW_DIR  = lib/sw
+SCRIPTS_DIR	= tools/
+LIB_REPO	= lib/hw/ip_repo
+LIB_HW_DIR	= lib/hw
+LIB_SW_DIR	= lib/sw
 LIB_HW_DIR_INSTANCES := $(shell cd $(LIB_HW_DIR) && find . -maxdepth 4 -type d)
 LIB_HW_DIR_INSTANCES := $(basename $(patsubst ./%,%,$(LIB_HW_DIR_INSTANCES)))
 LIB_SW_DIR_INSTANCES := $(shell cd $(LIB_SW_DIR) && find . -maxdepth 4 -type d)
@@ -56,20 +55,22 @@ PROJECTS_DIR = projects
 PROJECTS_DIR_INSTANCES := $(shell cd $(PROJECTS_DIR) && find . -maxdepth 1 -type d)
 PROJECTS_DIR_INSTANCES := $(basename $(patsubst ./%,%,$(PROJECTS_DIR_INSTANCES)))
 
-DEVPROJECTS_DIR = dev-projects
-DEVPROJECTS_DIR_INSTANCES := $(shell cd $(DEVPROJECTS_DIR) && find . -maxdepth 1 -type d)
-DEVPROJECTS_DIR_INSTANCES := $(basename $(patsubst ./%,%,$(DEVPROJECTS_DIR_INSTANCES)))
-
-
+CONTRIBPROJECTS_DIR = contrib-projects
+CONTRIBPROJECTS_DIR_INSTANCES := $(shell cd $(CONTRIBPROJECTS_DIR) && find . -maxdepth 1 -type d)
+CONTRIBPROJECTS_DIR_INSTANCES := $(basename $(patsubst ./%,%,$(CONTRIBPROJECTS_DIR_INSTANCES)))
 
 RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 $(eval $(RUN_ARGS):;@:)
+
+
 all:	clean sume hwtestlib 
 
 clean: libclean toolsclean projectsclean hwtestlibclean swclean
-	rm -rfv *.*~
+	@rm -rfv *.*~
+	@rm -rfv ip_proj
+	@rm -rfv ip_user_files
 
-#sume:	devprojects
+
 sume:
 	make -C $(LIB_HW_DIR)/contrib/cores/nf_endianess_manager_v1_0_0/
 	make -C $(LIB_HW_DIR)/std/cores/fallthrough_small_fifo_v1_0_0/
@@ -79,92 +80,99 @@ sume:
 	make -C $(LIB_HW_DIR)/std/cores/switch_output_port_lookup_v1_0_1/
 	make -C $(LIB_HW_DIR)/std/cores/switch_lite_output_port_lookup_v1_0_0/
 	make -C $(LIB_HW_DIR)/std/cores/nic_output_port_lookup_v1_0_0/
-	make -C $(LIB_HW_DIR)/std/cores/nf_axis_converter_v1_0_0/.
+	make -C $(LIB_HW_DIR)/std/cores/nf_axis_converter_v1_0_0/
 	make -C $(LIB_HW_DIR)/std/cores/nf_riffa_dma_v1_0_0/
 	make -C $(LIB_HW_DIR)/std/cores/barrier_v1_0_0/
 	make -C $(LIB_HW_DIR)/std/cores/axis_sim_record_v1_0_0/
-	make -C $(LIB_HW_DIR)/std/cores/axis_sim_stim_v1_0_0/	
+	make -C $(LIB_HW_DIR)/std/cores/axis_sim_stim_v1_0_0/
 	make -C $(LIB_HW_DIR)/std/cores/axi_sim_transactor_v1_0_0/
 	make -C $(LIB_HW_DIR)/std/cores/barrier_gluelogic_v1_0_0/
 	make -C $(LIB_HW_DIR)/std/cores/identifier_v1_0_0/
 	make -C $(LIB_HW_DIR)/std/cores/nf_10ge_attachment_v1_0_0/
 	make -C $(LIB_HW_DIR)/std/cores/nf_10ge_interface_shared_v1_0_0/
 	make -C $(LIB_HW_DIR)/std/cores/nf_10ge_interface_v1_0_0/
-	make -C $(LIB_HW_DIR)/contrib/cores/nfmac_10ge_interface_shared_v1_0_0/
-	make -C $(LIB_HW_DIR)/contrib/cores/nfmac_10ge_interface_v1_0_0/
+#	make -C $(LIB_HW_DIR)/contrib/cores/nfmac_10ge_interface_shared_v1_0_0/
+#	make -C $(LIB_HW_DIR)/contrib/cores/nfmac_10ge_interface_v1_0_0/
 	@echo "/////////////////////////////////////////";
-	@echo "//Library cores created.";
+	@echo "//\tLibrary cores created.";
 	@echo "/////////////////////////////////////////";
 
-
-	
 
 libclean:
-	rm -rf $(LIB_REPO)
-	for lib in $(LIB_HW_DIR_INSTANCES) ; do \
-					if test -f $(LIB_HW_DIR)/$$lib/Makefile; \
-						then $(MAKE) -C $(LIB_HW_DIR)/$$lib clean; \
-					fi; \
+	@rm -rf $(LIB_REPO)
+	@for lib in $(LIB_HW_DIR_INSTANCES) ; do \
+		if test -f $(LIB_HW_DIR)/$$lib/Makefile; then \
+			$(MAKE) -C $(LIB_HW_DIR)/$$lib clean; \
+		fi; \
 	done;
 	@echo "/////////////////////////////////////////";
-	@echo "//Library cores cleaned.";
+	@echo "//\tLibrary cores cleaned.";
 	@echo "/////////////////////////////////////////";
 
 
 toolsclean:
-	if test -f $(TOOLS_DIR)/Makefile; \
-		then $(MAKE) -C $(TOOLS_DIR) clean; \
-	fi; \
-
+	@if test -f $(TOOLS_DIR)/Makefile; then \
+		$(MAKE) -C $(TOOLS_DIR) clean; \
+	fi;
 	@echo "/////////////////////////////////////////";
-	@echo "//tools cleaned.";
+	@echo "//\tTools cleaned.";
 	@echo "/////////////////////////////////////////";
 
 
 projectsclean:
-	for lib in $(PROJECTS_DIR_INSTANCES) ; do \
-		if test -f $(PROJECTS_DIR)/$$lib/Makefile; \
-			then $(MAKE) -C $(PROJECTS_DIR)/$$lib/ clean; \
+	@for lib in $(PROJECTS_DIR_INSTANCES) ; do \
+		if test -f $(PROJECTS_DIR)/$$lib/Makefile; then \
+			$(MAKE) -C $(PROJECTS_DIR)/$$lib/ clean; \
 		fi; \
 	done;
 	@echo "/////////////////////////////////////////";
-	@echo "//projects cleaned.";
+	@echo "//\tProjects cleaned.";
 	@echo "/////////////////////////////////////////";
 
 
-devprojectsclean:
-	for lib in $(DEVPROJECTS_DIR_INSTANCES) ; do \
-		if test -f $(DEVPROJECTS_DIR)/$$lib/Makefile; \
-			then $(MAKE) -C $(DEVPROJECTS_DIR)/$$lib/ clean; \
+contribprojectsclean:
+	@for lib in $(CONTRIBPROJECTS_DIR_INSTANCES) ; do \
+		if test -f $(CONTRIBPROJECTS_DIR)/$$lib/Makefile; then \
+			$(MAKE) -C $(CONTRIBPROJECTS_DIR)/$$lib/ clean; \
 		fi; \
 	done;
 	@echo "/////////////////////////////////////////";
-	@echo "//devprojects cleaned.";
+	@echo "//\tContrib-projects cleaned.";
 	@echo "/////////////////////////////////////////";
 
-devprojects:
-	for lib in $(DEVPROJECTS_DIR_INSTANCES) ; do \
-		if test -f $(DEVPROJECTS_DIR)/$$lib/Makefile; \
-			then $(MAKE) -C $(DEVPROJECTS_DIR)/$$lib/; \
+
+contribprojects:
+	@for lib in $(CONTRIBPROJECTS_DIR_INSTANCES) ; do \
+		if test -f $(CONTRIBPROJECTS_DIR)/$$lib/Makefile; then \
+			$(MAKE) -C $(CONTRIBPROJECTS_DIR)/$$lib/; \
 		fi; \
 	done;
 	@echo "/////////////////////////////////////////";
-	@echo "//devprojects cleaned.";
+	@echo "//\tContrib-projects created.";
 	@echo "/////////////////////////////////////////";
+
 
 hwtestlib:
 	$(MAKE) -C lib/sw/std/hwtestlib
+	@echo "/////////////////////////////////////////";
+	@echo "//\tHW test Library created.";
+	@echo "/////////////////////////////////////////";
+
 
 hwtestlibclean:
 	$(MAKE) -C lib/sw/std/hwtestlib clean
+	@echo "/////////////////////////////////////////";
+	@echo "//\tHW test Library cleaned.";
+	@echo "/////////////////////////////////////////";
+
 
 swclean:
-	for swlib in $(LIB_SW_DIR_INSTANCES) ; do \
-		if test -f $(LIB_SW_DIR)/$$swlib/Makefile; \
-			then $(MAKE) -C $(LIB_SW_DIR)/$$swlib clean; \
+	@for swlib in $(LIB_SW_DIR_INSTANCES) ; do \
+		if test -f $(LIB_SW_DIR)/$$swlib/Makefile; then \
+			$(MAKE) -C $(LIB_SW_DIR)/$$swlib clean; \
 		fi; \
 	done;
 	@echo "/////////////////////////////////////////";
-	@echo "//SW Library cleaned.";
+	@echo "//\tSW Library cleaned.";
 	@echo "/////////////////////////////////////////";
 

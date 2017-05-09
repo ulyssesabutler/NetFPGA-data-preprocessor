@@ -34,6 +34,7 @@
 #
 
 # Connect to Digilent Cable on localhost:3121
+open_hw
 connect_hw_server -url localhost:3121
 current_hw_target [get_hw_targets */xilinx_tcf/Digilent/*]
 open_hw_target
