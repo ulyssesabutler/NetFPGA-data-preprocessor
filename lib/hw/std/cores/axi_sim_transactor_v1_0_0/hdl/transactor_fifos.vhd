@@ -50,8 +50,8 @@ use IEEE.STD_LOGIC_1164.all;
 use std.textio.all;
 
 library xil_defaultlib;
-library lib_srl_fifo_v1_0;
-use lib_srl_fifo_v1_0.all;
+library lib_srl_fifo_v1_0_2;
+use lib_srl_fifo_v1_0_2.all;
 
 entity transactor_fifos is
     port (
@@ -158,7 +158,7 @@ begin
 
 
 
-    int_w_addr: entity lib_srl_fifo_v1_0.srl_fifo_f
+    int_w_addr: entity lib_srl_fifo_v1_0_2.srl_fifo_f
         generic map (
             C_DWIDTH => w_req_addr_data'length,
             C_DEPTH  => 16)
@@ -175,7 +175,7 @@ begin
             FIFO_Empty => int_w_addr_empty,
             Addr       => open);
 
-    axi_w_addr: entity lib_srl_fifo_v1_0.srl_fifo_f
+    axi_w_addr: entity lib_srl_fifo_v1_0_2.srl_fifo_f
         generic map (
             C_DWIDTH => w_req_addr'length,
             C_DEPTH  => 16)
@@ -192,7 +192,7 @@ begin
             FIFO_Empty => axi_w_addr_empty,
             Addr       => open);
 
-    axi_w_data: entity lib_srl_fifo_v1_0.srl_fifo_f
+    axi_w_data: entity lib_srl_fifo_v1_0_2.srl_fifo_f
         generic map (
             C_DWIDTH => w_req_data_strb'length,
             C_DEPTH  => 16)
@@ -233,7 +233,7 @@ begin
     
     int_r_re    <= M_AXI_RVALID and not int_r_addr_empty;
 
-    int_r_addr: entity lib_srl_fifo_v1_0.srl_fifo_f
+    int_r_addr: entity lib_srl_fifo_v1_0_2.srl_fifo_f
         generic map (
             C_DWIDTH => r_req_addr'length,
             C_DEPTH  => 16)
@@ -250,7 +250,7 @@ begin
             FIFO_Empty => int_r_addr_empty,
             Addr       => open);
 
-    axi_r_addr: entity lib_srl_fifo_v1_0.srl_fifo_f
+    axi_r_addr: entity lib_srl_fifo_v1_0_2.srl_fifo_f
         generic map (
             C_DWIDTH => r_req_addr'length,
             C_DEPTH  => 16)

@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2015 Noa Zilberman
+# Modified by Salvator Galea
 # All rights reserved.
 #
 # This software was developed by
@@ -42,9 +43,10 @@ set lib_name NetFPGA
 #####################################
 # Project Settings
 #####################################
-create_project -name ${design} -force -dir "./${proj_dir}" -part ${device} 
+create_project -name ${design} -force -dir "./${proj_dir}" -part ${device} -ip
 set_property source_mgmt_mode All [current_project]  
 set_property top ${top} [current_fileset]
+set_property ip_repo_paths $::env(SUME_FOLDER)/lib/hw/  [current_fileset]
 puts "Creating AXIS Converter IP"
 # Project Constraints
 #####################################
@@ -69,69 +71,69 @@ set_property version ${ip_version} [ipx::current_core]
 set_property display_name ${design} [ipx::current_core]
 set_property description ${design} [ipx::current_core]
 
-ipx::add_subcore NetFPGA:NetFPGA:fallthrough_small_fifo:1.00 [ipx::get_file_groups xilinx_verilogsynthesis -of_objects [ipx::current_core]]
-ipx::add_subcore NetFPGA:NetFPGA:fallthrough_small_fifo:1.00 [ipx::get_file_groups xilinx_verilogbehavioralsimulation -of_objects [ipx::current_core]]
+ipx::add_subcore NetFPGA:NetFPGA:fallthrough_small_fifo:1.00 [ipx::get_file_groups xilinx_anylanguagesynthesis -of_objects [ipx::current_core]]
+ipx::add_subcore NetFPGA:NetFPGA:fallthrough_small_fifo:1.00 [ipx::get_file_groups xilinx_anylanguagebehavioralsimulation -of_objects [ipx::current_core]]
 ipx::infer_user_parameters [ipx::current_core]
 
 ipx::add_user_parameter {C_M_AXIS_DATA_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_M_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property display_name {C_M_AXIS_DATA_WIDTH} [ipx::get_user_parameter C_M_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property value {64} [ipx::get_user_parameter C_M_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_M_AXIS_DATA_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_M_AXIS_DATA_WIDTH]
+set_property display_name {C_M_AXIS_DATA_WIDTH} [ipx::get_user_parameters C_M_AXIS_DATA_WIDTH]
+set_property value {64} [ipx::get_user_parameters C_M_AXIS_DATA_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_M_AXIS_DATA_WIDTH]
 
 ipx::add_user_parameter {C_S_AXIS_DATA_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_S_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property display_name {C_S_AXIS_DATA_WIDTH} [ipx::get_user_parameter C_S_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property value {256} [ipx::get_user_parameter C_S_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_S_AXIS_DATA_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_S_AXIS_DATA_WIDTH]
+set_property display_name {C_S_AXIS_DATA_WIDTH} [ipx::get_user_parameters C_S_AXIS_DATA_WIDTH]
+set_property value {256} [ipx::get_user_parameters C_S_AXIS_DATA_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_S_AXIS_DATA_WIDTH]
 
 ipx::add_user_parameter {C_M_AXIS_TUSER_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_M_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property display_name {C_M_AXIS_TUSER_WIDTH} [ipx::get_user_parameter C_M_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property value {128} [ipx::get_user_parameter C_M_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_M_AXIS_TUSER_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_M_AXIS_TUSER_WIDTH]
+set_property display_name {C_M_AXIS_TUSER_WIDTH} [ipx::get_user_parameters C_M_AXIS_TUSER_WIDTH]
+set_property value {128} [ipx::get_user_parameters C_M_AXIS_TUSER_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_M_AXIS_TUSER_WIDTH]
 
 ipx::add_user_parameter {C_S_AXIS_TUSER_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_S_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property display_name {C_S_AXIS_TUSER_WIDTH} [ipx::get_user_parameter C_S_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property value {128} [ipx::get_user_parameter C_S_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_S_AXIS_TUSER_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_S_AXIS_TUSER_WIDTH]
+set_property display_name {C_S_AXIS_TUSER_WIDTH} [ipx::get_user_parameters C_S_AXIS_TUSER_WIDTH]
+set_property value {128} [ipx::get_user_parameters C_S_AXIS_TUSER_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_S_AXIS_TUSER_WIDTH]
 
 ipx::add_user_parameter {C_LEN_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_LEN_WIDTH [ipx::current_core]]
-set_property display_name {C_LEN_WIDTH} [ipx::get_user_parameter C_LEN_WIDTH [ipx::current_core]]
-set_property value {16} [ipx::get_user_parameter C_LEN_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_LEN_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_LEN_WIDTH]
+set_property display_name {C_LEN_WIDTH} [ipx::get_user_parameters C_LEN_WIDTH]
+set_property value {16} [ipx::get_user_parameters C_LEN_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_LEN_WIDTH]
 
 ipx::add_user_parameter {C_SPT_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_SPT_WIDTH [ipx::current_core]]
-set_property display_name {C_SPT_WIDTH} [ipx::get_user_parameter C_SPT_WIDTH [ipx::current_core]]
-set_property value {8} [ipx::get_user_parameter C_SPT_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_SPT_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_SPT_WIDTH]
+set_property display_name {C_SPT_WIDTH} [ipx::get_user_parameters C_SPT_WIDTH]
+set_property value {8} [ipx::get_user_parameters C_SPT_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_SPT_WIDTH]
 
 ipx::add_user_parameter {C_DPT_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_DPT_WIDTH [ipx::current_core]]
-set_property display_name {C_DPT_WIDTH} [ipx::get_user_parameter C_DPT_WIDTH [ipx::current_core]]
-set_property value {8} [ipx::get_user_parameter C_DPT_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_DPT_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_DPT_WIDTH]
+set_property display_name {C_DPT_WIDTH} [ipx::get_user_parameters C_DPT_WIDTH]
+set_property value {8} [ipx::get_user_parameters C_DPT_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_DPT_WIDTH]
 
 ipx::add_user_parameter {C_DEFAULT_VALUE_ENABLE} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_DEFAULT_VALUE_ENABLE [ipx::current_core]]
-set_property display_name {C_DEFAULT_VALUE_ENABLE} [ipx::get_user_parameter C_DEFAULT_VALUE_ENABLE [ipx::current_core]]
-set_property value {0} [ipx::get_user_parameter C_DEFAULT_VALUE_ENABLE [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_DEFAULT_VALUE_ENABLE [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_DEFAULT_VALUE_ENABLE]
+set_property display_name {C_DEFAULT_VALUE_ENABLE} [ipx::get_user_parameters C_DEFAULT_VALUE_ENABLE]
+set_property value {0} [ipx::get_user_parameters C_DEFAULT_VALUE_ENABLE]
+set_property value_format {long} [ipx::get_user_parameters C_DEFAULT_VALUE_ENABLE]
 
 ipx::add_user_parameter {C_DEFAULT_SRC_PORT} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_DEFAULT_SRC_PORT [ipx::current_core]]
-set_property display_name {C_DEFAULT_SRC_PORT} [ipx::get_user_parameter C_DEFAULT_SRC_PORT [ipx::current_core]]
-set_property value {0} [ipx::get_user_parameter C_DEFAULT_SRC_PORT [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_DEFAULT_SRC_PORT [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_DEFAULT_SRC_PORT]
+set_property display_name {C_DEFAULT_SRC_PORT} [ipx::get_user_parameters C_DEFAULT_SRC_PORT]
+set_property value {0} [ipx::get_user_parameters C_DEFAULT_SRC_PORT]
+set_property value_format {long} [ipx::get_user_parameters C_DEFAULT_SRC_PORT]
 
 ipx::add_user_parameter {C_DEFAULT_DST_PORT} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_DEFAULT_DST_PORT [ipx::current_core]]
-set_property display_name {C_DEFAULT_DST_PORT} [ipx::get_user_parameter C_DEFAULT_DST_PORT [ipx::current_core]]
-set_property value {0} [ipx::get_user_parameter C_DEFAULT_DST_PORT [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_DEFAULT_DST_PORT [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_DEFAULT_DST_PORT]
+set_property display_name {C_DEFAULT_DST_PORT} [ipx::get_user_parameters C_DEFAULT_DST_PORT]
+set_property value {0} [ipx::get_user_parameters C_DEFAULT_DST_PORT]
+set_property value_format {long} [ipx::get_user_parameters C_DEFAULT_DST_PORT]
 
 ipx::check_integrity [ipx::current_core]
 ipx::save_core [ipx::current_core]

@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2015 Noa Zilberman
+# Modified by Salvator Galea
 # All rights reserved.
 #
 # This software was developed by
@@ -67,25 +68,26 @@ set_property taxonomy {{/NetFPGA/Generic}} [ipx::current_core]
 set_property version ${ip_version} [ipx::current_core]
 set_property display_name ${design} [ipx::current_core]
 set_property description ${design} [ipx::current_core]
+
 ipx::infer_user_parameters [ipx::current_core]
 
 ipx::add_user_parameter {WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter WIDTH [ipx::current_core]]
-set_property display_name {WIDTH} [ipx::get_user_parameter WIDTH [ipx::current_core]]
-set_property value {72} [ipx::get_user_parameter WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters WIDTH]
+set_property display_name {WIDTH} [ipx::get_user_parameters WIDTH]
+set_property value {72} [ipx::get_user_parameters WIDTH]
+set_property value_format {long} [ipx::get_user_parameters WIDTH]
 
 ipx::add_user_parameter {MAX_DEPTH_BITS} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter MAX_DEPTH_BITS [ipx::current_core]]
-set_property display_name {MAX_DEPTH_BITS} [ipx::get_user_parameter MAX_DEPTH_BITS [ipx::current_core]]
-set_property value {3} [ipx::get_user_parameter MAX_DEPTH_BITS [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter MAX_DEPTH_BITS [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters MAX_DEPTH_BITS]
+set_property display_name {MAX_DEPTH_BITS} [ipx::get_user_parameters MAX_DEPTH_BITS]
+set_property value {3} [ipx::get_user_parameters MAX_DEPTH_BITS]
+set_property value_format {long} [ipx::get_user_parameters MAX_DEPTH_BITS]
 
 ipx::add_user_parameter {PROG_FULL_THRESHOLD} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter PROG_FULL_THRESHOLD [ipx::current_core]]
-set_property display_name {PROG_FULL_THRESHOLD} [ipx::get_user_parameter PROG_FULL_THRESHOLD [ipx::current_core]]
-set_property value {2} [ipx::get_user_parameter PROG_FULL_THRESHOLD [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter PROG_FULL_THRESHOLD [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters PROG_FULL_THRESHOLD]
+set_property display_name {PROG_FULL_THRESHOLD} [ipx::get_user_parameters PROG_FULL_THRESHOLD]
+set_property value {2} [ipx::get_user_parameters PROG_FULL_THRESHOLD]
+set_property value_format {long} [ipx::get_user_parameters PROG_FULL_THRESHOLD]
 
 ipx::check_integrity [ipx::current_core]
 ipx::save_core [ipx::current_core]

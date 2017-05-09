@@ -36,23 +36,23 @@
 
 module router_output_port_lookup
 #(
-    // -- Master AXI Stream Data Width
-    parameter C_M_AXIS_DATA_WIDTH  = 256,
-    parameter C_S_AXIS_DATA_WIDTH  = 256,
-    parameter C_M_AXIS_TUSER_WIDTH = 128,
-    parameter C_S_AXIS_TUSER_WIDTH = 128,
+	// -- Master AXI Stream Data Width
+	parameter C_M_AXIS_DATA_WIDTH	= 256,
+	parameter C_S_AXIS_DATA_WIDTH	= 256,
+	parameter C_M_AXIS_TUSER_WIDTH	= 128,
+	parameter C_S_AXIS_TUSER_WIDTH	= 128,
 
-    // -- AXI Registers Data Width
-    parameter C_S_AXI_DATA_WIDTH    	= 32,          
-    parameter C_S_AXI_ADDR_WIDTH    	= 12,          
-    parameter C_USE_WSTRB           	= 0,	   
-    parameter C_DPHASE_TIMEOUT      	= 0,               
-    parameter C_NUM_ADDRESS_RANGES 	= 1,
-    parameter C_TOTAL_NUM_CE       	= 1,
-    parameter C_S_AXI_MIN_SIZE    	= 32'h0000_FFFF,
-    parameter C_FAMILY              = "virtex7", 
-    parameter C_BASEADDR            = 32'h00000000,
-    parameter C_HIGHADDR            = 32'h0000FFFF
+	// -- AXI Registers Data Width
+	parameter C_S_AXI_DATA_WIDTH	= 32,          
+	parameter C_S_AXI_ADDR_WIDTH	= 12,          
+	parameter C_USE_WSTRB		= 0,
+	parameter C_DPHASE_TIMEOUT	= 0,               
+	parameter C_NUM_ADDRESS_RANGES	= 1,
+	parameter C_TOTAL_NUM_CE	= 1,
+	parameter C_S_AXI_MIN_SIZE	= 32'h0000_FFFF,
+	parameter C_FAMILY		= "virtex7", 
+	parameter C_BASEADDR		= 32'h00000000,
+	parameter C_HIGHADDR		= 32'h0000FFFF
 
 
 )
@@ -248,7 +248,7 @@ module router_output_port_lookup
    assign lpm_wr_req		=	ip_lpm_tcam_cmd_valid & ~ip_lpm_tcam_rd_wrn;
    assign lpm_wr_addr		=	lpm_wr_req ? ip_lpm_tcam_addr[LPM_LUT_ROWS_BITS-1:0] 	: {LPM_LUT_ROWS_BITS{1'b0}};
    assign lpm_wr_ip		=	lpm_wr_req ? ip_lpm_tcam_data[127:96] 	: 32'b0;
-   assign lpm_wr_next_hop_ip	=	lpm_wr_req ? ip_lpm_tcam_data[95:64] 	: 32'b0;	
+   assign lpm_wr_next_hop_ip	=	lpm_wr_req ? ip_lpm_tcam_data[95:64] 	: 32'b0;
    assign lpm_wr_mask		=	lpm_wr_req ? ip_lpm_tcam_data[63:32] 	: 32'b0;
    assign lpm_wr_oq		=	lpm_wr_req ? ip_lpm_tcam_data[7:0] 	: 8'b0;
 
@@ -511,7 +511,6 @@ always @(posedge axis_aclk)
 
 		// -- pkt_sent_from_cpu counter
 		pkt_sent_from_cpu_cntr_reg[`REG_PKT_SENT_FROM_CPU_CNTR_WIDTH - 2 : 0]	<=	(clear_counters | pkt_sent_from_cpu_cntr_reg_clear) ? 'h0 : pkt_sent_from_cpu_cntr_reg[`REG_PKT_SENT_FROM_CPU_CNTR_WIDTH - 2 : 0] + pkt_sent_from_cpu;
-		
 		pkt_sent_from_cpu_cntr_reg[`REG_PKT_SENT_FROM_CPU_CNTR_WIDTH - 1 : 0]	<=	(clear_counters | pkt_sent_from_cpu_cntr_reg_clear) ? 1'b1 : pkt_sent_from_cpu & (pkt_sent_from_cpu_cntr_reg[`REG_PKT_SENT_FROM_CPU_CNTR_WIDTH - 2 : 0] + 1'b1 > {(`REG_PKT_SENT_FROM_CPU_CNTR_WIDTH-1){1'b1}}) ? 1'b1 : pkt_sent_from_cpu_cntr_reg[`REG_PKT_SENT_FROM_CPU_CNTR_WIDTH - 1];
 
 
@@ -522,7 +521,6 @@ always @(posedge axis_aclk)
 
 		// -- pkt_sent_to_cpu_bad_ttl counter
 		pkt_sent_to_cpu_bad_ttl_cntr_reg[`REG_PKT_SENT_TO_CPU_BAD_TTL_CNTR_WIDTH - 2 : 0]	<=	(clear_counters | pkt_sent_to_cpu_bad_ttl_cntr_reg_clear) ? 'h0 : pkt_sent_to_cpu_bad_ttl_cntr_reg[`REG_PKT_SENT_TO_CPU_BAD_TTL_CNTR_WIDTH - 2 : 0] + pkt_sent_to_cpu_bad_ttl;
-
 		pkt_sent_to_cpu_bad_ttl_cntr_reg[`REG_PKT_SENT_TO_CPU_BAD_TTL_CNTR_WIDTH - 1]		<=	(clear_counters | pkt_sent_to_cpu_bad_ttl_cntr_reg_clear) ? 1'b0 : pkt_sent_to_cpu_bad_ttl & (pkt_sent_to_cpu_bad_ttl_cntr_reg[`REG_PKT_SENT_TO_CPU_BAD_TTL_CNTR_WIDTH - 2 : 0] + 1'b1 > {(`REG_PKT_SENT_TO_CPU_BAD_TTL_CNTR_WIDTH-1){1'b1}}) ? 1'b1 : pkt_sent_to_cpu_bad_ttl_cntr_reg[`REG_PKT_SENT_TO_CPU_BAD_TTL_CNTR_WIDTH - 1];
 
 
@@ -533,41 +531,34 @@ always @(posedge axis_aclk)
 
 		// -- pkt_forwarded counter
 		pkt_forwarded_cntr_reg[`REG_PKT_FORWARDED_CNTR_WIDTH - 2 : 0]	<=	(clear_counters | pkt_forwarded_cntr_reg_clear) ? 'h0 : pkt_forwarded_cntr_reg[`REG_PKT_FORWARDED_CNTR_WIDTH - 2 : 0] + pkt_forwarded;
-
 		pkt_forwarded_cntr_reg[`REG_PKT_FORWARDED_CNTR_WIDTH - 1]	<=	(clear_counters | pkt_forwarded_cntr_reg_clear) ? 1'b0 : pkt_forwarded & (pkt_forwarded_cntr_reg[`REG_PKT_FORWARDED_CNTR_WIDTH - 2 : 0] + (1'b1) > {(`REG_PKT_FORWARDED_CNTR_WIDTH-1){1'b1}}) ? 1'b1 : pkt_forwarded_cntr_reg[`REG_PKT_FORWARDED_CNTR_WIDTH - 1];
 
 
 		// -- pkt_dropped_checksum counter
 		pkt_dropped_checksum_cntr_reg[`REG_PKT_DROPPED_CHECKSUM_CNTR_WIDTH - 2 : 0]	<=	(clear_counters | pkt_dropped_checksum_cntr_reg_clear) ? 'h0 : pkt_dropped_checksum_cntr_reg[`REG_PKT_DROPPED_CHECKSUM_CNTR_WIDTH - 2 : 0] + pkt_dropped_checksum;
-		
 		pkt_dropped_checksum_cntr_reg[`REG_PKT_DROPPED_CHECKSUM_CNTR_WIDTH - 1 ]	<=	(clear_counters | pkt_dropped_checksum_cntr_reg_clear) ? 1'b0 : pkt_dropped_checksum & (pkt_dropped_checksum_cntr_reg[`REG_PKT_DROPPED_CHECKSUM_CNTR_WIDTH - 2 : 0] + 1'b1 > {(`REG_PKT_DROPPED_CHECKSUM_CNTR_WIDTH-1){1'b1}}) ? 1'b1 : pkt_dropped_checksum_cntr_reg[`REG_PKT_DROPPED_CHECKSUM_CNTR_WIDTH - 1];
 
 
 		// -- pkt_sent_to_cpu_non_ip counter
 		pkt_sent_to_cpu_non_ip_cntr_reg[`REG_PKT_SENT_TO_CPU_NON_IP_CNTR_WIDTH - 2 : 0]	<=	(clear_counters | pkt_sent_to_cpu_non_ip_cntr_reg_clear) ? 'h0 : pkt_sent_to_cpu_non_ip_cntr_reg[`REG_PKT_SENT_TO_CPU_NON_IP_CNTR_WIDTH - 2 : 0] + pkt_sent_to_cpu_non_ip;
-
-		pkt_sent_to_cpu_non_ip_cntr_reg[`REG_PKT_SENT_TO_CPU_NON_IP_CNTR_WIDTH - 1 ]	<=	(clear_counters | pkt_sent_to_cpu_non_ip_cntr_reg_clear) ? 1'b0 : pkt_sent_to_cpu_non_ip & (pkt_sent_to_cpu_non_ip_cntr_reg[`REG_PKT_SENT_TO_CPU_NON_IP_CNTR_WIDTH - 2 : 0] + 1'b1 > {(`REG_PKT_SENT_TO_CPU_NON_IP_CNTR_WIDTH-1){1'b1}}) ? 1'b1 : pkt_sent_to_cpu_non_ip_cntr_reg[`REG_PKT_SENT_TO_CPU_NON_IP_CNTR_WIDTH - 1];	
+		pkt_sent_to_cpu_non_ip_cntr_reg[`REG_PKT_SENT_TO_CPU_NON_IP_CNTR_WIDTH - 1 ]	<=	(clear_counters | pkt_sent_to_cpu_non_ip_cntr_reg_clear) ? 1'b0 : pkt_sent_to_cpu_non_ip & (pkt_sent_to_cpu_non_ip_cntr_reg[`REG_PKT_SENT_TO_CPU_NON_IP_CNTR_WIDTH - 2 : 0] + 1'b1 > {(`REG_PKT_SENT_TO_CPU_NON_IP_CNTR_WIDTH-1){1'b1}}) ? 1'b1 : pkt_sent_to_cpu_non_ip_cntr_reg[`REG_PKT_SENT_TO_CPU_NON_IP_CNTR_WIDTH - 1];
 		
 
 		// -- pkt_sent_to_cpu_arp_miss counter
 		pkt_sent_to_cpu_arp_miss_cntr_reg[`REG_PKT_SENT_TO_CPU_ARP_MISS_CNTR_WIDTH - 2 : 0]	<=	(clear_counters | pkt_sent_to_cpu_arp_miss_cntr_reg_clear) ? 'h0 : pkt_sent_to_cpu_arp_miss_cntr_reg[`REG_PKT_SENT_TO_CPU_ARP_MISS_CNTR_WIDTH - 2 : 0] + pkt_sent_to_cpu_arp_miss;
-
-		pkt_sent_to_cpu_arp_miss_cntr_reg[`REG_PKT_SENT_TO_CPU_ARP_MISS_CNTR_WIDTH - 1 ]	<=	(clear_counters | pkt_sent_to_cpu_arp_miss_cntr_reg_clear) ? 1'b0 : pkt_sent_to_cpu_arp_miss & (pkt_sent_to_cpu_arp_miss_cntr_reg[`REG_PKT_SENT_TO_CPU_ARP_MISS_CNTR_WIDTH - 2 : 0] + 1'b1 > {(`REG_PKT_SENT_TO_CPU_ARP_MISS_CNTR_WIDTH-1){1'b1}}) ? 1'b1 : pkt_sent_to_cpu_arp_miss_cntr_reg[`REG_PKT_SENT_TO_CPU_ARP_MISS_CNTR_WIDTH - 1];	
+		pkt_sent_to_cpu_arp_miss_cntr_reg[`REG_PKT_SENT_TO_CPU_ARP_MISS_CNTR_WIDTH - 1 ]	<=	(clear_counters | pkt_sent_to_cpu_arp_miss_cntr_reg_clear) ? 1'b0 : pkt_sent_to_cpu_arp_miss & (pkt_sent_to_cpu_arp_miss_cntr_reg[`REG_PKT_SENT_TO_CPU_ARP_MISS_CNTR_WIDTH - 2 : 0] + 1'b1 > {(`REG_PKT_SENT_TO_CPU_ARP_MISS_CNTR_WIDTH-1){1'b1}}) ? 1'b1 : pkt_sent_to_cpu_arp_miss_cntr_reg[`REG_PKT_SENT_TO_CPU_ARP_MISS_CNTR_WIDTH - 1];
 
 
 		// -- pkt_sent_to_cpu_lpm_miss counter
 		pkt_sent_to_cpu_lpm_miss_cntr_reg[`REG_PKT_SENT_TO_CPU_LPM_MISS_CNTR_WIDTH - 2 : 0]	<=	(clear_counters | pkt_sent_to_cpu_lpm_miss_cntr_reg_clear) ? 'h0 : pkt_sent_to_cpu_lpm_miss_cntr_reg[`REG_PKT_SENT_TO_CPU_LPM_MISS_CNTR_WIDTH - 2 : 0] + pkt_sent_to_cpu_lpm_miss;
-
 		pkt_sent_to_cpu_lpm_miss_cntr_reg[`REG_PKT_SENT_TO_CPU_LPM_MISS_CNTR_WIDTH - 1 ]	<=	(clear_counters | pkt_sent_to_cpu_lpm_miss_cntr_reg_clear) ? 1'b0 : pkt_sent_to_cpu_lpm_miss & (pkt_sent_to_cpu_lpm_miss_cntr_reg[`REG_PKT_SENT_TO_CPU_LPM_MISS_CNTR_WIDTH - 2 : 0] + 1'b1 > {(`REG_PKT_SENT_TO_CPU_LPM_MISS_CNTR_WIDTH-1){1'b1}}) ? 1'b1 : pkt_sent_to_cpu_lpm_miss_cntr_reg[`REG_PKT_SENT_TO_CPU_LPM_MISS_CNTR_WIDTH - 1];
 
 
 		// -- pkt_dropped_wrong_dst_mac counter
 		pkt_dropped_wrong_dst_mac_cntr_reg[`REG_PKT_DROPPED_WRONG_DST_MAC_CNTR_WIDTH - 2 : 0]	<=	(clear_counters | pkt_dropped_wrong_dst_mac_cntr_reg_clear) ? 'h0 : pkt_dropped_wrong_dst_mac_cntr_reg[`REG_PKT_DROPPED_WRONG_DST_MAC_CNTR_WIDTH - 2 : 0] + pkt_dropped_wrong_dst_mac;
+		pkt_dropped_wrong_dst_mac_cntr_reg[`REG_PKT_DROPPED_WRONG_DST_MAC_CNTR_WIDTH - 1 ]	<=	(clear_counters | pkt_dropped_wrong_dst_mac_cntr_reg_clear) ? 1'b0 : pkt_dropped_wrong_dst_mac & (pkt_dropped_wrong_dst_mac_cntr_reg[`REG_PKT_DROPPED_WRONG_DST_MAC_CNTR_WIDTH - 2 : 0] + 1'b1 > {(`REG_PKT_DROPPED_WRONG_DST_MAC_CNTR_WIDTH-1){1'b1}}) ? 1'b1 : pkt_dropped_wrong_dst_mac_cntr_reg[`REG_PKT_DROPPED_WRONG_DST_MAC_CNTR_WIDTH - 1];
 
-		pkt_dropped_wrong_dst_mac_cntr_reg[`REG_PKT_DROPPED_WRONG_DST_MAC_CNTR_WIDTH - 1 ]	<=	(clear_counters | pkt_dropped_wrong_dst_mac_cntr_reg_clear) ? 1'b0 : pkt_dropped_wrong_dst_mac & (pkt_dropped_wrong_dst_mac_cntr_reg[`REG_PKT_DROPPED_WRONG_DST_MAC_CNTR_WIDTH - 2 : 0] + 1'b1 > {(`REG_PKT_DROPPED_WRONG_DST_MAC_CNTR_WIDTH-1){1'b1}}) ? 1'b1 : pkt_dropped_wrong_dst_mac_cntr_reg[`REG_PKT_DROPPED_WRONG_DST_MAC_CNTR_WIDTH - 1];	
-
-		
-        end
+end
 
 
 

@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2015 Georgina Kalogeridou
+# Modified by Salvator Galea
 # All rights reserved.
 #
 # This software was developed by
@@ -36,8 +37,8 @@ set ip_version    1.00
 set lib_name      NetFPGA
 
 set axis_sim_pkg_path ../axis_sim_pkg_v1_0_0/hdl/
-set lib_srl_fifo_path $::env(XILINX_PATH)/data/ip/xilinx/lib_srl_fifo_v1_0/hdl/src/vhdl/
-set lib_pkg_path $::env(XILINX_PATH)/data/ip/xilinx/lib_pkg_v1_0/hdl/src/vhdl/ 
+set lib_srl_fifo_path $::env(XILINX_PATH)/data/ip/xilinx/lib_srl_fifo_v1_0/hdl
+set lib_pkg_path $::env(XILINX_PATH)/data/ip/xilinx/lib_pkg_v1_0/hdl
 
 # Project setting.
 create_project -name ${design} -force -dir "./${proj_dir}" -part ${device} -ip
@@ -46,28 +47,20 @@ set_property top ${design} [current_fileset]
 set_property ip_repo_paths $::env(SUME_FOLDER)/lib/hw/  [current_fileset]
 
 # IP build.
-file copy -force ${lib_srl_fifo_path}/ "./hdl/lib_srl_fifo_v1_0/"
-read_vhdl "./hdl/lib_srl_fifo_v1_0/cntr_incr_decr_addn_f.vhd"
-read_vhdl "./hdl/lib_srl_fifo_v1_0/dynshreg_f.vhd"
-read_vhdl "./hdl/lib_srl_fifo_v1_0/srl_fifo_rbu_f.vhd"
-read_vhdl "./hdl/lib_srl_fifo_v1_0/srl_fifo_f.vhd"
-
-set_property is_global_include true [get_files  ./hdl/lib_srl_fifo_v1_0/cntr_incr_decr_addn_f.vhd]
-set_property is_global_include true [get_files  ./hdl/lib_srl_fifo_v1_0/dynshreg_f.vhd]
-set_property is_global_include true [get_files  ./hdl/lib_srl_fifo_v1_0/srl_fifo_rbu_f.vhd]
-set_property is_global_include true [get_files  ./hdl/lib_srl_fifo_v1_0/srl_fifo_f.vhd]
-
+file copy -force ${lib_srl_fifo_path}/lib_srl_fifo_v1_0_rfs.vhd "./hdl/lib_srl_fifo_v1_0_rfs.vhd"
+read_vhdl "./hdl/lib_srl_fifo_v1_0_rfs.vhd"
+set_property is_global_include true [get_files ./hdl/lib_srl_fifo_v1_0_rfs.vhd]
 update_ip_catalog
 
-file copy -force ${lib_pkg_path}/ "./hdl/lib_pkg_v1_0/"
-read_vhdl "./hdl/lib_pkg_v1_0/lib_pkg.vhd"
-
-set_property is_global_include true [get_files  ./hdl/lib_pkg_v1_0/lib_pkg.vhd]
-
+file copy -force ${lib_pkg_path}/lib_pkg_v1_0_rfs.vhd "./hdl/lib_pkg_v1_0_rfs.vhd"
+read_vhdl "./hdl/lib_pkg_v1_0_rfs.vhd"
+set_property is_global_include true [get_files ./hdl/lib_pkg_v1_0_rfs.vhd]
 update_ip_catalog
+
 file copy -force ${axis_sim_pkg_path}/ "./hdl/axis_sim_pkg/"
 read_vhdl "./hdl/axis_sim_pkg/axis_sim_pkg.vhd"
 update_ip_catalog
+
 read_vhdl "./hdl/transactor_fifos.vhd"
 read_vhdl "./hdl/axi_sim_transactor.vhd"
 update_compile_order -fileset sources_1

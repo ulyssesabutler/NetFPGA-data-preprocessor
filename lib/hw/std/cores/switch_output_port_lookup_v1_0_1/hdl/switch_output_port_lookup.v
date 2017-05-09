@@ -3,6 +3,7 @@
 //                          Junior University
 // Copyright (C) 2010, 2011 Muhammad Shahbaz
 // Copyright (C) 2015 Gianni Antichi, Noa Zilberman
+// Modified by Salvator Galea
 // All rights reserved.
 //
 // This software was developed by
@@ -42,7 +43,7 @@
  *
  *  Author:
  *        Gianni Antichi, Muhammad Shahbaz
- *        Modified by Noa Zilberman
+ *        Modified by Noa Zilberman, Salvator Galea
  * 		
  *  Description:
  *        Output port lookup for the reference Switch project
@@ -277,13 +278,11 @@ module switch_output_port_lookup
 	       send_packet = 0;
         
      	   if(!dst_port_fifo_empty) begin
-		m_axis_tuser[DST_PORT_POS+7:DST_PORT_POS] = dst_ports_latched;
-		send_packet = 1;
-		if (m_axis_tvalid & m_axis_tready) begin
-	             state_next = SEND_STATE;
-                     dst_port_rd = 1; 
-                 end
-  	       end	
+	          state_next = SEND_STATE;
+		  send_packet = 1;
+                  dst_port_rd = 1;
+           	  m_axis_tuser[DST_PORT_POS+7:DST_PORT_POS] = dst_ports_latched;
+	       end	
 	    end
 
 	    SEND_STATE: begin

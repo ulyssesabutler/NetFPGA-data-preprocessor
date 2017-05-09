@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2015 Noa Zilberman
+# Modified by Salvator Galea
 # All rights reserved.
 #
 # This software was developed by
@@ -128,10 +129,10 @@ set_property value {0x00000000} [ipx::get_user_parameter C_BASEADDR [ipx::curren
 set_property value_format {bitstring} [ipx::get_user_parameter C_BASEADDR [ipx::current_core]]
 
 
-ipx::add_subcore NetFPGA:NetFPGA:fallthrough_small_fifo:1.00 [ipx::get_file_groups xilinx_verilogsynthesis -of_objects [ipx::current_core]]
-ipx::add_subcore NetFPGA:NetFPGA:fallthrough_small_fifo:1.00 [ipx::get_file_groups xilinx_verilogbehavioralsimulation -of_objects [ipx::current_core]]
-ipx::add_subcore xilinx:xilinx:cam:1.00 [ipx::get_file_groups xilinx_verilogsynthesis -of_objects [ipx::current_core]]
-ipx::add_subcore xilinx:xilinx:cam:1.00 [ipx::get_file_groups xilinx_verilogbehavioralsimulation -of_objects [ipx::current_core]]
+ipx::add_subcore NetFPGA:NetFPGA:fallthrough_small_fifo:1.00 [ipx::get_file_groups xilinx_anylanguagesynthesis -of_objects [ipx::current_core]]
+ipx::add_subcore NetFPGA:NetFPGA:fallthrough_small_fifo:1.00 [ipx::get_file_groups xilinx_anylanguagebehavioralsimulation -of_objects [ipx::current_core]]
+ipx::add_subcore xilinx:xilinx:cam:1.10 [ipx::get_file_groups xilinx_anylanguagesynthesis -of_objects [ipx::current_core]]
+ipx::add_subcore xilinx:xilinx:cam:1.10 [ipx::get_file_groups xilinx_anylanguagebehavioralsimulation -of_objects [ipx::current_core]]
 
 ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces m_axis -of_objects [ipx::current_core]]
 ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces s_axis -of_objects [ipx::current_core]]
@@ -144,15 +145,4 @@ update_ip_catalog
 close_project
 
 file delete -force ${proj_dir} 
-
-
-
-
-
-
-
-
-
-
-
 

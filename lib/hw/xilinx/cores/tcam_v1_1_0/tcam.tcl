@@ -1,5 +1,7 @@
 #
-# Copyright (c) 2015 University of Cambridge All rights reserved.
+# Copyright (c) 2015 University of Cambridge 
+# Modified by Salvator Galea
+# All rights reserved.
 #
 # This software was developed by the University of Cambridge Computer
 # Laboratory under EPSRC INTERNET Project EP/H040536/1, National Science
@@ -27,7 +29,7 @@
 
 # Set variables
 set   lib_name       xilinx
-set   ip_version     1.00
+set   ip_version     1.10
 set   design         tcam
 
 set   device         xc7vx690t-3-ffg1761

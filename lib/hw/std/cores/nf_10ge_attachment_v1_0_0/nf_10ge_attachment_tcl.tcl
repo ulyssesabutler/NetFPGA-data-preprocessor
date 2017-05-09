@@ -1,5 +1,6 @@
 # 
 # Copyright (c) 2015 Yury Audzevich
+# Modified by Salvator Galea
 # All rights reserved.
 # 
 # Description:
@@ -48,7 +49,7 @@ set proj_dir 		./ip_proj
 
 
 ## # of added files
-set_param project.singleFileAddWarning.Threshold 500				
+set_param project.singleFileAddWarning.Threshold 500
 
 
 ### SubCore Reference
@@ -61,7 +62,7 @@ set subcore_names {\
 # Here for all directory
 set source_dir { \
 		hdl\
-}		
+}
 
 ## quick way, there is a cleaner way
 set VerilogFiles [list]
@@ -106,7 +107,7 @@ foreach rtl_dir $rtl_dirs {
 # Add verilog sources here
 # Add Verilog Files to The IP Core
 foreach verilog_file $VerilogFiles {
-	add_files -norecurse ${verilog_file}	
+	add_files -norecurse ${verilog_file}
 }
 #read_verilog $VerilogFiles
 
@@ -136,9 +137,9 @@ foreach subcore ${subcore_names} {
 	set subcore_regex NAME=~*$subcore*
 	set subcore_ipdef [get_ipdefs -filter ${subcore_regex}]
 
-	ipx::add_subcore ${subcore_ipdef} [ipx::get_file_groups xilinx_verilogsynthesis -of_objects [ipx::current_core]]
-	ipx::add_subcore ${subcore_ipdef}  [ipx::get_file_groups xilinx_verilogbehavioralsimulation -of_objects [ipx::current_core]]
-	puts "Adding the following subcore: $subcore_ipdef \n"		
+	ipx::add_subcore ${subcore_ipdef} [ipx::get_file_groups xilinx_anylanguagesynthesis -of_objects [ipx::current_core]]
+	ipx::add_subcore ${subcore_ipdef}  [ipx::get_file_groups xilinx_anylanguagebehavioralsimulation -of_objects [ipx::current_core]]
+	puts "Adding the following subcore: $subcore_ipdef \n"
 
 }
 
@@ -191,8 +192,8 @@ ipx::add_bus_parameter POLARITY [ipx::get_bus_interfaces areset_clk156 -of_objec
 set_property value ACTIVE_HIGH [ipx::get_bus_parameters POLARITY -of_objects [ipx::get_bus_interfaces areset_clk156 -of_objects [ipx::current_core]]]
 
 # axis clk - auto inferred as axis_signal_aclk -- bug of 2014.4
-ipx::add_bus_parameter ASSOCIATED_BUSIF [ipx::get_bus_interfaces axis_signal_clock -of_objects [ipx::current_core]]
-set_property value m_axis_pipe:s_axis_pipe [ipx::get_bus_parameters ASSOCIATED_BUSIF -of_objects [ipx::get_bus_interfaces axis_signal_clock -of_objects [ipx::current_core]]]
+ipx::add_bus_parameter ASSOCIATED_BUSIF [ipx::get_bus_interfaces axis_aclk -of_objects [ipx::current_core]]
+set_property value m_axis_pipe:s_axis_pipe [ipx::get_bus_parameters ASSOCIATED_BUSIF -of_objects [ipx::get_bus_interfaces axis_aclk -of_objects [ipx::current_core]]]
 
 # rst associated with axis clk - auto inferred
 
