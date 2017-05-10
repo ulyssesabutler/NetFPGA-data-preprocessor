@@ -124,7 +124,6 @@ proc create_hier_cell_nf_sume_dma_engine { parentCell coreName tdataWidth } {
    set_property -dict [list CONFIG.PF1_DEVICE_ID {7011} CONFIG.axisten_freq {250}] [get_bd_cells pcie3_7x_1]
 
    # load dma.
-   #create_bd_cell -type ip -vlnv NetFPGA-SUME:NetFPGA-SUME:nf_riffa_dma:1.00 nf_riffa_dma_0
    create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_riffa_dma:1.0 nf_riffa_dma_0
 
    # This async fifo is connected to dma tx and rx.
