@@ -127,11 +127,11 @@ proc create_hier_cell_nf_sume_sim_dma { parentCell coreName fstimName frecName f
    # create data path blocks
    # TX - AXIS
    set axis_sim_stim_ip [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:axis_sim_stim:1.00 axis_sim_stim_ip]
-   set_property -dict [list CONFIG.input_file $::env(NF_DESIGN_DIR)/test/$fstimName] $axis_sim_stim_ip	
+   set_property -dict [list CONFIG.input_file $::env(NF_DESIGN_DIR)/test/$fstimName] $axis_sim_stim_ip
   
    # RX - AXIS
    set axis_sim_record_ip [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:axis_sim_record:1.00 axis_sim_record_ip]
-   set_property -dict [list CONFIG.OUTPUT_FILE $::env(NF_DESIGN_DIR)/test/$frecName] $axis_sim_record_ip		
+   set_property -dict [list CONFIG.OUTPUT_FILE $::env(NF_DESIGN_DIR)/test/$frecName] $axis_sim_record_ip
    
    # TX AXI-Lite     
    set axi_sim_transactor_ip [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:axi_sim_transactor:1.00 axi_sim_transactor_ip]
@@ -148,12 +148,12 @@ proc create_hier_cell_nf_sume_sim_dma { parentCell coreName fstimName frecName f
    connect_bd_net [get_bd_pins axis_aclk] [get_bd_pins axis_sim_record_ip/axi_aclk] 
 
    connect_bd_net [get_bd_pins m_axi_aclk] [get_bd_pins axi_sim_transactor_ip/axi_aclk]  
-   connect_bd_net [get_bd_pins m_axi_aresetn] [get_bd_pins axi_sim_transactor_ip/axi_resetn] 	
+   connect_bd_net [get_bd_pins m_axi_aresetn] [get_bd_pins axi_sim_transactor_ip/axi_resetn]
     
    # interfaces  
    connect_bd_intf_net [get_bd_intf_pin m_axis] [get_bd_intf_pins axis_sim_stim_ip/M_AXIS] 
-   connect_bd_intf_net [get_bd_intf_pin s_axis] [get_bd_intf_pins axis_sim_record_ip/s_axis] 	  
-   connect_bd_intf_net [get_bd_intf_pins m_axi_lite] [get_bd_intf_pins axi_sim_transactor_ip/M_AXI]  	 
+   connect_bd_intf_net [get_bd_intf_pin s_axis] [get_bd_intf_pins axis_sim_record_ip/s_axis]
+   connect_bd_intf_net [get_bd_intf_pins m_axi_lite] [get_bd_intf_pins axi_sim_transactor_ip/M_AXI]
  
 
    # non-std
@@ -166,10 +166,10 @@ proc create_hier_cell_nf_sume_sim_dma { parentCell coreName fstimName frecName f
    connect_bd_net [get_bd_pins activity_trans_sim] [get_bd_pins axi_sim_transactor_ip/activity_trans_sim]
    connect_bd_net [get_bd_pins activity_trans_log] [get_bd_pins axi_sim_transactor_ip/activity_trans_log]
    connect_bd_net [get_bd_pins barrier_req_trans] [get_bd_pins axi_sim_transactor_ip/barrier_req_trans]
-   connect_bd_net [get_bd_pins barrier_proceed] [get_bd_pins axi_sim_transactor_ip/barrier_proceed]	
+   connect_bd_net [get_bd_pins barrier_proceed] [get_bd_pins axi_sim_transactor_ip/barrier_proceed]
    
    # Internal connection
-   connect_bd_net [get_bd_pins axis_sim_record_ip/counter] [get_bd_pins axis_sim_stim_ip/counter]	
+   connect_bd_net [get_bd_pins axis_sim_record_ip/counter] [get_bd_pins axis_sim_stim_ip/counter]
 
    # Restore current instance
    current_bd_instance $oldCurInst

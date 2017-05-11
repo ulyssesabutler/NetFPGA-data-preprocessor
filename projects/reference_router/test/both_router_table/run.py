@@ -47,14 +47,14 @@ nftest_init(sim_loop = [], hw_config = [phy2loop0])
 nftest_start()
 
 if isHW():
-    # asserting the reset_counter to 1 for clearing the registers
-    nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_RESET(), 0x1)
-    nftest_regwrite(SUME_INPUT_ARBITER_0_RESET(), 0x1)
-    nftest_regwrite(SUME_OUTPUT_QUEUES_0_RESET(), 0x1)
-    nftest_regwrite(SUME_NF_10G_INTERFACE_SHARED_0_RESET(), 0x1)
-    nftest_regwrite(SUME_NF_10G_INTERFACE_1_RESET(), 0x1)
-    nftest_regwrite(SUME_NF_10G_INTERFACE_2_RESET(), 0x1)
-    nftest_regwrite(SUME_NF_10G_INTERFACE_3_RESET(), 0x1)
+	# asserting the reset_counter to 1 for clearing the registers
+	nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_RESET(), 0x1)
+	nftest_regwrite(SUME_INPUT_ARBITER_0_RESET(), 0x1)
+	nftest_regwrite(SUME_OUTPUT_QUEUES_0_RESET(), 0x1)
+	nftest_regwrite(SUME_NF_10G_INTERFACE_SHARED_0_RESET(), 0x1)
+	nftest_regwrite(SUME_NF_10G_INTERFACE_1_RESET(), 0x1)
+	nftest_regwrite(SUME_NF_10G_INTERFACE_2_RESET(), 0x1)
+	nftest_regwrite(SUME_NF_10G_INTERFACE_3_RESET(), 0x1)
 
 # Write and read command for the indirect register access
 WR_IND_COM		= 0x0001
@@ -69,16 +69,16 @@ ALLSPFRouters	= "224.0.0.5"
 
 # Clear all tables in a hardware test (not needed in software)
 if isHW():
-    nftest_invalidate_all_tables()
+	nftest_invalidate_all_tables()
 else:
-    simReg.regDelay(3000) # Give enough time to initiliaze all the memories
+	simReg.regDelay(3000) # Give enough time to initiliaze all the memories
 
 # Write the mac and IP addresses
 for port in range(4):
-    nftest_add_dst_ip_filter_entry (port, routerIP[port])
-    nftest_set_router_MAC ('nf%d'%port, routerMAC[port])
-nftest_add_dst_ip_filter_entry (4, ALLSPFRouters)
+	nftest_add_dst_ip_filter_entry (port, routerIP[port])
+	nftest_set_router_MAC ('nf%d'%port, routerMAC[port])
 
+nftest_add_dst_ip_filter_entry (4, ALLSPFRouters)
 
 # router mac 0
 nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_MAC_0_HI(), 0xca)
@@ -95,18 +95,17 @@ nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_MAC_3_LOW(), 0xfe000004)
 
 # add LPM and ARP entries for each port
 for i in range(NUM_PORTS):
-    i_plus_1	= i + 1
-    subnetIP 	= "192.168." + str(i_plus_1) + ".1"
-    subnetMask	= "255.255.255.225"
-    nextHopIP	= "192.168.5." + str(i_plus_1)
-    outPort	= 1 << (2 * i)
-    nextHopMAC	= dest_MACs[i]
+	i_plus_1	= i + 1
+	subnetIP 	= "192.168." + str(i_plus_1) + ".1"
+	subnetMask	= "255.255.255.225"
+	nextHopIP	= "192.168.5." + str(i_plus_1)
+	outPort		= 1 << (2 * i)
+	nextHopMAC	= dest_MACs[i]
 
-    # add an entry in the routing table
-    nftest_add_LPM_table_entry(i, subnetIP, subnetMask, nextHopIP, outPort)
-    # add and entry in the ARP table
-    nftest_add_ARP_table_entry(i, nextHopIP, nextHopMAC)
-
+	# add an entry in the routing table
+	nftest_add_LPM_table_entry(i, subnetIP, subnetMask, nextHopIP, outPort)
+	# add and entry in the ARP table
+	nftest_add_ARP_table_entry(i, nextHopIP, nextHopMAC)
 
 
 num = SUME_OUTPUT_PORT_LOOKUP_0_MEM_IP_ARP_CAM_DEPTH() - 1
@@ -116,20 +115,20 @@ mac_lo	= [0xfe000002, 0xfe000001, 0xfe000004, 0xfe000003]
 router_ip = [0xc0a80501, 0xc0a80502, 0xc0a80503, 0xc0a80504]
 
 for i in range(num):
-    #nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTADDRESS(), int("0x10000000",16) | i)
-    nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTADDRESS(), SUME_OUTPUT_PORT_LOOKUP_0_MEM_IP_ARP_CAM_ADDRESS() | i)
-    nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTCOMMAND(), RD_IND_COM)
-    # ARP MAC
-    # |- -INDIRECTREPLY_A_HI 32bit- -INDIRECTREPLY_A_LOW 32bit- -INDIRECTREPLY_B_HI 32bit- -INDIRECTREPLY_B_LOW 32bit- -|
-    # |-- 		mac_hi 		-- 		mac_lo 	      -- 	0x0000 		   -- 		IP    --|
-    if i < 4:
-        nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_A_HI(),	mac_hi)
-        nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_A_LOW(),	mac_lo[i])
-        nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_B_LOW(),	router_ip[i])
-    else:
-        nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_A_HI(),	0)
-        nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_A_LOW(),	0)
-        nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_B_LOW(),	0)
+	#nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTADDRESS(), int("0x10000000",16) | i)
+	nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTADDRESS(), SUME_OUTPUT_PORT_LOOKUP_0_MEM_IP_ARP_CAM_ADDRESS() | i)
+	nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTCOMMAND(), RD_IND_COM)
+	# ARP MAC
+	# |- -INDIRECTREPLY_A_HI 32bit- -INDIRECTREPLY_A_LOW 32bit- -INDIRECTREPLY_B_HI 32bit- -INDIRECTREPLY_B_LOW 32bit- -|
+	# |-- 		mac_hi 		-- 		mac_lo 	      -- 	0x0000 		   -- 		IP    --|
+	if i < 4:
+		nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_A_HI(),	mac_hi)
+		nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_A_LOW(),	mac_lo[i])
+		nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_B_LOW(),	router_ip[i])
+	else:
+		nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_A_HI(),	0)
+		nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_A_LOW(),	0)
+		nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_B_LOW(),	0)
 
 # Routing table
 router_ip 	= [0xc0a80101, 0xc0a80201, 0xc0a80301, 0xc0a80401]
@@ -138,40 +137,40 @@ arp_port	= [1, 4]
 next_hop_ip	= [0xc0a80501, 0xc0a80502, 0xc0a80503, 0xc0a80504]
 
 for i in range(num):
-    #nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTADDRESS(), int("0x00000000",16) | i)
-    nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTADDRESS(), SUME_OUTPUT_PORT_LOOKUP_0_MEM_IP_LPM_TCAM_ADDRESS() | i)
-    nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTCOMMAND(), RD_IND_COM)
-    # |- -INDIRECTREPLY_A_HI 32bit- -INDIRECTREPLY_A_LOW 32bit- -INDIRECTREPLY_B_HI 32bit- -INDIRECTREPLY_B_LOW 32bit- -|
-    # |-- 		IP 		-- 	next_IP 	     -- 	mask 		 -- 	next_port      --|	
-    if i < 2:
-        nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_B_LOW(),	arp_port[i])
-    if i < 4:
-        # Router IP
-        nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_A_HI(),	router_ip[i])
-        nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_A_LOW(),	next_hop_ip[i])
-        # Router subnet mask
-        nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_B_HI(),	subnet_mask[i])
-    else:
-        # Router IP
-        nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_A_HI(),	0)
-        nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_A_LOW(),	0)
-        # Router subnet mask
-        nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_B_HI(),	0xffffffff)
+	#nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTADDRESS(), int("0x00000000",16) | i)
+	nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTADDRESS(), SUME_OUTPUT_PORT_LOOKUP_0_MEM_IP_LPM_TCAM_ADDRESS() | i)
+	nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTCOMMAND(), RD_IND_COM)
+	# |- -INDIRECTREPLY_A_HI 32bit- -INDIRECTREPLY_A_LOW 32bit- -INDIRECTREPLY_B_HI 32bit- -INDIRECTREPLY_B_LOW 32bit- -|
+	# |-- 		IP 		-- 	next_IP 	     -- 	mask 		 -- 	next_port      --|	
+	if i < 2:
+		nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_B_LOW(),	arp_port[i])
+	if i < 4:
+		# Router IP
+		nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_A_HI(),	router_ip[i])
+		nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_A_LOW(),	next_hop_ip[i])
+		# Router subnet mask
+		nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_B_HI(),	subnet_mask[i])
+	else:
+		# Router IP
+		nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_A_HI(),	0)
+		nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_A_LOW(),	0)
+		# Router subnet mask
+		nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_B_HI(),	0xffffffff)
 
 # IP filter
 num	= SUME_OUTPUT_PORT_LOOKUP_0_MEM_DEST_IP_CAM_DEPTH() - 1
-filters= [0xc0a80028, 0xc0a80128, 0xc0a80228, 0xc0a80328, 0xe0000005]
+filters	= [0xc0a80028, 0xc0a80128, 0xc0a80228, 0xc0a80328, 0xe0000005]
 
 for i in range(num):
-    #nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTADDRESS(), int("0x20000000",16) | i)
-    nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTADDRESS(), SUME_OUTPUT_PORT_LOOKUP_0_MEM_DEST_IP_CAM_ADDRESS() | i)
-    nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTCOMMAND(), RD_IND_COM)
-    # |- -INDIRECTREPLY_A_HI 32bit- -INDIRECTREPLY_A_LOW 32bit- -INDIRECTREPLY_B_HI 32bit- -INDIRECTREPLY_B_LOW 32bit- -|
-    # |-- 		0x0000 		-- 		0x0000 	      -- 	0x0000 		   -- 		IP     --|	
-    if i < 5:
-        nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_B_LOW(), filters[i])
-    else:
-        nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_B_LOW(), 0)
+	#nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTADDRESS(), int("0x20000000",16) | i)
+	nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTADDRESS(), SUME_OUTPUT_PORT_LOOKUP_0_MEM_DEST_IP_CAM_ADDRESS() | i)
+	nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTCOMMAND(), RD_IND_COM)
+	# |- -INDIRECTREPLY_A_HI 32bit- -INDIRECTREPLY_A_LOW 32bit- -INDIRECTREPLY_B_HI 32bit- -INDIRECTREPLY_B_LOW 32bit- -|
+	# |-- 		0x0000 		-- 		0x0000 	      -- 	0x0000 		   -- 		IP     --|	
+	if i < 5:
+		nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_B_LOW(), filters[i])
+	else:
+		nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTREPLY_B_LOW(), 0)
 
 
 mres=[]

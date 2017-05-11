@@ -37,5 +37,5 @@
 
 fpga -f [lindex $argv 0]
 connect mb mdm
-dow SDK_Workspace/project/Debug/project.elf
+dow SDK_Workspace/project/Debug/reference_router.elf
 run

@@ -42,33 +42,31 @@ from reg_defines_reference_router import *
 phy2loop0 = ('../connections/conn', [])
 nftest_init(sim_loop = [], hw_config = [phy2loop0])
 
-
-
 nftest_start()
 
 if isHW():
-    # asserting the reset_counter to 1 for clearing the registers
-    nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_RESET(), 0x1)
-    nftest_regwrite(SUME_INPUT_ARBITER_0_RESET(), 0x1)
-    nftest_regwrite(SUME_OUTPUT_QUEUES_0_RESET(), 0x1)
-    nftest_regwrite(SUME_NF_10G_INTERFACE_SHARED_0_RESET(), 0x1)
-    nftest_regwrite(SUME_NF_10G_INTERFACE_1_RESET(), 0x1)
-    nftest_regwrite(SUME_NF_10G_INTERFACE_2_RESET(), 0x1)
-    nftest_regwrite(SUME_NF_10G_INTERFACE_3_RESET(), 0x1)
+	# asserting the reset_counter to 1 for clearing the registers
+	nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_RESET(), 0x1)
+	nftest_regwrite(SUME_INPUT_ARBITER_0_RESET(), 0x1)
+	nftest_regwrite(SUME_OUTPUT_QUEUES_0_RESET(), 0x1)
+	nftest_regwrite(SUME_NF_10G_INTERFACE_SHARED_0_RESET(), 0x1)
+	nftest_regwrite(SUME_NF_10G_INTERFACE_1_RESET(), 0x1)
+	nftest_regwrite(SUME_NF_10G_INTERFACE_2_RESET(), 0x1)
+	nftest_regwrite(SUME_NF_10G_INTERFACE_3_RESET(), 0x1)
 
 routerMAC	= ["00:ca:fe:00:00:01", "00:ca:fe:00:00:02", "00:ca:fe:00:00:03", "00:ca:fe:00:00:04"]
 routerIP	= ["192.168.0.40", "192.168.1.40", "192.168.2.40", "192.168.3.40"]
 
 # Clear all tables in a hardware test (not needed in software)
 if isHW():
-    nftest_invalidate_all_tables()
+	nftest_invalidate_all_tables()
 else:
-    simReg.regDelay(2000)
+	simReg.regDelay(2000)
 
 # Write the mac and IP addresses
 for port in range(4):
-    nftest_add_dst_ip_filter_entry (port, routerIP[port])
-    nftest_set_router_MAC ('nf%d'%port, routerMAC[port])
+	nftest_add_dst_ip_filter_entry (port, routerIP[port])
+	nftest_set_router_MAC ('nf%d'%port, routerMAC[port])
 
 index		= 0
 subnetIP	= "192.168.1.0"
@@ -85,26 +83,25 @@ nftest_add_ARP_table_entry(index, nextHopIP, nextHopMAC)
 nftest_barrier()
 
 for i in range(pkts_num):
-    pkt = make_IP_pkt(src_MAC="aa:bb:cc:dd:ee:ff", dst_MAC=routerMAC[0],
-                      src_IP="192.168.0.1", dst_IP="192.168.2.1")
-    if isHW():
-        nftest_send_phy('nf0', pkt)
-        nftest_expect_dma('nf0', pkt)
-    else:
-	pkt.time = (i*(1e-8))
-	pkts.append(pkt)
+	pkt = make_IP_pkt(src_MAC="aa:bb:cc:dd:ee:ff", dst_MAC=routerMAC[0], src_IP="192.168.0.1", dst_IP="192.168.2.1")
+	if isHW():
+		nftest_send_phy('nf0', pkt)
+		nftest_expect_dma('nf0', pkt)
+	else:
+		pkt.time	= ((i*(1e-8)) + (2e-6))
+		pkts.append(pkt)
 
 if not isHW():
-    nftest_send_phy('nf0', pkts)
-    nftest_expect_dma('nf0', pkts)
+	nftest_send_phy('nf0', pkts)
+	nftest_expect_dma('nf0', pkts)
 
 nftest_barrier()
 
 if isHW():
-    rres1=nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_PKT_SENT_TO_CPU_LPM_MISS_CNTR(), pkts_num)
-    mres=[rres1]
+	rres1=nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_PKT_SENT_TO_CPU_LPM_MISS_CNTR(), pkts_num)
+	mres=[rres1]
 else:
-    nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_PKT_SENT_TO_CPU_LPM_MISS_CNTR(), pkts_num)
-    mres=[]
+	nftest_regread_expect(SUME_OUTPUT_PORT_LOOKUP_0_PKT_SENT_TO_CPU_LPM_MISS_CNTR(), pkts_num)
+	mres=[]
 
 nftest_finish(mres)
