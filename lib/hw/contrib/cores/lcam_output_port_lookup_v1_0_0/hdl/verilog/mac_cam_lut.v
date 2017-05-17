@@ -138,7 +138,6 @@ reg [LUT_DEPTH_BITS+NCAMS_BITS-1:0]	  pointer_add_cam, pointer_add_cam_next;
 
 //------------------------- Modules-------------------------------
 
-// 1 cycle read latency, 2 cycles write latency, width=48, depth=16
 ncams #(
 	.TCAM_ADDR_WIDTH       (LUT_DEPTH_BITS),
 	.TCAM_MATCH_ADDR_WIDTH (LUT_DEPTH_BITS),
@@ -187,7 +186,6 @@ assign rd_mac = lut_rd_data[47:0];
 assign dst_ports = (lut_miss) ? (DEFAULT_MISS_OUTPUT_PORTS & ~src_port_latched)
                                  : (rd_oq & ~src_port_latched);
 
-/* Tokusashi added */
 reg lookup_req_stage1, lookup_req_stage2, lookup_req_stage3, lookup_req_stage4; 
 reg [48+LUT_DEPTH_BITS+NCAMS_BITS-1:0] cache [7:0];
 reg [2:0] cache_pointer;
@@ -324,95 +322,7 @@ always @(*) begin
 				end
 			end
 		end
-		//lookup_state_next = IDLE;
 	end
-
-	//case(lookup_state)
-	//	/* write to all locations */
-	//	RESET: begin
-	//		if (!cam_we_learn && !cam_busy_learn && !cam_we 
-	//				&& !cam_busy && reset_count < LUT_DEPTH-1) begin
-	//			cam_wr_addr_next = reset_count;
-	//			cam_we_next = 1;
-	//			cam_din_next = 0;
-
-	//			cam_wr_addr_learn_next = reset_count;
-	//			cam_we_learn_next = 1;
-	//			cam_din_learn_next = 0;
-	//			
-	//			reset_count_inc = 1;
-	//			lut_wr_addr_next = reset_count;
-	//			lut_wr_data_next = 0;
-	//			lut_wr_en_next = 1;
-	//		// write the broadcast
-   	//		end else if (!cam_we_learn && !cam_busy_learn && !cam_we 
-	//				&& !cam_busy && reset_count == LUT_DEPTH-1) begin
-	//			cam_wr_addr_next = reset_count;
-	//			cam_we_next = 1;
-	//			cam_din_next = ~48'h0;
-	//			
-	//			cam_wr_addr_learn_next = reset_count;
-	//			cam_we_learn_next = 1;
-	//			cam_din_learn_next = ~48'h0;
-	//			
-	//			reset_count_inc = 1;
-	//			// write the broadcast address
-	//			lut_wr_addr_next = reset_count;
-	//			lut_wr_data_next = {DEFAULT_MISS_OUTPUT_PORTS, ~48'h0};
-	//			lut_wr_en_next = 1;
-	//		end else if (!cam_we && !cam_busy) begin
-	//			lookup_state_next = IDLE;
-	//		end
-	//	end // case: RESET 
-
-	//	IDLE: begin
-	//		cam_cmp_din       = dst_mac;
-	//		cam_cmp_din_learn = src_mac;
-	//		if (lookup_req) begin
-	//			lookup_state_next = DELAY_ONE;
-	//			latch_src = 1;
-	//		end
-	//	end // case: IDLE
-
-	//	//DELAY_ONE : begin
-	//	//	lookup_state_next = DELAY_TWO;
-	//	//end
-
-	//	//DELAY_TWO : begin
-	//	//	lookup_state_next = DELAY_THREE;
-	//	//end
-
-	//	//DELAY_THREE : begin
-	//	//	lookup_state_next = LATCH_DST_LOOKUP;
-	//	//end
-
-	//	LATCH_DST_LOOKUP: begin
-	//		/* latch the info from the lut if we have a match */
-	//		lookup_done_next = 1;
-	//		if (!cam_match)
-	//			lut_miss_next = 1;
-	//		else
-	//			lut_hit_next = 1;
-
-	//		if(cam_match_learn)
-	//			lut_wr_en_next = 1;
-	//		else begin
-	//			if (!cam_busy && !cam_busy_learn) begin
-	//				lut_wr_addr_next = pointer_add_cam;
-	//				lut_wr_en_next = 1;
-	//				cam_we_next = 1;
-	//				cam_we_learn_next = 1;
-	//				if (pointer_add_cam == LUT_DEPTH-2)
-	//					pointer_add_cam_next = 0;
-	//				else
-	//					pointer_add_cam_next = pointer_add_cam + 1;
-	//				end
-	//			end
-	//		lookup_state_next = IDLE;
-	//	end // case: LATCH_DST_LOOKUP
-
-	//	default: begin end
-	//endcase // case(lookup_state)
 end // always @ (*)
 
 
@@ -480,7 +390,6 @@ always @(posedge clk) begin
 		
 		lookup_state      <= lookup_state_next;
 
-		/* Tokusashi added */
 		lookup_req_stage1 <= lookup_req;	
 		lookup_req_stage2 <= lookup_req_stage1;	
 		lookup_req_stage3 <= lookup_req_stage2;	
@@ -514,19 +423,6 @@ always @(posedge clk) begin
 		cache_miss_stage2 <= cache_miss_stage1;
 		cache_hit_addr <= cache_hit_addr_next;
 		cache_hit_addr_stage1 <= cache_hit_addr;
-		//cam_wr_addr_stage1 <= cam_wr_addr_next;
-		//cam_wr_addr_stage2 <= {cam_wr_addr_stage1, cam_wr_addr_next};
-		//cam_din_stage1 <= cam_din_next;
-		//cam_din_stage2 <= {cam_din_stage1, cam_din_next};
-		//cam_we_stage1  <= cam_we_next;
-		//cam_we_stage2  <= {cam_we_stage1, cam_we_next};
-
-		//cam_wr_addr_learn_stage1       <= cam_wr_addr_learn_next;
-		//cam_wr_addr_learn_stage2       <= {cam_wr_addr_learn_stage1, cam_wr_addr_learn_next};
-		//cam_din_learn_stage1           <= cam_din_learn_next;
-		//cam_din_learn_stage2           <= {cam_din_learn_stage1, cam_din_learn_next};
-		//cam_we_learn_stage1            <= cam_we_learn_next;
-		//cam_we_learn_stage2            <= {cam_we_learn_next, cam_we_learn_stage1};
 
 	end
 end
