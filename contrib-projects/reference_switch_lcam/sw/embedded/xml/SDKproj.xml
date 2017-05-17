@@ -38,6 +38,6 @@
 <project name="SDK Script" default="main">
   <target name="main">
     <createHwProject projname="hw_platform_0" hwspecpath="hw/control_sub.xml" />
-    <createAppProject projname="reference_switch" hwprojname="hw_platform_0" processor="nf_mbsys_mbsys_microblaze_0" bspprojname="bsp" os="standalone" template="Hello World" language="C" />
+    <createAppProject projname="reference_switch_lcam" hwprojname="hw_platform_0" processor="nf_mbsys_mbsys_microblaze_0" bspprojname="bsp" os="standalone" template="Hello World" language="C" />
   </target>
 </project>
