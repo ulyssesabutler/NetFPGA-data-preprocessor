@@ -70,18 +70,9 @@ for i in range(4):
 
 num_broadcast = 20
 
-
-#if not isHW(): 
-#	simReg.regDelay(3000)
-#	#simReg.regDelay(3000)
-#	#simReg.regDelay(3000)
-#	#simReg.regDelay(3000)
-#
-#nftest_barrier()
 if not isHW():
-     for i in range(5):
-          simReg.regDelay(3900)
-          nftest_barrier()
+    simReg.regDelay(8000)
+    nftest_barrier()
 
 pkts = []
 for i in range(num_broadcast):
