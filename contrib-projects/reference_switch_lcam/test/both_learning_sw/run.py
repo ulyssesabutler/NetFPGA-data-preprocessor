@@ -93,7 +93,6 @@ if not isHW():
     nftest_expect_phy('nf2', pkts)
     nftest_expect_phy('nf3', pkts)
 
-#simReg.regDelay(11000)
 nftest_barrier()
 
 num_normal = 10
