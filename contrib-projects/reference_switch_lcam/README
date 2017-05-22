@@ -1,0 +1,29 @@
+Instruction for Reference Switch with Large CAM on NetFPGA-SUME
+----
+Modification to setting parameters
+
+$ vim tools/settings.sh
+export NF_PROJECT_NAME=reference_switch_lcam
+export PROJECTS=${SUME_FOLDER}/contrib-projects
+export NF_DESIGN_DIR=${SUME_FOLDER}/contrib-projects/${NF_PROJECT_NAME}
+
+For simulation, you have to modify barrier_v1_0_0 rtl for increasing timeout.
+
+$ vim $SUME_FOLDER/lib/hw/std/cores/barrier_v1_0_0/hdl/barrier.v 
++ parameter INACTIVITY_TIMEOUT = 12000;
+- parameter INACTIVITY_TIMEOUT = 4000;
+
+Executing simulation and synthesis for hardware testing
+
+$ source tools/settings.sh
+$ cd $SUME_FOLDER && make
+$ cd $SUME_FOLDER/lib/hw/contrib/cores/lcam_output_port_lookup_v1_0_0 
+$ cp /path_to_zip/xapp1151_Param_CAM.zip
+$ make update && make
+
+For simulation
+$ cd $SUME_FOLDER/tools/scripts/
+$ ./nf_test.py sim --major learning --minor sw
+or 
+$ ./nf_test.py sim --major simple --minor broadcast
+
