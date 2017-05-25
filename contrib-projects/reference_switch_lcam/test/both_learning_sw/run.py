@@ -71,7 +71,7 @@ for i in range(4):
 num_broadcast = 10
 
 if not isHW():
-	simReg.regDelay(8000)
+	simReg.regDelay(9000)
 	nftest_barrier()
 
 pkts = []

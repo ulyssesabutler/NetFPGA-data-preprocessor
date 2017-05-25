@@ -62,7 +62,7 @@
 
  parameter PCIE_PERIOD = 10;
  parameter XPHY_PERIOD = 6.4;
- parameter CORE_PERIOD = 5;
+ parameter CORE_PERIOD = 5.0;
  
    localparam  TCQ                                 = 1;
    localparam  BAR0AXI                             = 32'h40000000;
