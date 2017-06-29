@@ -27,7 +27,8 @@
 # @NETFPGA_LICENSE_HEADER_END@
 #
 
+set design [lindex $argv 1] 
 fpga -f [lindex $argv 0]
 connect mb mdm
-dow SDK_Workspace/acceptance_test/Debug/acceptance_test.elf
+dow nf_sume_$design/SDK_Workspace/acceptance_test/Debug/acceptance_test.elf
 run

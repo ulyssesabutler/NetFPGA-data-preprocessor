@@ -47,5 +47,6 @@ set_property -dict [list \
 	CONFIG.baser32 {64bit}\
 ] [get_ips $ip_name]
 
-generate_target {synthesis example} [get_ips $ip_name] 
+generate_target {synthesis} [get_ips $ip_name]
+open_example_project -force -dir $ip_name/example_design [get_ips $ip_name]
 

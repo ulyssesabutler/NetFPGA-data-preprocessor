@@ -69,7 +69,11 @@ clean: libclean toolsclean projectsclean hwtestlibclean swclean
 	@rm -rfv *.*~
 	@rm -rfv ip_proj
 	@rm -rfv ip_user_files
-
+	@find . -type f -name '*.pyc' -delete
+	@find . -type f -name '*.jou' -delete
+	@find . -type f -name '*.log' -delete
+	@find . -type f -name '*.coe' -delete
+	@find . -type f -name '*.mif' -delete
 
 sume:
 	make -C $(LIB_HW_DIR)/contrib/cores/nf_endianess_manager_v1_0_0/

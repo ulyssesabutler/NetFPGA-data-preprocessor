@@ -232,7 +232,7 @@ module nf_sume_10g_interface #
         .USE_SHARED_TXUSRCLK(USE_SHARED_TXUSRCLK)
     ) nf_sume_10g_interface_pcs_pma_wrapper_inst (
         // Clocking and Reset
-        .clk156     (clk156),                       // System Clock for the Core 
+        .coreclk     (clk156),                       // System Clock for the Core 
         .dclk       (dclk),                         // DRP Clock (must be the same as clk156)   
         .qplllock   (qplllock),                     // QPLL lock signal
         .qplloutclk (qplloutclk),                   // QPLL clock
@@ -242,7 +242,7 @@ module nf_sume_10g_interface #
 		.txusrclk_out(txusrclk_out),				// Shared txusrclk Output
      
         .areset     (areset),                       // Async (Master) Reset
-        .areset_clk156  (areset_clk156),            // Sync Reset in clk156 Domain
+        .areset_coreclk  (areset_clk156),            // Sync Reset in clk156 Domain
         .gttxreset  (gttxreset),                    // TX Reset in refclk domain
         .gtrxreset  (gtrxreset),                    // RX Reset in refclk domain
         .reset_counter_done (reset_counter_done),   // Indicate that 500ns have passed after configuration

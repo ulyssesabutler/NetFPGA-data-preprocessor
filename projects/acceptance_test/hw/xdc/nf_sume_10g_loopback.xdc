@@ -106,6 +106,8 @@ create_clock -period 3.103 -name xphy_txusrclkout3 [get_pins -hier -filter name=
 create_clock -period 6.400 -name clk156 [get_pins -hier -filter name=~*xge_shared_logic*clk156_bufg_inst/O]
 create_clock -period 6.400 -name xge_refclk [get_pins -hier -filter name=~*sfp_ibufdsgte/IBUF_OUT*]
 
+create_clock -period 5.000 -name sys_clk_ref [get_pins -hier -filter name=~*sysclk_ibufds/IBUF_OUT*]
+
 set_clock_groups -name async_sys_xgemac -asynchronous -group [get_clocks sys_clk_ref] -group [get_clocks clk156]
 
 set_clock_groups -name async_rxusrclk_xgemac -asynchronous -group [get_clocks xphy_rxusrclkout?] -group [get_clocks clk156]
@@ -118,13 +120,15 @@ set_false_path -from [get_clocks clk_out1_system_clk_wiz_1_0] -to [get_clocks cl
 set_false_path -from [get_clocks clk156] -to [get_clocks clk_out1_system_clk_wiz_1_0]
 
 # 200MHz System Clock
-set_property PACKAGE_PIN H19 [get_ports {fpga_sysclk_p[0]}]
+# PadFunction: IO_L13P_T2_MRCC_38 
+set_property VCCAUX_IO DONTCARE [get_ports {fpga_sysclk_p}]
+set_property IOSTANDARD DIFF_SSTL15 [get_ports {fpga_sysclk_p}]
+set_property PACKAGE_PIN H19 [get_ports {fpga_sysclk_p}]
 
-set_property VCCAUX_IO DONTCARE [get_ports {fpga_sysclk_p[0]}]
-set_property IOSTANDARD DIFF_SSTL15 [get_ports {fpga_sysclk_p[0]}]
-set_property IOSTANDARD DIFF_SSTL15 [get_ports {fpga_sysclk_n[0]}]
-
-create_clock -period 5.000 -name sys_clk_ref [get_pins -hier -filter name=~*fpga_sysclk_ibuf/IBUF_OUT*]
+# PadFunction: IO_L13N_T2_MRCC_38 
+set_property VCCAUX_IO DONTCARE [get_ports {fpga_sysclk_n}]
+set_property IOSTANDARD DIFF_SSTL15 [get_ports {fpga_sysclk_n}]
+set_property PACKAGE_PIN G18 [get_ports {fpga_sysclk_n}]
 
 # reset - Btn0
 set_property PACKAGE_PIN AR13 [get_ports reset]

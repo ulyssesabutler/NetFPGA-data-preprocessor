@@ -36,7 +36,7 @@
     <LowPower_En>ON</LowPower_En>
     <XADC_En>Enabled</XADC_En>
     <TargetFPGA>xc7vx690t-ffg1761/-3</TargetFPGA>
-    <Version>2.0</Version>
+    <Version>4.0</Version>
     <SystemClock>Differential</SystemClock>
     <ReferenceClock>Use System Clock</ReferenceClock>
     <SysResetPolarity>ACTIVE HIGH</SysResetPolarity>
@@ -103,8 +103,8 @@
             <Pin VCCAUX_IO="NORMAL" IOSTANDARD="HSTL_I" PADName="AJ16" SLEW="" name="qdriip_d[8]" IN_TERM="" />
             <Pin VCCAUX_IO="NORMAL" IOSTANDARD="HSTL_I" PADName="AM12" SLEW="" name="qdriip_d[9]" IN_TERM="" />
             <Pin VCCAUX_IO="NORMAL" IOSTANDARD="HSTL_I" PADName="AJ20" SLEW="" name="qdriip_dll_off_n" IN_TERM="" />
-            <Pin VCCAUX_IO="NORMAL" IOSTANDARD="DIFF_HSTL_I" PADName="AL14" SLEW="" name="qdriip_k_n[0]" IN_TERM="" />
-            <Pin VCCAUX_IO="NORMAL" IOSTANDARD="DIFF_HSTL_I" PADName="AK15" SLEW="" name="qdriip_k_p[0]" IN_TERM="" />
+            <Pin VCCAUX_IO="NORMAL" IOSTANDARD="DIFF_HSTL_II" PADName="AL14" SLEW="" name="qdriip_k_n[0]" IN_TERM="" />
+            <Pin VCCAUX_IO="NORMAL" IOSTANDARD="DIFF_HSTL_II" PADName="AK15" SLEW="" name="qdriip_k_p[0]" IN_TERM="" />
             <Pin VCCAUX_IO="NORMAL" IOSTANDARD="HSTL_I_DCI" PADName="AJ23" SLEW="" name="qdriip_q[0]" IN_TERM="" />
             <Pin VCCAUX_IO="NORMAL" IOSTANDARD="HSTL_I_DCI" PADName="AN24" SLEW="" name="qdriip_q[10]" IN_TERM="" />
             <Pin VCCAUX_IO="NORMAL" IOSTANDARD="HSTL_I_DCI" PADName="AP23" SLEW="" name="qdriip_q[11]" IN_TERM="" />

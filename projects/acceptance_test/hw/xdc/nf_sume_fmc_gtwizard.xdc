@@ -34,15 +34,14 @@
 # @NETFPGA_LICENSE_HEADER_END@
 #
 
-# PadFunction: IO_L13P_T2_MRCC_38 
-set_property VCCAUX_IO DONTCARE [get_ports {SYSCLK_IN_P}]
-set_property IOSTANDARD DIFF_SSTL15 [get_ports {SYSCLK_IN_P}]
-set_property PACKAGE_PIN H19 [get_ports {SYSCLK_IN_P}]
+# PadFunction: IO_L13P_T2_MRCC_38
+set_property VCCAUX_IO DONTCARE [get_ports SYSCLK_IN_P]
+set_property IOSTANDARD DIFF_SSTL15 [get_ports SYSCLK_IN_P]
 
-# PadFunction: IO_L13N_T2_MRCC_38 
-set_property VCCAUX_IO DONTCARE [get_ports {SYSCLK_IN_N}]
-set_property IOSTANDARD DIFF_SSTL15 [get_ports {SYSCLK_IN_N}]
-set_property PACKAGE_PIN G18 [get_ports {SYSCLK_IN_N}]
+# PadFunction: IO_L13N_T2_MRCC_38
+set_property IOSTANDARD DIFF_SSTL15 [get_ports SYSCLK_IN_N]
+set_property PACKAGE_PIN H19 [get_ports SYSCLK_IN_P]
+set_property PACKAGE_PIN G18 [get_ports SYSCLK_IN_N]
 
 # reset - Btn0
 set_property PACKAGE_PIN AR13 [get_ports sys_rst]
@@ -53,4 +52,4 @@ set_property PACKAGE_PIN AR22 [get_ports TRACK_DATA_OUT]
 set_property IOSTANDARD LVCMOS15 [get_ports TRACK_DATA_OUT]
 
 # Timing Constraints
-create_clock -period 5 [get_nets SYSCLK_IN_P]
+create_clock -period 5.000 [get_nets SYSCLK_IN_P]

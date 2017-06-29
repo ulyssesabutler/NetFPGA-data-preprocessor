@@ -40,5 +40,6 @@ set_property -dict [list\
 ] [get_ips ${ip_name}]
 
 # Generate Example Code
-generate_target {Example} [get_ips ${ip_name}]
+# generate_target {Example} [get_ips ${ip_name}]
+open_example_project -force -dir $ip_name/example_design [get_ips $ip_name]
  

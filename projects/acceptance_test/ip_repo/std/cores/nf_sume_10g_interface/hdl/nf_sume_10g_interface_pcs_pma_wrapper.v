@@ -40,7 +40,7 @@ module nf_sume_10g_interface_pcs_pma_wrapper # (
 	parameter USE_SHARED_TXUSRCLK = "TRUE"
 	) (
     // Global Clock Input
-    input           clk156,
+    input           coreclk,
     input           dclk,
     input           qplllock,
     input           qplloutclk,
@@ -49,7 +49,7 @@ module nf_sume_10g_interface_pcs_pma_wrapper # (
 	output          txusrclk_out,
     // Global Reset Inputs
     input           areset,
-    input           areset_clk156,
+    input           areset_coreclk,
     input           gttxreset,
     input           gtrxreset,
     input           reset_counter_done,
@@ -84,7 +84,7 @@ module nf_sume_10g_interface_pcs_pma_wrapper # (
 
     wire            txusrclk;
     wire            txusrclk2;
-    wire            txclk322;
+    wire            txoutclk;
     reg             qplllock_txusrclk2;
     reg             gttxreset_txusrclk2;
     
@@ -100,7 +100,7 @@ else
 	begin
 		BUFG tx322clk_bufg_i
 		(
-		    .I (txclk322),
+		    .I (txoutclk),
 		    .O (txusrclk)
 		);
 		assign txusrclk_out = txusrclk;
@@ -178,14 +178,14 @@ endgenerate
      // Configuration and Status Vectors
 
      // Clocking and Reset
-     .clk156     (clk156),                       // System Clock for the Core 
+     .coreclk     (coreclk),                       // System Clock for the Core 
      .dclk       (dclk),                         // DRP Clock (must be the same as clk156)
      .txusrclk   (txusrclk),                     // Tx Clock, Derived from TXCLKOUT
      .txusrclk2  (txusrclk2),                    // Tx Clock, Derived from TXCLKOUT
-     .txclk322   (txclk322),                     // TXCLKOUT
+     .txoutclk   (txoutclk),                     // TXCLKOUT
 
      .areset     (areset),                       // Async (Master) Reset
-     .areset_clk156  (areset_clk156),            // Sync Reset in clk156 Domain
+     .areset_coreclk  (areset_coreclk),            // Sync Reset in clk156 Domain
 
      .gttxreset  (gttxreset),                    // TX Reset in refclk domain
      .gtrxreset  (gtrxreset),                    // RX Reset in refclk domain

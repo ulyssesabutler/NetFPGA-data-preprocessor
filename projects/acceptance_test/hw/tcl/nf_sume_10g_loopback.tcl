@@ -1,6 +1,7 @@
 #
 # Copyright (c) 2015 Digilent Inc.
 # Copyright (c) 2015 Tinghui Wang (Steve)
+# Copyright (C) 2017 Salvator Galea
 # All rights reserved.
 #
 # File:
@@ -11,6 +12,7 @@
 #
 # Author:
 # Tinghui Wang (Steve)
+# Modified by Salvator Galea
 #
 # Description:
 # Vivado TCL script to generate 10G Loopback Test 
@@ -35,7 +37,6 @@
 #
 
 source tcl/nf_sume_mbsys.tcl
-
 
 # Set up External Ports for 10G interfaces eth0-3
 proc create_ext_ports_10g { } {
@@ -305,7 +306,7 @@ proc create_hier_10g { nameHier } {
   current_bd_instance $oldCurInst
 }
 
-set project_name        {nf_sume_10g_loopback_example}
+set project_name        {nf_sume_10g_loopback_ex}
 set device 				{xc7vx690tffg1761-3}
 set ip_repo_path        {../../ip_repo}
 set bd_name             {baseSys}
@@ -319,6 +320,7 @@ create_project $project_name ./$project_name -part $device
 
 # Set IP Repository
 set_property ip_repo_paths ${ip_repo_path} [current_fileset]
+
 update_ip_catalog -rebuild
 
 # Create Microblaze System
@@ -327,12 +329,10 @@ open_bd_design [get_files -regexp -nocase {.*\.bd}]
 
 # Create instance: sysclk_ibufds, and set properties
 delete_bd_objs [get_bd_pins sysclk]
-set sysclk_ibufds [ create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf sysclk_ibufds ]
+
+# set sysclk_ibufds [ create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf sysclk_ibufds ]
 set fpga_sysclk_n [ create_bd_port -dir I -from 0 -to 0 fpga_sysclk_n ]
 set fpga_sysclk_p [ create_bd_port -dir I -from 0 -to 0 fpga_sysclk_p ]
-connect_bd_net [get_bd_ports fpga_sysclk_p] [get_bd_pins sysclk_ibufds/IBUF_DS_P]
-connect_bd_net [get_bd_ports fpga_sysclk_n] [get_bd_pins sysclk_ibufds/IBUF_DS_N]
-connect_bd_net [get_bd_pins sysclk_ibufds/IBUF_OUT] [get_bd_pins clk_wiz_1/clk_in1]
 
 # Create External Ports for 10G Ethernet
 create_ext_ports_10g
@@ -343,7 +343,7 @@ post_connection_hier_10g {nf_sume_10g_subsys}
 create_bd_port -dir I -from 0 -to 0 sfp_refclk_n
 create_bd_port -dir I -from 0 -to 0 sfp_refclk_p
 # Create instance: sfp_ibufdsgte, and set properties
-set sfp_ibufdsgte [ create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf:2.0 sfp_ibufdsgte ]
+set sfp_ibufdsgte [ create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf:2.1 sfp_ibufdsgte ]
 set_property -dict [ list CONFIG.C_BUF_TYPE {IBUFDSGTE}  ] $sfp_ibufdsgte
 # Connect SFP+ Refclk
 connect_bd_net [get_bd_ports sfp_refclk_p] [get_bd_pins sfp_ibufdsgte/IBUF_DS_P]
@@ -353,9 +353,50 @@ connect_bd_net [get_bd_ports sfp_refclk_n] [get_bd_pins sfp_ibufdsgte/IBUF_DS_N]
 connect_bd_net [get_bd_ports reset] [get_bd_pins nf_sume_10g_subsys/areset]
 connect_bd_net [get_bd_pins sfp_ibufdsgte/IBUF_OUT] [get_bd_pins nf_sume_10g_subsys/refclk]
 
+
+# ---------------------------------------------------------------------------------------------------------------
+# Bug Vivado 2016.4 -- Workaround -- Start
+# https://forums.xilinx.com/t5/Synthesis/Vivado-2016-3-Utility-Buffer-issue-Limiting-clock-on-100Mhz/td-p/736176
+# System clock buffer.
+startgroup
+set CLK_IN_D [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 CLK_IN_D ]
+set_property -dict [ list CONFIG.FREQ_HZ {200000000} ] $CLK_IN_D
+
+set sysclk_ibufds [ create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf:2.1 sysclk_ibufds_0 ]
+
+connect_bd_net -net fpga_sysclk_n [get_bd_ports fpga_sysclk_n] [get_bd_pins sysclk_ibufds_0/IBUF_DS_N]
+connect_bd_net -net fpga_sysclk_p [get_bd_ports fpga_sysclk_p] [get_bd_pins sysclk_ibufds_0/IBUF_DS_P]
+endgroup
+
+create_bd_intf_net clk_in_d_0
+connect_bd_intf_net -intf_net clk_in_d_0 [get_bd_intf_ports CLK_IN_D] [get_bd_intf_pins sysclk_ibufds_0/CLK_IN_D]
+
+delete_bd_objs [get_bd_intf_nets clk_in_d_0] [get_bd_cells sysclk_ibufds_0]
+
+startgroup
+set_property -dict [ list CONFIG.FREQ_HZ {200000000} ] $CLK_IN_D
+set sysclk_ibufds [ create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf sysclk_ibufds ]
+set_property -dict [ list CONFIG.C_BUF_TYPE {IBUFDS} ] $sysclk_ibufds
+endgroup
+
+connect_bd_net [get_bd_pins sysclk_ibufds/IBUF_OUT] [get_bd_pins clk_wiz_1/clk_in1]
+connect_bd_intf_net [get_bd_intf_ports CLK_IN_D] [get_bd_intf_pins sysclk_ibufds/CLK_IN_D]
+validate_bd_design
+
+delete_bd_obj [get_bd_intf_nets CLK_IN_D_1] [get_bd_intf_ports CLK_IN_D]
+
+connect_bd_net -net fpga_sysclk_n [get_bd_ports fpga_sysclk_n] [get_bd_pins sysclk_ibufds/IBUF_DS_N]
+connect_bd_net -net fpga_sysclk_p [get_bd_ports fpga_sysclk_p] [get_bd_pins sysclk_ibufds/IBUF_DS_P]
+report_property -all [get_bd_intf_pins sysclk_ibufds/CLK_IN_D]
+validate_bd_design
+# Bug Vivado 2016.4 -- Workaround -- End
+# ---------------------------------------------------------------------------------------------------------------
+
+
 # Generate Top Wrapper
 regenerate_bd_layout
 save_bd_design
+
 close_bd_design [current_bd_design]
 make_wrapper -files [get_files -regexp -nocase {.*\.bd}] -top -import -force
 add_files -fileset constrs_1 -norecurse ../xdc/nf_sume_system_general.xdc

@@ -29,15 +29,17 @@
 
 # Create NetFPGA-SUME 10G MAC Core using Xilinx Ten Gigabit Ethernet Mac IP Core
 set ip_name "nf_sume_10g_interface_mac"
-
+set ip_name_ex ${ip_name}_example_design 
 # Create Project
 create_project -in_memory -part xc7vx690tffg1761-3
 set nf_sume_10g_mac [\
 	create_ip -name ten_gig_eth_mac\
               -vendor xilinx.com \
+              -version 15.1\
               -library ip \
               -module_name $ip_name\
               -dir .\
+              -verbose \
 	]
 
 set_property -dict [list\
@@ -45,5 +47,5 @@ set_property -dict [list\
 	CONFIG.Statistics_Gathering {false}\
 ] [get_ips $ip_name]
 
-generate_target {synthesis example} [get_ips $ip_name] 
-
+generate_target {synthesis} [get_ips $ip_name]
+open_example_project -force -dir $ip_name/example_design [get_ips $ip_name]

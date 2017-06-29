@@ -11,6 +11,7 @@
 #
 # Author:
 # Tinghui Wang (Steve)
+# Modified by Salvator Galea
 #
 # Description:
 # This makefile is used to generate and compile acceptance_test hardware
@@ -50,34 +51,43 @@ all:
 	@echo "clean:           Remove specified project"
 	@echo "distclean:       Remove all generated projects"
 	@echo ""
-	@echo "Available Projects are: ddr3A, ddr3B, qdrA, qdrB, qdrC, pcie, fmc_ibert, fmc_gtwizard, fmc_aurora, qth_ibert, qth_gtwizard, qth_aurora, xge_loopback, gpio"
+	@echo "Available Projects are: ddr3A ddr3B qdrA qdrB qdrC pcie fmc_ibert fmc_gtwizard qth_ibert qth_gtwizard pcie_ibert gpio sata 10g_loopback"
 	@echo ""
 
 .PHONY: project compile export_to_sdk load_elf clean distclean
 
 project:
-	@if [ -z ${PROJ} ]; then\
+	@if [ -z ${PROJ} ]; then \
 		echo "make PROJ=<proj_name> project";\
-		echo "Available Projects are: ddr3A, ddr3B, qdrA, qdrB, qdrC, pcie, fmc_ibert, fmc_gtwizard, fmc_aurora, qth_ibert, qth_gtwizard, qth_aurora, xge_loopback, gpio";\
-	else\
-		echo "Create ${PROJ} acceptance test under folder /project";\
-		if test -d project/nf_sume_${PROJ}_example; then\
+		echo "Available Projects are: ddr3A ddr3B qdrA qdrB qdrC pcie fmc_ibert fmc_gtwizard qth_ibert qth_gtwizard pcie_ibert gpio sata 10g_loopback ";\
+	else \
+		echo "";\
+		echo "*******************************************************************";\
+		echo "* Create ${PROJ} acceptance test under folder /project";\
+		echo "*******************************************************************\n";\
+		if test -d project/nf_sume_${PROJ}_ex; then \
 			echo "${PROJ} already exists"; \
 		else \
 			vivado -mode batch -source tcl/nf_sume_${PROJ}.tcl;\
-			if [ -f patch/nf_sume_${PROJ}.patch ]; then\
+			if [ -f patch/nf_sume_${PROJ}.patch ]; then \
 				patch -p1 < patch/nf_sume_${PROJ}.patch;\
+			fi;\
+			if [ -f project/nf_sume_${PROJ}_ex/nf_sume_${PROJ}_ex.srcs/sources_1/ip/nf_sume_${PROJ}/nf_sume_${PROJ}/example_design/rtl/example_top.v ]; then \
+				cp -f project/nf_sume_${PROJ}_ex/nf_sume_${PROJ}_ex.srcs/sources_1/ip/nf_sume_${PROJ}/nf_sume_${PROJ}/example_design/rtl/example_top.v project/nf_sume_${PROJ}_ex/imports/example_top.v;\
 			fi;\
 		fi;\
 	fi;
 
 compile:
-	@if [ -z ${PROJ} ]; then\
+	@if [ -z ${PROJ} ]; then \
 		echo "make PROJ=<proj_name> compile";\
-		echo "Available Projects are: ddr3A, ddr3B, qdrA, qdrB, qdrC, pcie, fmc_ibert, fmc_gtwizard, fmc_aurora, qth_ibert, qth_gtwizard, qth_aurora, xge_loopback, gpio";\
-	else\
-		if test -d project/nf_sume_${PROJ}_example; then\
-			echo "Start Compiling ${PROJ}"; \
+		echo "Available Projects are: ddr3A ddr3B qdrA qdrB qdrC pcie fmc_ibert fmc_gtwizard qth_ibert qth_gtwizard pcie_ibert gpio sata 10g_loopback ";\
+	else \
+		if test -d project/nf_sume_${PROJ}_ex; then \
+			echo "";\
+			echo "***********************************";\
+			echo "* Start Compiling ${PROJ}"; \
+			echo "***********************************\n";\
 			vivado -mode batch -source tcl/nf_sume_compile.tcl -tclargs ${PROJ};\
 		else \
 			echo "Acceptance test ${PROJ} does not exists.";\
@@ -86,13 +96,21 @@ compile:
 	fi;
 
 export_to_sdk:
-	@if [ -z ${PROJ} ]; then\
+	@if [ -z ${PROJ} ]; then \
 		echo "make PROJ=<proj_name> export_to_sdk";\
-		echo "Available Projects are: ddr3A, ddr3B, qdrA, qdrB, qdrC, pcie, fmc_ibert, fmc_gtwizard, fmc_aurora, qth_ibert, qth_gtwizard, qth_aurora, xge_loopback, gpio";\
-	else\
-		if test -d project/nf_sume_${PROJ}_example; then\
-			echo "export ${PROJ} project to SDK"; \
-			vivado -mode batch -source tcl/nf_sume_export_hardware.tcl -tclargs nf_sume_${PROJ};\
+		echo "Available Projects are: ddr3A ddr3B qdrA qdrB qdrC pcie fmc_ibert fmc_gtwizard qth_ibert qth_gtwizard pcie_ibert gpio sata 10g_loopback ";\
+	else \
+		if test -d project/nf_sume_${PROJ}_ex; then \
+			echo "";\
+			echo "******************************************";\
+			echo "* Export ${PROJ} project to SDK";\
+			echo "******************************************\n";\
+#			vivado -mode batch -source tcl/nf_sume_export_hardware.tcl -tclargs nf_sume_${PROJ};\
+			if test -d ../sw/embedded/nf_sume_${PROJ}; then \
+				rm -rf ../sw/embedded/nf_sume_${PROJ}/; \
+			fi; \
+			mkdir ../sw/embedded/nf_sume_${PROJ}/; \
+			find project/nf_sume_${PROJ}_ex/ -name "*.sysdef" -exec cp -f {} ../sw/embedded/nf_sume_${PROJ}/nf_sume_${PROJ}.hdf  \; ;\
 		else \
 			echo "Acceptance test ${PROJ} does not exists.";\
 			echo "Please run \"make PROJ=${PROJ} project compile\" to create and build the project first";\
@@ -100,12 +118,15 @@ export_to_sdk:
 	fi;
 
 sim:
-	@if [ -z ${PROJ} ]; then\
+	@if [ -z ${PROJ} ]; then \
 		echo "make PROJ=<proj_name> sim";\
-		echo "Available Projects are: ddr3A, ddr3B, qdrA, qdrB, qdrC, pcie, fmc_ibert, fmc_gtwizard, fmc_aurora, qth_ibert, qth_gtwizard, qth_aurora, xge_loopback, gpio";\
-	else\
-		if test -d project/nf_sume_${PROJ}_example; then\
-			echo "export ${PROJ} project to SDK"; \
+		echo "Available Projects are: ddr3A ddr3B qdrA qdrB qdrC pcie fmc_ibert fmc_gtwizard qth_ibert qth_gtwizard pcie_ibert gpio sata 10g_loopback ";\
+	else \
+		if test -d project/nf_sume_${PROJ}_ex; then \
+			echo "";\
+			echo "******************************************";\
+			echo "* Export SIM ${PROJ} project to SDK"; \
+			echo "******************************************\n";\
 			vivado -mode batch -source tcl/nf_sume_sim.tcl -tclargs nf_sume_${PROJ};\
 		else \
 			echo "Acceptance test ${PROJ} does not exists.";\
@@ -115,12 +136,15 @@ sim:
 
 load_elf:
 	@if [ ! -d ../bitfiles ]; then mkdir ../bitfiles; fi;
-	@if [ -z ${PROJ} ]; then\
+	@if [ -z ${PROJ} ]; then \
 		echo "make PROJ=<proj_name> load_elf";\
-		echo "Available Projects are: ddr3A, ddr3B, qdrA, qdrB, qdrC, pcie, fmc_ibert, fmc_gtwizard, fmc_aurora, qth_ibert, qth_gtwizard, qth_aurora, xge_loopback, gpio";\
-	else\
-		if test -d project/nf_sume_${PROJ}_example; then\
-			echo "load elf file to ${PROJ} project"; \
+		echo "Available Projects are: ddr3A ddr3B qdrA qdrB qdrC pcie fmc_ibert fmc_gtwizard qth_ibert qth_gtwizard pcie_ibert gpio sata 10g_loopback ";\
+	else \
+		if test -d project/nf_sume_${PROJ}_ex; then \
+			echo "";\
+			echo "******************************************";\
+			echo "* Load elf file to ${PROJ} project"; \
+			echo "******************************************\n";\
 			vivado -mode batch -source tcl/nf_sume_load_elf.tcl -tclargs nf_sume_${PROJ};\
 		else \
 			echo "Acceptance test ${PROJ} does not exists.";\
@@ -129,12 +153,12 @@ load_elf:
 	fi;
 
 clean:
-	@if [ -z ${PROJ} ]; then\
+	@if [ -z ${PROJ} ]; then \
 		echo "make PROJ=<proj_name> clean";\
-		echo "Available Projects are: ddr3A, ddr3B, qdrA, qdrB, qdrC, pcie, fmc_ibert, fmc_gtwizard, fmc_aurora, qth_ibert, qth_gtwizard, qth_aurora, xge_loopback, gpio";\
-	else\
-		rm -rfv project/nf_sume_${PROJ}_example;\
-		rm -rfv ../sw/embedded/nf_sume_${PROJ}/hw;\
+		echo "Available Projects are: ddr3A ddr3B qdrA qdrB qdrC pcie fmc_ibert fmc_gtwizard qth_ibert qth_gtwizard pcie_ibert gpio sata 10g_loopback ";\
+	else \
+		rm -rfv project/nf_sume_${PROJ}*;\
+		rm -rfv ../sw/embedded/nf_sume_${PROJ}*;\
 		rm -rfv vivado*;\
 		rm -rfv *.log;\
 		rm -rfv .Xil;\

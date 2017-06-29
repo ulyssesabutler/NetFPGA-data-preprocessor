@@ -43,7 +43,7 @@ set ipname				{nf_sume_10g_interface_shared_logic}
 set mem_proj [create_project -in_memory -part $device]
 
 # Create IP Edit Project
-set ip_proj [ipx::edit_ip_in_project -name $ipname -directory ./${ipname}_project ./component.xml]
+set ip_proj [ipx::edit_ip_in_project -name nf_sume_10g_interface_shared_logic_project -directory ./nf_sume_10g_interface_shared_logic_project ./component.xml]
 ipx::open_ipxact_file ./component.xml
 
 # Close mem_proj window

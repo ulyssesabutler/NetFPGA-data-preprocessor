@@ -39,6 +39,10 @@
 # @NETFPGA_LICENSE_HEADER_END@
 #
 
+## -- The following two properties should be set for every design
+set_property CFGBVS GND [current_design]
+set_property CONFIG_VOLTAGE 1.8 [current_design]
+
 # Main I2C Bus - 100KHz
 set_property IOSTANDARD LVCMOS18 [get_ports iic_fpga_scl_io]
 set_property SLEW SLOW [get_ports iic_fpga_scl_io]
@@ -69,3 +73,6 @@ set_property IOSTANDARD LVCMOS15 [get_ports uart_txd]
 
 # Bitfile Generation
 set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
+
+
+
