@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2015 University of Cambridge
+// Copyright (c) 2017 Yuta Tokusashi
 // 
 // All rights reserved.
 //
@@ -31,8 +32,8 @@
 
 module cam_wrapper
 #(
-   parameter  MEM_TYPE              = 0,
-   parameter  CAM_MODE              = 0,
+   parameter  MEM_TYPE           = 0,
+   parameter  CAM_MODE           = 0,
    parameter  C_TCAM_ADDR_WIDTH 	= 4,
    parameter  C_TCAM_DATA_WIDTH 	= 16,
    parameter  C_TCAM_ADDR_TYPE  	= 0,
