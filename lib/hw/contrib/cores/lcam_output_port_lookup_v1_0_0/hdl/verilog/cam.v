@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2015 University of Cambridge
+// Copyright (c) 2017 Yuta Tokusashi
 // 
 // All rights reserved.
 //
