@@ -2,6 +2,7 @@
 *
 * Copyright (C) 2013 Gianni Antichi
 * Copyright (C) 2015 Noa Zilberman
+* Copyright (C) 2017 Yuta Tokusasahi
 * All rights reserved.
 *
 * This software was developed by
