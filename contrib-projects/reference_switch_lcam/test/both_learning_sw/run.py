@@ -3,6 +3,7 @@
 #
 # Copyright (c) 2015 University of Cambridge
 # Copyright (c) 2015 Neelakandan Manihatty Bojan, Georgina Kalogeridou
+# Copyright (c) 2017 Yuta Tokusashi
 # All rights reserved.
 #
 # This software was developed by Stanford University and the University of Cambridge Computer Laboratory 
@@ -31,6 +32,7 @@
 #
 # Author:
 #        Modified by Neelakandan Manihatty Bojan, Georgina Kalogeridou
+#        Modified by Yuta Tokusashi
 
 import logging
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
