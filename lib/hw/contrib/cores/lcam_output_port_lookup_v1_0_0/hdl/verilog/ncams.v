@@ -54,7 +54,7 @@ module ncams #(
 	output wire                             busy,
 	input  wire [TCAM_DATA_WIDTH-1:0]       cmp_din,
 	output wire                             match,
-	output wire [TCAM_MATCH_ADDR_WIDTH-1:0] match_addr
+	output wire [TCAM_MATCH_ADDR_WIDTH+ID_BITS-1:0] match_addr
 );
 
 /* 
@@ -1434,13 +1434,13 @@ prio_enc1 #(
 	.en         (l1_prio_match_en_0),
 
 	.en_0       (match_0),
-	.din_0      (match_addr_0),
+	.din_0      ({5'd0, match_addr_0}),
 	.en_1       (match_1),
-	.din_1      (match_addr_1),
+	.din_1      ({5'd1, match_addr_1}),
 	.en_2       (match_2),
-	.din_2      (match_addr_2),
+	.din_2      ({5'd2, match_addr_2}),
 	.en_3       (match_3),
-	.din_3      (match_addr_3),
+	.din_3      ({5'd3, match_addr_3}),
 
 	.dout_en    (l1_prio_match_0),
 	.dout       (l1_prio_match_addr_0)
@@ -1461,13 +1461,13 @@ prio_enc1 #(
 	.en         (l1_prio_match_en_1),
 
 	.en_0       (match_4),
-	.din_0      (match_addr_4),
+	.din_0      ({5'd4, match_addr_4}),
 	.en_1       (match_5),
-	.din_1      (match_addr_5),
+	.din_1      ({5'd5, match_addr_5}),
 	.en_2       (match_6),
-	.din_2      (match_addr_6),
+	.din_2      ({5'd6, match_addr_6}),
 	.en_3       (match_7),
-	.din_3      (match_addr_7),
+	.din_3      ({5'd7, match_addr_7}),
 
 	.dout_en    (l1_prio_match_1),
 	.dout       (l1_prio_match_addr_1)
@@ -1488,13 +1488,13 @@ prio_enc1 #(
 	.en         (l1_prio_match_en_2),
 
 	.en_0       (match_8),
-	.din_0      (match_addr_8),
+	.din_0      ({5'd8, match_addr_8}),
 	.en_1       (match_9),
-	.din_1      (match_addr_9),
+	.din_1      ({5'd9, match_addr_9}),
 	.en_2       (match_10),
-	.din_2      (match_addr_10),
+	.din_2      ({5'd10, match_addr_10}),
 	.en_3       (match_11),
-	.din_3      (match_addr_11),
+	.din_3      ({5'd11, match_addr_11}),
 
 	.dout_en    (l1_prio_match_2),
 	.dout       (l1_prio_match_addr_2)
@@ -1515,13 +1515,13 @@ prio_enc1 #(
 	.en         (l1_prio_match_en_3),
 
 	.en_0       (match_12),
-	.din_0      (match_addr_12),
+	.din_0      ({5'd12, match_addr_12}),
 	.en_1       (match_13),
-	.din_1      (match_addr_13),
+	.din_1      ({5'd13, match_addr_13}),
 	.en_2       (match_14),
-	.din_2      (match_addr_14),
+	.din_2      ({5'd14, match_addr_14}),
 	.en_3       (match_15),
-	.din_3      (match_addr_15),
+	.din_3      ({5'd15, match_addr_15}),
 
 	.dout_en    (l1_prio_match_3),
 	.dout       (l1_prio_match_addr_3)
@@ -1542,13 +1542,13 @@ prio_enc1 #(
 	.en         (l1_prio_match_en_4),
 
 	.en_0       (match_16),
-	.din_0      (match_addr_16),
+	.din_0      ({5'd16, match_addr_16}),
 	.en_1       (match_17),
-	.din_1      (match_addr_17),
+	.din_1      ({5'd17, match_addr_17}),
 	.en_2       (match_18),
-	.din_2      (match_addr_18),
+	.din_2      ({5'd18, match_addr_18}),
 	.en_3       (match_19),
-	.din_3      (match_addr_19),
+	.din_3      ({5'd19, match_addr_19}),
 
 	.dout_en    (l1_prio_match_4),
 	.dout       (l1_prio_match_addr_4)
@@ -1569,13 +1569,13 @@ prio_enc1 #(
 	.en         (l1_prio_match_en_5),
 
 	.en_0       (match_20),
-	.din_0      (match_addr_20),
+	.din_0      ({5'd20, match_addr_20}),
 	.en_1       (match_21),
-	.din_1      (match_addr_21),
+	.din_1      ({5'd21, match_addr_21}),
 	.en_2       (match_22),
-	.din_2      (match_addr_22),
+	.din_2      ({5'd22, match_addr_22}),
 	.en_3       (match_23),
-	.din_3      (match_addr_23),
+	.din_3      ({5'd23, match_addr_23}),
 
 	.dout_en    (l1_prio_match_5),
 	.dout       (l1_prio_match_addr_5)
@@ -1596,13 +1596,13 @@ prio_enc1 #(
 	.en         (l1_prio_match_en_6),
 
 	.en_0       (match_24),
-	.din_0      (match_addr_24),
+	.din_0      ({5'd24, match_addr_24}),
 	.en_1       (match_25),
-	.din_1      (match_addr_25),
+	.din_1      ({5'd25, match_addr_25}),
 	.en_2       (match_26),
-	.din_2      (match_addr_26),
+	.din_2      ({5'd26, match_addr_26}),
 	.en_3       (match_27),
-	.din_3      (match_addr_27),
+	.din_3      ({5'd27, match_addr_27}),
 
 	.dout_en    (l1_prio_match_6),
 	.dout       (l1_prio_match_addr_6)
@@ -1623,13 +1623,13 @@ prio_enc1 #(
 	.en         (l1_prio_match_en_7),
 
 	.en_0       (match_28),
-	.din_0      (match_addr_28),
+	.din_0      ({5'd28, match_addr_28}),
 	.en_1       (match_29),
-	.din_1      (match_addr_29),
+	.din_1      ({5'd29, match_addr_29}),
 	.en_2       (match_30),
-	.din_2      (match_addr_30),
+	.din_2      ({5'd30, match_addr_30}),
 	.en_3       (match_31),
-	.din_3      (match_addr_31),
+	.din_3      ({5'd31, match_addr_31}),
 
 	.dout_en    (l1_prio_match_7),
 	.dout       (l1_prio_match_addr_7)
