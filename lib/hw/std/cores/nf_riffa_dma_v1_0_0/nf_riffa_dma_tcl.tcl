@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2015 University of Cambridge
+# Modified by Salvator Galea
 # All rights reserved.
 #
 # This software was developed by
@@ -70,7 +71,7 @@ set axis_fifo_params [dict create CONFIG.INTERFACE_TYPE {AXI_STREAM} \
 		  		  CONFIG.Empty_Threshold_Assert_Value_axis {13}]
 
 ## # of added files
-set_param project.singleFileAddWarning.Threshold 500				
+set_param project.singleFileAddWarning.Threshold 500
 
 
 ### SubCore Reference
@@ -129,19 +130,18 @@ foreach rtl_dir $rtl_dirs {
         set_property include_dirs $rtl_dirs [current_fileset]
 }
 
-
 # Add verilog sources here
 # Add Verilog Files to The IP Core
 foreach verilog_file $VerilogFiles {
-	add_files ${verilog_file}	
+	add_files ${verilog_file}
 }
 #add_files -scan_for_includes -norecurse ${verilog_file}
 
 # Generate Xilinx AXIS-FIFO (xci)
-create_ip -name fifo_generator -vendor xilinx.com -library ip -version 12.0 -module_name ${xil_ip}
+create_ip -name fifo_generator -vendor xilinx.com -library ip -version 13.1 -module_name ${xil_ip}
 foreach item [dict keys $axis_fifo_params] {
-	set val [dict get $axis_fifo_params $item]	
-	set_property $item $val [get_ips ${xil_ip}]				
+	set val [dict get $axis_fifo_params $item]
+	set_property $item $val [get_ips ${xil_ip}]
 }
 #puts "( $item , $val ) pair \n"
 set xil_ip_xci [append xil_ip ".xci"]
@@ -168,15 +168,15 @@ foreach subcore ${subcore_names} {
 	set subcore_regex NAME=~*$subcore*
 	set subcore_ipdef [get_ipdefs -filter ${subcore_regex}]
 
-	ipx::add_subcore ${subcore_ipdef} [ipx::get_file_groups xilinx_verilogsynthesis -of_objects [ipx::current_core]]
-	ipx::add_subcore ${subcore_ipdef}  [ipx::get_file_groups xilinx_verilogbehavioralsimulation -of_objects [ipx::current_core]]
-	puts "Adding the following subcore: $subcore_ipdef \n"		
+	ipx::add_subcore ${subcore_ipdef} [ipx::get_file_groups xilinx_anylanguagesynthesis -of_objects [ipx::current_core]]
+	ipx::add_subcore ${subcore_ipdef}  [ipx::get_file_groups xilinx_anylanguagebehavioralsimulation -of_objects [ipx::current_core]]
+	puts "Adding the following subcore: $subcore_ipdef \n"
 
 }
 
 # process verilog header files early
-set_property processing_order early [ipx::get_files *.vh -of_objects [ipx::get_file_groups xilinx_verilogsynthesis -of_objects [ipx::current_core]]]
-set_property processing_order early [ipx::get_files *.vh -of_objects [ipx::get_file_groups xilinx_verilogbehavioralsimulation -of_objects [ipx::current_core]]]
+set_property processing_order early [ipx::get_files *.vh -of_objects [ipx::get_file_groups xilinx_anylanguagesynthesis -of_objects [ipx::current_core]]]
+set_property processing_order early [ipx::get_files *.vh -of_objects [ipx::get_file_groups xilinx_anylanguagebehavioralsimulation -of_objects [ipx::current_core]]]
 
 
 # Auto Generate Parameters
@@ -238,15 +238,17 @@ ipx::add_bus_parameter POLARITY [ipx::get_bus_interfaces user_reset -of_objects 
 set_property value ACTIVE_HIGH [ipx::get_bus_parameters POLARITY -of_objects [ipx::get_bus_interfaces user_reset -of_objects [ipx::current_core]]]
 
 # axi_lite rst
-set_property value ACTIVE_LOW [ipx::get_bus_parameters POLARITY -of_objects [ipx::get_bus_interfaces m_axi_lite_signal_reset -of_objects [ipx::current_core]]]
-set_property value ACTIVE_HIGH [ipx::get_bus_parameters POLARITY -of_objects [ipx::get_bus_interfaces user_signal_reset -of_objects [ipx::current_core]]]
+set_property value ACTIVE_LOW [ipx::get_bus_parameters POLARITY -of_objects [ipx::get_bus_interfaces m_axi_lite_aresetn -of_objects [ipx::current_core]]]
+set_property value ACTIVE_HIGH [ipx::get_bus_parameters POLARITY -of_objects [ipx::get_bus_interfaces user_reset -of_objects [ipx::current_core]]]
+
 
 ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces s_axi_lite -of_objects [ipx::current_core]]
 set_property description {Clock frequency (Hertz)} [ipx::get_bus_parameters FREQ_HZ -of_objects [ipx::get_bus_interfaces s_axi_lite -of_objects [ipx::current_core]]]
 
 ## other
-ipx::add_bus_parameter ASSOCIATED_BUSIF [ipx::get_bus_interfaces user_signal_clock -of_objects [ipx::current_core]]
-set_property value user_clk [ipx::get_bus_parameters ASSOCIATED_BUSIF -of_objects [ipx::get_bus_interfaces user_signal_clock -of_objects [ipx::current_core]]]
+ipx::add_bus_parameter ASSOCIATED_BUSIF [ipx::get_bus_interfaces user_clk -of_objects [ipx::current_core]]
+set_property value user_clk [ipx::get_bus_parameters ASSOCIATED_BUSIF -of_objects [ipx::get_bus_interfaces user_clk -of_objects [ipx::current_core]]]
+
 
 ## set bus parameters correctly
 ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces m_axis_cq -of_objects [ipx::current_core]]

@@ -55,6 +55,7 @@ set_property IOSTANDARD DIFF_SSTL15 [get_ports fpga_sysclk_p]
 set_property IOSTANDARD DIFF_SSTL15 [get_ports fpga_sysclk_n]
 
 create_clock -period 5.000 -name sys_clk_ref [get_pins -hier -filter name=~*sysclk_buf/IBUF_OUT*]
+#create_clock -period 5.000 -name sys_clk_ref [get_pins -hier -filter name=~*sysclk_buf/CLK_IN_D*]
 
 # Main I2C Bus - 100KHz
 set_property IOSTANDARD LVCMOS18 [get_ports iic_fpga_scl_io]

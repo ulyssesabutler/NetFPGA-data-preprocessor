@@ -30,8 +30,8 @@
 IPGEN_DIR = generated_ip
 MAC_IP = nf_sume_10g_interface_mac
 PMA_IP = nf_sume_10g_interface_pcs_pma
-MAC_DIR = $(IPGEN_DIR)/$(MAC_IP)/
-PMA_DIR = $(IPGEN_DIR)/$(PMA_IP)/
+MAC_DIR = $(IPGEN_DIR)/$(MAC_IP)
+PMA_DIR = $(IPGEN_DIR)/$(PMA_IP)
 
 all:
 	mkdir -p $(IPGEN_DIR)

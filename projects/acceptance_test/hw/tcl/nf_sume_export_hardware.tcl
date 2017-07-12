@@ -1,6 +1,7 @@
 #
 # Copyright (c) 2015 Digilent Inc.
 # Copyright (c) 2015 Tinghui Wang (Steve)
+# Copyright (C) 2017 Salvator Galea
 # All rights reserved.
 #
 # File:
@@ -11,6 +12,7 @@
 #
 # Author:
 # Tinghui Wang (Steve)
+# Modified by Salvator Galea
 #
 # Description:
 # Vivado TCL scripts to export an implemented hardware design to SDK
@@ -39,13 +41,16 @@
 
 set project_name [lindex $argv 0] 
 
-open_project project/${project_name}_example/${project_name}_example.xpr
+puts "\nOpening $project_name XPR project\n"
+open_project project/${project_name}_ex/${project_name}_ex.xpr
 
-set bd_file [get_files -regexp -nocase {.*\.bd}] 
-
-open_bd_design $bd_file
+puts "\nOpening $project_name Implementation design\n"
 open_run impl_1
-export_hardware $bd_file [get_runs impl_1] -bitstream -dir ../sw/embedded/${project_name}
+
+puts "\nCopying $project_name.sysdef\n"
+file mkdir ../sw/embedded/${project_name}
+file copy -force project/${project_name}_ex/${project_name}_ex.runs/impl_1/example_top.sysdef ../sw/embedded/${project_name}/$project_name.hdf
 
 exit
+
 

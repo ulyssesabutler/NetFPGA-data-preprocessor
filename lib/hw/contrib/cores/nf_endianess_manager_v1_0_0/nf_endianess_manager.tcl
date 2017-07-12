@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2015 Noa Zilberman
+# Modified by Salvator Galea
 # All rights reserved.
 #
 # This software was developed by
@@ -73,28 +74,28 @@ set_property description ${design} [ipx::current_core]
 
 
 ipx::add_user_parameter {C_M_AXIS_DATA_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_M_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property display_name {C_M_AXIS_DATA_WIDTH} [ipx::get_user_parameter C_M_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property value {256} [ipx::get_user_parameter C_M_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_M_AXIS_DATA_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_M_AXIS_DATA_WIDTH]
+set_property display_name {C_M_AXIS_DATA_WIDTH} [ipx::get_user_parameters C_M_AXIS_DATA_WIDTH]
+set_property value {256} [ipx::get_user_parameters C_M_AXIS_DATA_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_M_AXIS_DATA_WIDTH]
 
 ipx::add_user_parameter {C_S_AXIS_DATA_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_S_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property display_name {C_S_AXIS_DATA_WIDTH} [ipx::get_user_parameter C_S_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property value {256} [ipx::get_user_parameter C_S_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_S_AXIS_DATA_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_S_AXIS_DATA_WIDTH]
+set_property display_name {C_S_AXIS_DATA_WIDTH} [ipx::get_user_parameters C_S_AXIS_DATA_WIDTH]
+set_property value {256} [ipx::get_user_parameters C_S_AXIS_DATA_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_S_AXIS_DATA_WIDTH]
   
 ipx::add_user_parameter {C_M_AXIS_TUSER_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_M_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property display_name {C_M_AXIS_TUSER_WIDTH} [ipx::get_user_parameter C_M_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property value {128} [ipx::get_user_parameter C_M_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_M_AXIS_TUSER_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_M_AXIS_TUSER_WIDTH]
+set_property display_name {C_M_AXIS_TUSER_WIDTH} [ipx::get_user_parameters C_M_AXIS_TUSER_WIDTH]
+set_property value {128} [ipx::get_user_parameters C_M_AXIS_TUSER_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_M_AXIS_TUSER_WIDTH]
 
 ipx::add_user_parameter {C_S_AXIS_TUSER_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_S_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property display_name {C_S_AXIS_TUSER_WIDTH} [ipx::get_user_parameter C_S_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property value {128} [ipx::get_user_parameter C_S_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_S_AXIS_TUSER_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_S_AXIS_TUSER_WIDTH]
+set_property display_name {C_S_AXIS_TUSER_WIDTH} [ipx::get_user_parameters C_S_AXIS_TUSER_WIDTH]
+set_property value {128} [ipx::get_user_parameters C_S_AXIS_TUSER_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_S_AXIS_TUSER_WIDTH]
 
 
 ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces S_AXIS -of_objects [ipx::current_core]]

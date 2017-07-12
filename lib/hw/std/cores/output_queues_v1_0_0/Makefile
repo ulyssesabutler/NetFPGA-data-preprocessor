@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2015 University of Cambridge
+# Modified by Salvator Galea
 # All rights reserved.
 #
 # This software was developed by
@@ -31,4 +32,4 @@ all: clean
 	vivado -mode batch -source output_queues.tcl
 
 clean:
-	rm -rf ip_*  vivado*.* *.xml xgui/ .Xil* *.*~ *.zip hdl/axi_lite_ipif/
+	rm -rf ip_*  vivado*.* *.xml xgui/ .Xil* *.*~ *.zip

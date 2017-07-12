@@ -1,5 +1,5 @@
---- a/project/nf_sume_qdrB_example/nf_sume_qdrB_example.srcs/sources_1/imports/hw/.srcs/sources_1/ip/nf_sume_qdrB/nf_sume_qdrB/example_design/rtl/example_top.v	2015-02-19 15:47:05.216913974 -0800
-+++ b/project/nf_sume_qdrB_example/nf_sume_qdrB_example.srcs/sources_1/imports/hw/.srcs/sources_1/ip/nf_sume_qdrB/nf_sume_qdrB/example_design/rtl/example_top.v	2015-02-19 15:56:58.143866845 -0800
+--- a/project/nf_sume_qdrB_ex/nf_sume_qdrB_ex.srcs/sources_1/ip/nf_sume_qdrB/nf_sume_qdrB/example_design/rtl/example_top.v	2017-05-30 17:38:19.234169099 +0100
++++ b/project/nf_sume_qdrB_ex/nf_sume_qdrB_ex.srcs/sources_1/ip/nf_sume_qdrB/nf_sume_qdrB/example_design/rtl/example_top.v	2017-05-30 17:44:03.602169321 +0100
     !
     ! Copyright (C) 2015 Digilent Inc.
     ! All rights reserved.
@@ -28,7 +28,7 @@
     output wire                       qdriip_dll_off_n,
 -   output                                       tg_compare_error,
 -   output                                       init_calib_complete,
-+   
++  
 +   // 200MHz Clock
 +   input                                        clk_ref_p,
 +   input                                        clk_ref_n,
@@ -38,30 +38,28 @@
 +   output [1:0]                                 iic_reset,
 +   input                                        uart_rxd,
 +   output                                       uart_txd,
-+
 +   output                                       led_error,
 +   output                                       led_init_done,
++
        
  
     // System reset - Default polarity of sys_rst pin is Active Low.
-@@ -195,7 +206,11 @@
-    // Number of bits needed to represent number of q's
+@@ -199,6 +210,9 @@
     localparam integer Q_BITS   = clogb2(DATA_WIDTH - 1);
  
--  // Wire declarations
-+   // Wire declarations
+   // Wire declarations
 +   wire                              clk_ref_i;
 +   wire                              tg_compare_error;
 +   wire                              init_calib_complete;
-+  
     wire                            clk;
     wire                            rst_clk;
     wire                            cmp_err;
-@@ -947,6 +962,28 @@
-        assign qdriip_vio2_sync_out  = 36'b0;
+@@ -1240,6 +1254,29 @@
+       assign qdriip_vio2_sync_out  = 36'b0;
      end
-  endgenerate
+   endgenerate
 -      
++
 +
 + IBUFGDS # (
 +     .DIFF_TERM      ("TRUE"),
@@ -84,6 +82,7 @@
 + );       
 + 
 + assign led_error = tg_compare_error;
-+ assign led_init_done = init_calib_complete;    
++ assign led_init_done = init_calib_complete;        
  
  endmodule
+

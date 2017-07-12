@@ -57,7 +57,7 @@ set source_dir { \
 	hdl\
 }
 # Top Module Name
-set top_module_name {nf_sume_10g_interface}
+set top_module_name $ip_name
 set top_module_file hdl/$top_module_name.v
 
 # Inferred Bus Interface

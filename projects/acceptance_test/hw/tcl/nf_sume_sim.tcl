@@ -1,6 +1,7 @@
 #
 # Copyright (c) 2015 Digilent Inc.
 # Copyright (c) 2015 Tinghui Wang (Steve)
+# Copyright (C) 2017 Salvator Galea
 # All rights reserved.
 #
 # File:
@@ -11,6 +12,7 @@
 #
 # Author:
 # Tinghui Wang (Steve)
+# Modifed by Salvator Galea
 #
 # Description:
 # Vivado TCL script to simulate the specified acceptance_test project.
@@ -40,7 +42,7 @@
 set project_name [lindex $argv 0]
 
 # open project
-open_project project/${project_name}_example/${project_name}_example.xpr
+open_project project/${project_name}_ex/${project_name}_ex.xpr
 
 set bd_file [get_files -regexp -nocase {.*\.bd}]
 set elf_file ../sw/embedded/${project_name}/SDK_Workspace/acceptance_test_sim/Debug/acceptance_test_sim.elf

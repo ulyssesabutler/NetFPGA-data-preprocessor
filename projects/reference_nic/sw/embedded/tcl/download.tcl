@@ -2,6 +2,7 @@
 #
 # Copyright (c) 2015 Digilent Inc.
 # Copyright (c) 2015 Tinghui Wang (Steve)
+# Modified by Salvator Galea
 # All rights reserved.
 #
 #  File:
@@ -37,5 +38,5 @@
 
 fpga -f [lindex $argv 0]
 connect mb mdm
-dow SDK_Workspace/project/Debug/project.elf
+dow SDK_Workspace/reference_nic/Debug/reference_nic.elf
 run

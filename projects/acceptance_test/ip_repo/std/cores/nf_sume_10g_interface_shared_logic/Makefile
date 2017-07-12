@@ -46,7 +46,7 @@ ip_gen:
 	@echo "// PCS PMA Shared Clk Rst Core Generated "; 
 	@echo "/////////////////////////////////////////";
 	for i in $(FILES); do \
-		cp $(IPGEN_DIR)/.srcs/sources_1/ip/${ip_name}/example_design/support/$$i hdl/ -v; \
+		cp $(IPGEN_DIR)/${ip_name}/example_design/${ip_name}_ex/imports/$$i hdl/ -v; \
 	done;
 	@vivado -mode batch -source tcl/nf_sume_10g_interface_shared_logic.tcl
 

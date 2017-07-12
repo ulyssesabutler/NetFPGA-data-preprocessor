@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2015 University of Cambridge
+# Modified by Salvator Galea
 # All rights reserved.
 #
 # This software was developed by Stanford University and the University of Cambridge Computer Laboratory 
@@ -54,15 +55,37 @@ update_ip_catalog
 
 create_bd_design ${design}
 
-# System clock buffer.
-create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf:2.0 sysclk_buf
-
 # System clock generator, clock1 for bus registers, clock2 for axi-stream data path.
-create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:5.1 sys_clock_0
+create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:5.3 sys_clock_0
 set_property -dict [list CONFIG.PRIM_IN_FREQ {200.000}] [get_bd_cells sys_clock_0]
 set_property -dict [list CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100.000}] [get_bd_cells sys_clock_0]
 set_property -dict [list CONFIG.CLKOUT2_USED {true} ] [get_bd_cells sys_clock_0]
 set_property -dict [list CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {160.000}] [get_bd_cells sys_clock_0]
+
+# Bug Vivado 2016.4 -- Workaround -- Start
+# https://forums.xilinx.com/t5/Synthesis/Vivado-2016-3-Utility-Buffer-issue-Limiting-clock-on-100Mhz/td-p/736176
+# System clock buffer.
+startgroup
+create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 CLK_IN_D
+create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf:2.1 sysclk_buf_0
+# CONFIG.FREQ_HZ 500000000 <- random value
+set_property CONFIG.FREQ_HZ 500000000 [get_bd_intf_ports CLK_IN_D]
+endgroup
+
+create_bd_net clk_in_d_0
+create_bd_net ibuf_out_0
+connect_bd_intf_net -intf_net clk_in_d_0 [get_bd_intf_ports CLK_IN_D] [get_bd_intf_pins sysclk_buf_0/CLK_IN_D] 
+connect_bd_net -net ibuf_out_0 [get_bd_pins sysclk_buf_0/IBUF_OUT] [get_bd_pins sys_clock_0/clk_in1]
+
+delete_bd_objs [get_bd_intf_nets clk_in_d_0] [get_bd_nets ibuf_out_0] [get_bd_cells sysclk_buf_0] 
+
+startgroup
+set_property CONFIG.FREQ_HZ 200000000 [get_bd_intf_ports CLK_IN_D]
+create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf:2.1 sysclk_buf
+endgroup
+connect_bd_intf_net [get_bd_intf_ports CLK_IN_D] [get_bd_intf_pins sysclk_buf/CLK_IN_D]
+connect_bd_net [get_bd_pins sysclk_buf/IBUF_OUT] [get_bd_pins sys_clock_0/clk_in1]
+# Bug Vivado 2016.4 -- Workaround -- End
 
 # fpga system reset generator.
 create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 proc_sys_reset_0
@@ -117,6 +140,12 @@ make_wrapper -files [get_files $::env(NF_DESIGN_DIR)/hw/${proj_dir}/${design}.sr
 add_files -norecurse $::env(NF_DESIGN_DIR)/hw/${proj_dir}/${design}.srcs/sources_1/bd/${design}/hdl/${design}_wrapper.v
 set_property top ${design}_wrapper [current_fileset]
 
+# Bug Vivado 2016.4 -- Workaround
+# https://forums.xilinx.com/t5/Synthesis/Vivado-2016-3-Utility-Buffer-issue-Limiting-clock-on-100Mhz/td-p/736176
+validate_bd_design
+connect_bd_net [get_bd_ports fpga_sysclk_n] [get_bd_pins sysclk_buf/IBUF_DS_N]
+connect_bd_net [get_bd_ports fpga_sysclk_p] [get_bd_pins sysclk_buf/IBUF_DS_P]
+
 # clk and rst stimuli
 read_verilog "$::env(NF_DESIGN_DIR)/hw/hdl/top_tb_bd.v"
 
@@ -138,9 +167,4 @@ set output [exec python $::env(NF_DESIGN_DIR)/test/${test_name}/run.py]
 puts $output
 
 launch_xsim -simset sim_1 -mode behavioral
-run 100us
-#if {$test_name == "both_router_table"} {run 100us}\
-#else {run 300us}
-
-
-
+run 120us

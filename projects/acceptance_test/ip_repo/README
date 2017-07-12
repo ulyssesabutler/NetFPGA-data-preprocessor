@@ -1,4 +1,4 @@
-The following cores have been commited from Digilent Inc. as part of the Acceptance Test for NetFPGA SUME board:
+he following cores have been commited from Digilent Inc. as part of the Acceptance Test for NetFPGA SUME board:
 
 - projects/acceptance_test/ip_repo/digilent/cores/d_clkfreq_detector/
 - projects/acceptance_test/ip_repo/digilent/cores/d_sdctrl/

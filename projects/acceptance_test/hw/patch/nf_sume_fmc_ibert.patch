@@ -1,5 +1,5 @@
---- a/project/nf_sume_fmc_ibert_example/nf_sume_fmc_ibert_example.srcs/sources_1/imports/example_design/example_nf_sume_fmc_ibert.v	2015-02-26 10:37:26.000000000 -0800
-+++ b/project/nf_sume_fmc_ibert_example/nf_sume_fmc_ibert_example.srcs/sources_1/imports/example_design/example_nf_sume_fmc_ibert.v	2014-12-10 08:59:52.365422909 -0800
+--- a/project/nf_sume_fmc_ibert_ex/imports/example_nf_sume_fmc_ibert.v	2017-06-08 13:28:55.000000000 +0100
++++ b/project/nf_sume_fmc_ibert_ex/imports/example_nf_sume_fmc_ibert.v	2017-06-08 13:32:15.934661353 +0100
     !
     ! Copyright (C) 2015 Digilent Inc.
     ! All rights reserved.
@@ -35,7 +35,7 @@
    input  [`C_REFCLKS_USED-1:0]        	GTREFCLK0P_I,
    input  [`C_REFCLKS_USED-1:0]        	GTREFCLK0N_I,
    input  [`C_REFCLKS_USED-1:0]        	GTREFCLK1P_I,
-@@ -103,4 +109,14 @@
+@@ -101,4 +107,14 @@
        .GTREFCLK1_I(gtrefclk1_i)
      );
  
@@ -50,3 +50,5 @@
 +);
 +
  endmodule
+
+

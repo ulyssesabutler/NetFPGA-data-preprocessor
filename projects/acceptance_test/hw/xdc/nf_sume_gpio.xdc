@@ -128,18 +128,25 @@ set_property PACKAGE_PIN AW36 [get_ports fmc_la_even[32]]
 set_property PACKAGE_PIN AV36 [get_ports fmc_la_even[33]]
 
 # FMC IO Standards
-set_property IOSTANDARD LVCMOS18 [get_ports {fmc_la_even[*]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {fmc_la_odd[*]}]
+set_property IOSTANDARD LVCMOS18 [get_ports fmc_la_even[*]]
+set_property IOSTANDARD LVCMOS18 [get_ports fmc_la_odd[*]]
 
-set_property IOSTANDARD LVCMOS15 [get_ports {pmod_up[*]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {pmod_down[*]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {pmod_up_dir[*]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {pmod_down_dir[*]}]
-set_property IOSTANDARD LVCMOS15 [get_ports {pmod_oe}]
+set_property IOSTANDARD LVCMOS15 [get_ports pmod_up[*]]
+set_property IOSTANDARD LVCMOS15 [get_ports pmod_down[*]]
+set_property IOSTANDARD LVCMOS15 [get_ports pmod_up_dir[*]]
+set_property IOSTANDARD LVCMOS15 [get_ports pmod_down_dir[*]]
+set_property IOSTANDARD LVCMOS15 [get_ports pmod_oe]
+
+
+#set_property IOB TRUE [get_ports fmc_la_even[*]]
+#set_property IOB TRUE [get_ports fmc_la_odd[*]]
+#set_property IOB TRUE [get_ports pmod_up[*]]
+#set_property IOB TRUE [get_ports pmod_down[*]]
 
 # SD Card Constraints
 set_property PACKAGE_PIN AJ26 [get_ports sd_cmd_io]
 set_property IOSTANDARD LVCMOS18 [get_ports sd_cmd_io]
+#set_property IOB TRUE [get_ports sd_cmd_io]
 
 set_property PACKAGE_PIN AJ25 [get_ports sd_sck_o]
 set_property IOSTANDARD LVCMOS18 [get_ports sd_sck_o]
@@ -191,12 +198,12 @@ set_property PACKAGE_PIN AR13 [get_ports reset]
 set_property IOSTANDARD LVCMOS15 [get_ports reset]
 
 # Timing Constraints
-set_clock_groups -asynchronous -group [get_clocks fmc_clk0] -group [get_clocks -of_objects [get_pins -hier "*CLKOUT0"]]
-set_clock_groups -asynchronous -group [get_clocks fmc_clk1] -group [get_clocks -of_objects [get_pins -hier "*CLKOUT0"]]
-set_clock_groups -asynchronous -group [get_clocks fmc_gbtclk0] -group [get_clocks -of_objects [get_pins -hier "*CLKOUT0"]]
-set_clock_groups -asynchronous -group [get_clocks fmc_gbtclk1] -group [get_clocks -of_objects [get_pins -hier "*CLKOUT0"]]
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins -hier "*CLKOUT0"]] -group [get_clocks fmc_clk0]
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins -hier "*CLKOUT0"]] -group [get_clocks fmc_clk1]
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins -hier "*CLKOUT0"]] -group [get_clocks fmc_gbtclk0]
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins -hier "*CLKOUT0"]] -group [get_clocks fmc_gbtclk1]
+set_clock_groups -asynchronous -group [get_clocks fmc_clk0] -group [get_clocks -of_objects [get_pins -hier "*CLKOUT0*"]]
+set_clock_groups -asynchronous -group [get_clocks fmc_clk1] -group [get_clocks -of_objects [get_pins -hier "*CLKOUT0*"]]
+set_clock_groups -asynchronous -group [get_clocks fmc_gbtclk0] -group [get_clocks -of_objects [get_pins -hier "*CLKOUT0*"]]
+set_clock_groups -asynchronous -group [get_clocks fmc_gbtclk1] -group [get_clocks -of_objects [get_pins -hier "*CLKOUT0*"]]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins -hier "*CLKOUT0*"]] -group [get_clocks fmc_clk0]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins -hier "*CLKOUT0*"]] -group [get_clocks fmc_clk1]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins -hier "*CLKOUT0*"]] -group [get_clocks fmc_gbtclk0]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins -hier "*CLKOUT0*"]] -group [get_clocks fmc_gbtclk1]
 

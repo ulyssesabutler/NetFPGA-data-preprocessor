@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2015 University of Cambridge
+# Modified by Salvator Galea
 # All rights reserved.
 #
 # This software was developed by Stanford University and the University of Cambridge Computer Laboratory 
@@ -127,49 +128,47 @@ proc create_hier_cell_nf_sume_sim_dma { parentCell coreName fstimName frecName f
    # create data path blocks
    # TX - AXIS
    set axis_sim_stim_ip [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:axis_sim_stim:1.00 axis_sim_stim_ip]
-   set_property -dict [list CONFIG.input_file $::env(NF_DESIGN_DIR)/test/$fstimName] $axis_sim_stim_ip	
+   set_property -dict [list CONFIG.input_file $::env(NF_DESIGN_DIR)/test/$fstimName] $axis_sim_stim_ip
   
    # RX - AXIS
    set axis_sim_record_ip [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:axis_sim_record:1.00 axis_sim_record_ip]
-   set_property -dict [list CONFIG.OUTPUT_FILE $::env(NF_DESIGN_DIR)/test/$frecName] $axis_sim_record_ip		
+   set_property -dict [list CONFIG.OUTPUT_FILE $::env(NF_DESIGN_DIR)/test/$frecName] $axis_sim_record_ip
    
    # TX AXI-Lite     
    set axi_sim_transactor_ip [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:axi_sim_transactor:1.00 axi_sim_transactor_ip]
    set_property -dict [list CONFIG.STIM_FILE $::env(NF_DESIGN_DIR)/test/$ftranStimName] $axi_sim_transactor_ip
    set_property -dict [list CONFIG.EXPECT_FILE $::env(NF_DESIGN_DIR)/test/$ftranExpctName] $axi_sim_transactor_ip
    set_property -dict [list CONFIG.LOG_FILE $::env(NF_DESIGN_DIR)/test/$ftranLogName] $axi_sim_transactor_ip
-			
   
    # External port connections  
-   # axis	 
+   # axis
    connect_bd_net [get_bd_pins axis_aclk] [get_bd_pins axis_sim_stim_ip/ACLK]  
    connect_bd_net [get_bd_pins axis_aresetn] [get_bd_pins axis_sim_stim_ip/ARESETN] 
  
    connect_bd_net [get_bd_pins axis_aclk] [get_bd_pins axis_sim_record_ip/axi_aclk] 
 
    connect_bd_net [get_bd_pins m_axi_aclk] [get_bd_pins axi_sim_transactor_ip/axi_aclk]  
-   connect_bd_net [get_bd_pins m_axi_aresetn] [get_bd_pins axi_sim_transactor_ip/axi_resetn] 	
+   connect_bd_net [get_bd_pins m_axi_aresetn] [get_bd_pins axi_sim_transactor_ip/axi_resetn] 
     
    # interfaces  
    connect_bd_intf_net [get_bd_intf_pin m_axis] [get_bd_intf_pins axis_sim_stim_ip/M_AXIS] 
-   connect_bd_intf_net [get_bd_intf_pin s_axis] [get_bd_intf_pins axis_sim_record_ip/s_axis] 	  
-   connect_bd_intf_net [get_bd_intf_pins m_axi_lite] [get_bd_intf_pins axi_sim_transactor_ip/M_AXI]  	 
+   connect_bd_intf_net [get_bd_intf_pin s_axis] [get_bd_intf_pins axis_sim_record_ip/s_axis]
+   connect_bd_intf_net [get_bd_intf_pins m_axi_lite] [get_bd_intf_pins axi_sim_transactor_ip/M_AXI]
  
-
    # non-std
    connect_bd_net [get_bd_pins stim_barrier_proceed] [get_bd_pins axis_sim_stim_ip/barrier_proceed]
    connect_bd_net [get_bd_pins stim_activity_stim] [get_bd_pins axis_sim_stim_ip/activity_stim]
    connect_bd_net [get_bd_pins stim_barrier_req] [get_bd_pins axis_sim_stim_ip/barrier_req]
- 	
+
    connect_bd_net [get_bd_pins rec_activity_rec] [get_bd_pins axis_sim_record_ip/activity_rec]
  
    connect_bd_net [get_bd_pins activity_trans_sim] [get_bd_pins axi_sim_transactor_ip/activity_trans_sim]
    connect_bd_net [get_bd_pins activity_trans_log] [get_bd_pins axi_sim_transactor_ip/activity_trans_log]
    connect_bd_net [get_bd_pins barrier_req_trans] [get_bd_pins axi_sim_transactor_ip/barrier_req_trans]
-   connect_bd_net [get_bd_pins barrier_proceed] [get_bd_pins axi_sim_transactor_ip/barrier_proceed]	
+   connect_bd_net [get_bd_pins barrier_proceed] [get_bd_pins axi_sim_transactor_ip/barrier_proceed]
    
    # Internal connection
-   connect_bd_net [get_bd_pins axis_sim_record_ip/counter] [get_bd_pins axis_sim_stim_ip/counter]	
+   connect_bd_net [get_bd_pins axis_sim_record_ip/counter] [get_bd_pins axis_sim_stim_ip/counter]
 
    # Restore current instance
    current_bd_instance $oldCurInst

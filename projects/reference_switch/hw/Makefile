@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2015 Noa Zilberman, Georgina Kalogeridou
+# Modified by Salvator Galea
 # All rights reserved.
 #
 #  File:
@@ -55,45 +56,45 @@ all:
 .PHONY: clean project export_to_sdk load_elf  
 
 project: identifier
-	echo "Create reference project under folder /project";\
-	if test -d project/; then\
+	echo "Create reference project under folder /project"; \
+	@if test -d project/; then \
 		echo "Project already exists"; \
 	else \
-		vivado -mode batch -source tcl/${PROJ}.tcl;\
-		if [ -f patch/${PROJ}.patch ]; then\
-			patch -p1 < patch/${PROJ}.patch;\
-		fi;\
-	fi;\
+		vivado -mode batch -source tcl/${PROJ}.tcl; \
+		if [ -f patch/${PROJ}.patch ]; then \
+			patch -p1 < patch/${PROJ}.patch; \
+		fi; \
+	fi
 
 projectgui:
 	echo "Create reference project under folder /project";\
-	if test -d project/; then\
+	@if test -d project/; then \
 		echo "Project already exists"; \
 	else \
-		vivado -mode gui -source tcl/${PROJ}.tcl;\
-		if [ -f patch/${PROJ}.patch ]; then\
-			patch -p1 < patch/${PROJ}.patch;\
-		fi;\
-	fi;\
+		vivado -mode gui -source tcl/${PROJ}.tcl; \
+		if [ -f patch/${PROJ}.patch ]; then \
+			patch -p1 < patch/${PROJ}.patch; \
+		fi; \
+	fi
 
 export_to_sdk: identifier
-	if test -d project; then\
+	@if test -d project; then \
 		echo "export ${PROJ} project to SDK"; \
-		vivado -mode tcl -source tcl/export_hardware.tcl -tclargs ${PROJ};\
+		vivado -mode tcl -source tcl/export_hardware.tcl -tclargs ${PROJ}; \
 	else \
-		echo "Project ${PROJ} does not exist.";\
-		echo "Please run \"make project\" to create and build the project first";\
-	fi;\
+		echo "Project ${PROJ} does not exist."; \
+		echo "Please run \"make project\" to create and build the project first"; \
+	fi
 
 load_elf:
 	@if [ ! -d ../bitfiles ]; then mkdir ../bitfiles; fi;
-	if test -d project; then\
+	@if test -d project; then \
 		echo "export ${PROJ} project to SDK"; \
-		vivado -mode tcl -source tcl/load_elf.tcl -tclargs ${PROJ};\
+		vivado -mode tcl -source tcl/load_elf.tcl -tclargs ${PROJ}; \
 	else \
 		echo "Project ${PROJ} does not exist.";\
-		echo "Please run \"make project\" to create and build the project first";\
-	fi;\
+		echo "Please run \"make project\" to create and build the project first"; \
+	fi
 
 identifier:
 	rm -f ../hw/create_ip/id_rom16x32.coe

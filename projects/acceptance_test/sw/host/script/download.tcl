@@ -35,6 +35,7 @@
 #
 
 # Connect to Digilent Cable on localhost:3121
+open_hw
 connect_hw_server -url localhost:3121
 current_hw_target [get_hw_targets */xilinx_tcf/Digilent/*]
 open_hw_target
@@ -42,8 +43,8 @@ open_hw_target
 # Program and Refresh FPGA
 set device [lindex [get_hw_devices] [expr [lindex $argv 0]]]
 current_hw_device $device
-#refresh_hw_device -update_hw_probes false $device
 set_property PROGRAM.FILE [lindex $argv 1] $device
 program_hw_devices $device
+#refresh_hw_device $device
 
 exit

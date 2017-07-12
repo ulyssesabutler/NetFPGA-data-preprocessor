@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2015 Noa Zilberman
+# Modified by Salvator Galea
 # All rights reserved.
 #
 # This software was developed by
@@ -37,10 +38,6 @@ set proj_dir ./ip_proj
 set ip_version 1.00
 set lib_name NetFPGA
 #####################################
-# set IP paths
-#####################################
-set axi_lite_ipif_ip_path ../../../xilinx/cores/axi_lite_ipif/source/
-#####################################
 # Project Settings
 #####################################
 create_project -name ${design} -force -dir "./${proj_dir}" -part ${device} -ip
@@ -48,7 +45,6 @@ set_property source_mgmt_mode All [current_project]
 set_property top ${top} [current_fileset]
 set_property ip_repo_paths $::env(SUME_FOLDER)/lib/hw/  [current_fileset]
 puts "Creating Output Queues IP"
-# Project Constraints
 #####################################
 # Project Structure & IP Build
 #####################################
@@ -72,56 +68,55 @@ set_property display_name ${design} [ipx::current_core]
 set_property description ${design} [ipx::current_core]
 
 ipx::add_user_parameter {C_M_AXIS_DATA_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_M_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property display_name {C_M_AXIS_DATA_WIDTH} [ipx::get_user_parameter C_M_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property value {256} [ipx::get_user_parameter C_M_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_M_AXIS_DATA_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_M_AXIS_DATA_WIDTH]
+set_property display_name {C_M_AXIS_DATA_WIDTH} [ipx::get_user_parameters C_M_AXIS_DATA_WIDTH]
+set_property value {256} [ipx::get_user_parameters C_M_AXIS_DATA_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_M_AXIS_DATA_WIDTH]
 
 ipx::add_user_parameter {C_S_AXIS_DATA_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_S_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property display_name {C_S_AXIS_DATA_WIDTH} [ipx::get_user_parameter C_S_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property value {256} [ipx::get_user_parameter C_S_AXIS_DATA_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_S_AXIS_DATA_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_S_AXIS_DATA_WIDTH]
+set_property display_name {C_S_AXIS_DATA_WIDTH} [ipx::get_user_parameters C_S_AXIS_DATA_WIDTH]
+set_property value {256} [ipx::get_user_parameters C_S_AXIS_DATA_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_S_AXIS_DATA_WIDTH]
 
 ipx::add_user_parameter {C_M_AXIS_TUSER_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_M_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property display_name {C_M_AXIS_TUSER_WIDTH} [ipx::get_user_parameter C_M_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property value {128} [ipx::get_user_parameter C_M_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_M_AXIS_TUSER_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_M_AXIS_TUSER_WIDTH]
+set_property display_name {C_M_AXIS_TUSER_WIDTH} [ipx::get_user_parameters C_M_AXIS_TUSER_WIDTH]
+set_property value {128} [ipx::get_user_parameters C_M_AXIS_TUSER_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_M_AXIS_TUSER_WIDTH]
 
 ipx::add_user_parameter {C_S_AXIS_TUSER_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_S_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property display_name {C_S_AXIS_TUSER_WIDTH} [ipx::get_user_parameter C_S_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property value {128} [ipx::get_user_parameter C_S_AXIS_TUSER_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_S_AXIS_TUSER_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_S_AXIS_TUSER_WIDTH]
+set_property display_name {C_S_AXIS_TUSER_WIDTH} [ipx::get_user_parameters C_S_AXIS_TUSER_WIDTH]
+set_property value {128} [ipx::get_user_parameters C_S_AXIS_TUSER_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_S_AXIS_TUSER_WIDTH]
 
 ipx::add_user_parameter {NUM_QUEUES} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter NUM_QUEUES [ipx::current_core]]
-set_property display_name {NUM_QUEUES} [ipx::get_user_parameter NUM_QUEUES [ipx::current_core]]
-set_property value {5} [ipx::get_user_parameter NUM_QUEUES [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter NUM_QUEUES [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters NUM_QUEUES]
+set_property display_name {NUM_QUEUES} [ipx::get_user_parameters NUM_QUEUES]
+set_property value {5} [ipx::get_user_parameters NUM_QUEUES]
+set_property value_format {long} [ipx::get_user_parameters NUM_QUEUES]
 
 ipx::add_user_parameter {C_S_AXI_DATA_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_S_AXI_DATA_WIDTH [ipx::current_core]]
-set_property display_name {C_S_AXI_DATA_WIDTH} [ipx::get_user_parameter C_S_AXI_DATA_WIDTH [ipx::current_core]]
-set_property value {32} [ipx::get_user_parameter C_S_AXI_DATA_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_S_AXI_DATA_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_S_AXI_DATA_WIDTH]
+set_property display_name {C_S_AXI_DATA_WIDTH} [ipx::get_user_parameters C_S_AXI_DATA_WIDTH]
+set_property value {32} [ipx::get_user_parameters C_S_AXI_DATA_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_S_AXI_DATA_WIDTH]
 
 ipx::add_user_parameter {C_S_AXI_ADDR_WIDTH} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_S_AXI_ADDR_WIDTH [ipx::current_core]]
-set_property display_name {C_S_AXI_ADDR_WIDTH} [ipx::get_user_parameter C_S_AXI_ADDR_WIDTH [ipx::current_core]]
-set_property value {32} [ipx::get_user_parameter C_S_AXI_ADDR_WIDTH [ipx::current_core]]
-set_property value_format {long} [ipx::get_user_parameter C_S_AXI_ADDR_WIDTH [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_S_AXI_ADDR_WIDTH]
+set_property display_name {C_S_AXI_ADDR_WIDTH} [ipx::get_user_parameters C_S_AXI_ADDR_WIDTH]
+set_property value {32} [ipx::get_user_parameters C_S_AXI_ADDR_WIDTH]
+set_property value_format {long} [ipx::get_user_parameters C_S_AXI_ADDR_WIDTH]
 
 ipx::add_user_parameter {C_BASEADDR} [ipx::current_core]
-set_property value_resolve_type {user} [ipx::get_user_parameter C_BASEADDR [ipx::current_core]]
-set_property display_name {C_BASEADDR} [ipx::get_user_parameter C_BASEADDR [ipx::current_core]]
-set_property value {0x00000000} [ipx::get_user_parameter C_BASEADDR [ipx::current_core]]
-set_property value_format {bitstring} [ipx::get_user_parameter C_BASEADDR [ipx::current_core]]
+set_property value_resolve_type {user} [ipx::get_user_parameters C_BASEADDR]
+set_property display_name {C_BASEADDR} [ipx::get_user_parameters C_BASEADDR]
+set_property value {0x00000000} [ipx::get_user_parameters C_BASEADDR]
+set_property value_format {bitstring} [ipx::get_user_parameters C_BASEADDR]
 
-
-ipx::add_subcore NetFPGA:NetFPGA:fallthrough_small_fifo:1.00 [ipx::get_file_groups xilinx_verilogsynthesis -of_objects [ipx::current_core]]
-ipx::add_subcore NetFPGA:NetFPGA:fallthrough_small_fifo:1.00 [ipx::get_file_groups xilinx_verilogbehavioralsimulation -of_objects [ipx::current_core]]
+ipx::add_subcore NetFPGA:NetFPGA:fallthrough_small_fifo:1.00 [ipx::get_file_groups xilinx_anylanguagesynthesis -of_objects [ipx::current_core]]
+ipx::add_subcore NetFPGA:NetFPGA:fallthrough_small_fifo:1.00 [ipx::get_file_groups xilinx_anylanguagebehavioralsimulation -of_objects [ipx::current_core]]
 
 ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces s_axis -of_objects [ipx::current_core]]
 ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces m_axis_0 -of_objects [ipx::current_core]]
@@ -131,7 +126,6 @@ ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces m_axis_3 -of_objects [ip
 ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces m_axis_4 -of_objects [ipx::current_core]]
 
 ipx::infer_user_parameters [ipx::current_core]
-
 
 ipx::check_integrity [ipx::current_core]
 ipx::save_core [ipx::current_core]

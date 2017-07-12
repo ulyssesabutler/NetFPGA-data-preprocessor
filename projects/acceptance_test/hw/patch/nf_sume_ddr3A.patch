@@ -1,5 +1,5 @@
---- a/project/nf_sume_ddr3A_example/nf_sume_ddr3A_example.srcs/sources_1/imports/hw/.srcs/sources_1/ip/nf_sume_ddr3A/nf_sume_ddr3A/example_design/rtl/example_top.v	2015-02-17 13:22:18.000000000 -0800
-+++ b/project/nf_sume_ddr3A_example/nf_sume_ddr3A_example.srcs/sources_1/imports/hw/.srcs/sources_1/ip/nf_sume_ddr3A/nf_sume_ddr3A/example_design/rtl/example_top.v	2015-02-17 13:20:24.405348461 -0800
+--- a/project/nf_sume_ddr3A_ex/nf_sume_ddr3A_ex.srcs/sources_1/ip/nf_sume_ddr3A/nf_sume_ddr3A/example_design/rtl/example_top.v	2017-05-25 11:54:25.565877016 +0100
++++ b/project/nf_sume_ddr3A_ex/nf_sume_ddr3A_ex.srcs/sources_1/ip/nf_sume_ddr3A/nf_sume_ddr3A/example_design/rtl/example_top.v	2017-05-25 12:01:15.437877281 +0100
     !
     ! Copyright (C) 2015 Digilent Inc.
     ! All rights reserved.
@@ -22,16 +22,15 @@
     !
     ! @NETFPGA_LICENSE_HEADER_END@
     !
-@@ -238,12 +238,21 @@
+@@ -245,14 +245,21 @@
  
     // Inputs
     
 -   // Single-ended system clock
 -   input                                        sys_clk_i,
+-   
 -   // Single-ended iodelayctrl clk (reference clock)
 -   input                                        clk_ref_i,
--   output                                       tg_compare_error,
--   output                                       init_calib_complete,
 +   // Differential system clocks
 +   input                                        sys_clk_p,
 +   input                                        sys_clk_n,
@@ -44,26 +43,29 @@
 +   output [1:0]                                 iic_reset,
 +   input                                        uart_rxd,
 +   output                                       uart_txd,
-+
+ 
+-   output                                       tg_compare_error,
+-   output                                       init_calib_complete,
 +   output                                       led_mmcm_locked,
 +   output                                       led_init_done,
+    
        
  
-    // System reset - Default polarity of sys_rst pin is Active Low.
-@@ -291,7 +300,11 @@
+@@ -301,7 +308,12 @@
        
  
    // Wire declarations
 -      
++    
 +  wire                              sys_clk_i;
 +  wire                              clk_ref_i;
 +  wire                              tg_compare_error;
-+  wire                              init_calib_complete;
++  wire                              init_calib_complete;  
 +  
    wire                              clk;
    wire                              rst;
    wire                              mmcm_locked;
-@@ -1266,6 +1279,37 @@
+@@ -1458,6 +1470,38 @@
      end
   endgenerate
  
@@ -98,6 +100,8 @@
 +
 +assign led_mmcm_locked = mmcm_locked;
 +assign led_init_done = init_calib_complete;
++        
         
- 
- endmodule
+ `ifdef SKIP_CALIB
+   //***************************************************************************
+

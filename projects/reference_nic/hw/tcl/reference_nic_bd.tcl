@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2015 University of Cambridge
+# Modified by Salvator Galea
 # All rights reserved.
 #
 # This software was developed by Stanford University and the University of Cambridge Computer Laboratory 
@@ -56,18 +57,21 @@ update_ip_catalog
 source ./create_ip/nf_10ge_interface.tcl
 create_ip -name nf_10ge_interface -vendor NetFPGA -library NetFPGA -module_name nf_10g_interface_ip
 set_property generate_synth_checkpoint false [get_files nf_10g_interface_ip.xci]
+set_property synth_checkpoint_mode None [get_files nf_10g_interface_ip.xci]
 reset_target all [get_ips nf_10g_interface_ip]
 generate_target all [get_ips nf_10g_interface_ip]
 
 source ./create_ip/nf_10ge_interface_shared.tcl
 create_ip -name nf_10ge_interface_shared -vendor NetFPGA -library NetFPGA -module_name nf_10g_interface_shared_ip
 set_property generate_synth_checkpoint false [get_files nf_10g_interface_shared_ip.xci]
+set_property synth_checkpoint_mode None [get_files nf_10g_interface_shared_ip.xci]
 reset_target all [get_ips nf_10g_interface_shared_ip]
 generate_target all [get_ips nf_10g_interface_shared_ip]
 
-create_ip -name blk_mem_gen -vendor xilinx.com -library ip -version 8.2 -module_name identifier_ip
+create_ip -name blk_mem_gen -vendor xilinx.com -library ip -version 8.3 -module_name identifier_ip
 set_property -dict [list CONFIG.Interface_Type {AXI4} CONFIG.AXI_Type {AXI4_Lite} CONFIG.AXI_Slave_Type {Memory_Slave} CONFIG.Use_AXI_ID {false} CONFIG.Load_Init_File {true} CONFIG.Coe_File {/../../../../../../create_ip/id_rom16x32.coe} CONFIG.Fill_Remaining_Memory_Locations {true} CONFIG.Remaining_Memory_Locations {DEADDEAD} CONFIG.Memory_Type {Simple_Dual_Port_RAM} CONFIG.Use_Byte_Write_Enable {true} CONFIG.Byte_Size {8} CONFIG.Assume_Synchronous_Clk {true} CONFIG.Write_Width_A {32} CONFIG.Write_Depth_A {4096} CONFIG.Read_Width_A {32} CONFIG.Operating_Mode_A {READ_FIRST} CONFIG.Write_Width_B {32} CONFIG.Read_Width_B {32} CONFIG.Operating_Mode_B {READ_FIRST} CONFIG.Enable_B {Use_ENB_Pin} CONFIG.Register_PortA_Output_of_Memory_Primitives {false} CONFIG.Register_PortB_Output_of_Memory_Primitives {false} CONFIG.Use_RSTB_Pin {true} CONFIG.Reset_Type {ASYNC} CONFIG.Port_A_Write_Rate {50} CONFIG.Port_B_Clock {100} CONFIG.Port_B_Enable_Rate {100}] [get_ips identifier_ip]
 set_property generate_synth_checkpoint false [get_files identifier_ip.xci]
+set_property synth_checkpoint_mode None [get_files identifier_ip.xci]
 reset_target all [get_ips identifier_ip]
 generate_target all [get_ips identifier_ip]
 
@@ -78,15 +82,37 @@ import_files -fileset constrs_1 ${project_constraints} ${nf_10g_constraints}
 
 create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_identifier:1.00 nf_identifier_0
 
-# System clock buffer.
-create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf:2.0 sysclk_buf
-
 # System clock generator, clock1 for bus registers, clock2 for axi-stream data path.
-create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:5.1 sys_clock_0
+create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:5.3 sys_clock_0
 set_property -dict [list CONFIG.PRIM_IN_FREQ {200.000}] [get_bd_cells sys_clock_0]
 set_property -dict [list CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100.000}] [get_bd_cells sys_clock_0]
-set_property -dict [list CONFIG.CLKOUT2_USED {true} ] [get_bd_cells sys_clock_0]
-set_property -dict [list CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {180.000}] [get_bd_cells sys_clock_0]
+set_property -dict [list CONFIG.CLKOUT2_USED {true}] [get_bd_cells sys_clock_0]
+set_property -dict [list CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {160.000}] [get_bd_cells sys_clock_0]
+
+# Bug Vivado 2016.4 -- Workaround -- Start
+# https://forums.xilinx.com/t5/Synthesis/Vivado-2016-3-Utility-Buffer-issue-Limiting-clock-on-100Mhz/td-p/736176
+# System clock buffer.
+startgroup
+create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 CLK_IN_D
+create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf:2.1 sysclk_buf_0
+# CONFIG.FREQ_HZ 500000000 <- random value
+set_property CONFIG.FREQ_HZ 500000000 [get_bd_intf_ports CLK_IN_D]
+endgroup
+
+create_bd_net clk_in_d_0
+create_bd_net ibuf_out_0
+connect_bd_intf_net -intf_net clk_in_d_0 [get_bd_intf_ports CLK_IN_D] [get_bd_intf_pins sysclk_buf_0/CLK_IN_D] 
+connect_bd_net -net ibuf_out_0 [get_bd_pins sysclk_buf_0/IBUF_OUT] [get_bd_pins sys_clock_0/clk_in1]
+
+delete_bd_objs [get_bd_intf_nets clk_in_d_0] [get_bd_nets ibuf_out_0] [get_bd_cells sysclk_buf_0] 
+
+startgroup
+set_property CONFIG.FREQ_HZ 200000000 [get_bd_intf_ports CLK_IN_D]
+create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf:2.1 sysclk_buf
+endgroup
+connect_bd_intf_net [get_bd_intf_ports CLK_IN_D] [get_bd_intf_pins sysclk_buf/CLK_IN_D]
+connect_bd_net [get_bd_pins sysclk_buf/IBUF_OUT] [get_bd_pins sys_clock_0/clk_in1]
+# Bug Vivado 2016.4 -- Workaround -- End
 
 # fpga system reset generator.
 create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 proc_sys_reset_0
@@ -95,6 +121,7 @@ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_iic:2.0 axi_iic_0
 set_property -dict [list CONFIG.C_GPO_WIDTH {2}] [get_bd_cells axi_iic_0]
 set_property -dict [list CONFIG.C_SCL_INERTIAL_DELAY {5}] [get_bd_cells axi_iic_0]
 set_property -dict [list CONFIG.C_SDA_INERTIAL_DELAY {5}] [get_bd_cells axi_iic_0]
+
 
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_uartlite:2.0 axi_uartlite_0
 set_property -dict [list CONFIG.C_BAUDRATE {115200}] [get_bd_cells axi_uartlite_0]
@@ -193,6 +220,12 @@ make_wrapper -files [get_files ./${proj_dir}/${design}.srcs/sources_1/bd/${desig
 add_files -norecurse ./${proj_dir}/${design}.srcs/sources_1/bd/${design}/hdl/${design}_wrapper.v
 set_property top ${design}_wrapper [current_fileset]
 
+# Bug Vivado 2016.4 -- Workaround
+# https://forums.xilinx.com/t5/Synthesis/Vivado-2016-3-Utility-Buffer-issue-Limiting-clock-on-100Mhz/td-p/736176
+validate_bd_design
+connect_bd_net [get_bd_ports fpga_sysclk_n] [get_bd_pins sysclk_buf/IBUF_DS_N]
+connect_bd_net [get_bd_ports fpga_sysclk_p] [get_bd_pins sysclk_buf/IBUF_DS_P]
+
 # These steps should in ip libraries. Will update for better bd based project.
 create_ip_run [get_files ./${proj_dir}/${design}.srcs/sources_1/ip/axi_10g_ethernet_nonshared/axi_10g_ethernet_nonshared.xci]
 launch_runs axi_10g_ethernet_nonshared_synth_1
@@ -206,11 +239,11 @@ wait_on_run inverter_0_synth_1
 create_ip_run [get_files ./${proj_dir}/${design}.srcs/sources_1/ip/axi_10g_ethernet_shared/axi_10g_ethernet_shared.xci]
 launch_runs axi_10g_ethernet_shared_synth_1
 wait_on_run axi_10g_ethernet_shared_synth_1
-###
 create_ip_run [get_files ./${proj_dir}/${design}.srcs/sources_1/ip/fifo_generator_1_9/fifo_generator_1_9.xci]
 launch_runs fifo_generator_1_9_synth_1
 wait_on_run fifo_generator_1_9_synth_1
 
+set_property synth_checkpoint_mode None [get_files ./${proj_dir}/${design}.srcs/sources_1/bd/${design}/${design}.bd]
 generate_target all [get_files ./${proj_dir}/${design}.srcs/sources_1/bd/${design}/${design}.bd]
 
 #### Start synthesis and implementation
@@ -218,7 +251,7 @@ synth_design -rtl -name rtl_1
 set_property BITSTREAM.GENERAL.COMPRESS TRUE [get_designs rtl_1]
 save_constraints
 
-set_property strategy Performance_LateBlockPlacement [get_runs impl_1]
+set_property strategy Performance_Explore [get_runs impl_1]
 
 launch_runs impl_1 -to_step write_bitstream
 wait_on_run impl_1

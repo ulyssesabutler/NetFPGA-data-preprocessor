@@ -36,7 +36,7 @@
     <LowPower_En>ON</LowPower_En>
     <XADC_En>Enabled</XADC_En>
     <TargetFPGA>xc7vx690t-ffg1761/-3</TargetFPGA>
-    <Version>2.0</Version>
+    <Version>4.0</Version>
     <SystemClock>Differential</SystemClock>
     <ReferenceClock>Use System Clock</ReferenceClock>
     <SysResetPolarity>ACTIVE HIGH</SysResetPolarity>
@@ -103,8 +103,8 @@
             <Pin VCCAUX_IO="NORMAL" IOSTANDARD="HSTL_I" PADName="R32" SLEW="" name="qdriip_d[8]" IN_TERM="" />
             <Pin VCCAUX_IO="NORMAL" IOSTANDARD="HSTL_I" PADName="P37" SLEW="" name="qdriip_d[9]" IN_TERM="" />
             <Pin VCCAUX_IO="NORMAL" IOSTANDARD="HSTL_I" PADName="E42" SLEW="" name="qdriip_dll_off_n" IN_TERM="" />
-            <Pin VCCAUX_IO="NORMAL" IOSTANDARD="DIFF_HSTL_I" PADName="R34" SLEW="" name="qdriip_k_n[0]" IN_TERM="" />
-            <Pin VCCAUX_IO="NORMAL" IOSTANDARD="DIFF_HSTL_I" PADName="R33" SLEW="" name="qdriip_k_p[0]" IN_TERM="" />
+            <Pin VCCAUX_IO="NORMAL" IOSTANDARD="DIFF_HSTL_II" PADName="R34" SLEW="" name="qdriip_k_n[0]" IN_TERM="" />
+            <Pin VCCAUX_IO="NORMAL" IOSTANDARD="DIFF_HSTL_II" PADName="R33" SLEW="" name="qdriip_k_p[0]" IN_TERM="" />
             <Pin VCCAUX_IO="NORMAL" IOSTANDARD="HSTL_I_DCI" PADName="A41" SLEW="" name="qdriip_q[0]" IN_TERM="" />
             <Pin VCCAUX_IO="NORMAL" IOSTANDARD="HSTL_I_DCI" PADName="F40" SLEW="" name="qdriip_q[10]" IN_TERM="" />
             <Pin VCCAUX_IO="NORMAL" IOSTANDARD="HSTL_I_DCI" PADName="F41" SLEW="" name="qdriip_q[11]" IN_TERM="" />

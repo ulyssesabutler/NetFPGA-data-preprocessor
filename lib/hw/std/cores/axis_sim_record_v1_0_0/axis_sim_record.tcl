@@ -59,6 +59,9 @@ set_property version ${ip_version} [ipx::current_core]
 set_property display_name ${design} [ipx::current_core]
 set_property description ${design} [ipx::current_core]
 
+ipx::add_bus_parameter ASSOCIATED_BUSIF [ipx::get_bus_interfaces axi_aclk -of_objects [ipx::current_core]]
+set_property value m_axis:s_axis [ipx::get_bus_parameters ASSOCIATED_BUSIF -of_objects [ipx::get_bus_interfaces axi_aclk -of_objects [ipx::current_core]]]
+
 update_ip_catalog -rebuild 
 ipx::infer_user_parameters [ipx::current_core]
 

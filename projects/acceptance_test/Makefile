@@ -12,7 +12,7 @@
 #
 # Author:
 # Tinghui Wang (Steve)
-# Modified by Noa Zilberman
+# Modified by Noa Zilberman, Salvator Galea
 #
 # Description:
 # This makefile is used to generate and compile acceptance_test project 
@@ -38,6 +38,8 @@
 
 LIB_REPO = ip_repo/
 LIB_HW_DIR_INSTANCES := $(shell cd $(LIB_REPO) && find . -mindepth 3 -maxdepth 3 -type d)
+
+# TODO
 # fmc_aurora qth_aurora 
 all: ddr3A ddr3B qdrA qdrB qdrC pcie fmc_ibert fmc_gtwizard qth_ibert qth_gtwizard pcie_ibert gpio sata 10g_loopback 
 
