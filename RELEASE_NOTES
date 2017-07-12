@@ -59,6 +59,10 @@ This release contains:
    - nic_output_port_lookup_v4_0_0	: used in encap_decap contrib-project
    - lcam_output_port_lookup_v1_0_0	: used in reference_switch_lcam contrib-project
 
-5. For known issues please visit the following link:    https://github.com/NetFPGA/NetFPGA-SUME-public/wiki/Known-issues
+5. Limitation
+   It has been observed that some reference projects fail during the place and route process.
+   This happens in hosts with 32GB of RAM, using Vivado v2016.4
+
+6. For known issues please visit the following link:    https://github.com/NetFPGA/NetFPGA-SUME-public/wiki/Known-issues
    The open issues can also be seen on:                 https://github.com/NetFPGA/NetFPGA-SUME-live/issues
    The procedure to open new issue tickets:             https://github.com/NetFPGA/NetFPGA-SUME-public/wiki/Before-opening-issues
