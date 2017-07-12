@@ -95,17 +95,51 @@ def make_ARP_hdr(op = None, src_MAC = None, dst_MAC = None, src_IP = None, dst_I
     return hdr
 
 ############################
+# Function: make_VLAN_hdr
+# Keyword Arguments: vlan, id, priority
+# Description: creates and returns a scapy VLAN layer
+#              if keyword arguments are not specified, scapy defaults are used
+############################
+
+def make_VLAN_hdr(vlan = None, id = None, prio = None, **kwargs):
+    hdr = scapy.Dot1Q()
+    if vlan:
+        hdr.vlan = vlan
+    if id:
+        hdr.id = id
+    if prio:
+        hdr.prio = prio
+    return hdr
+
+
+############################
 # Function: make_IP_pkt
 # Keyword Arguments: src_MAC, dst_MAC, EtherType
 #                    src_IP, dst_IP, TTL
 #                    pkt_len
 # Description: creates and returns a complete IP packet of length pkt_len
 ############################
+
 def make_IP_pkt(pkt_len = 60, **kwargs):
     if pkt_len < 60:
         pkt_len = 60
     pkt = make_MAC_hdr(**kwargs)/make_IP_hdr(**kwargs)/generate_load(pkt_len - 34)
     return pkt
+
+############################
+# Function: make_VLAN_pkt
+# Keyword Arguments: src_MAC, dst_MAC, EtherType
+#                    src_IP, dst_IP, TTL
+#                    pkt_len
+# Description: creates and returns a complete IP packet of length pkt_len with VLAN headers
+############################
+
+def make_VLAN_pkt(pkt_len = 60, **kwargs):
+    if pkt_len < 60:
+        pkt_len = 60
+    pkt = make_MAC_hdr(**kwargs)/make_VLAN_hdr(**kwargs)/make_IP_hdr(**kwargs)/generate_load(pkt_len - 34)
+    return pkt
+
 
 ############################
 # Function: make_ICMP_reply_pkt

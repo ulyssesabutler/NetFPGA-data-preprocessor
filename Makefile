@@ -92,6 +92,9 @@ sume:
 	make -C $(LIB_HW_DIR)/std/cores/nf_10ge_interface_v1_0_0/
 	make -C $(LIB_HW_DIR)/contrib/cores/nfmac_10ge_interface_shared_v1_0_0/
 	make -C $(LIB_HW_DIR)/contrib/cores/nfmac_10ge_interface_v1_0_0/
+	make -C $(LIB_HW_DIR)/contrib/cores/vlan_adder_v1_0_0/
+	make -C $(LIB_HW_DIR)/contrib/cores/vlan_remover_v1_00/
+	make -C $(LIB_HW_DIR)/contrib/cores/nic_output_port_lookup_v4_0_0/
 	@echo "/////////////////////////////////////////";
 	@echo "//Library cores created.";
 	@echo "/////////////////////////////////////////";
