@@ -27,22 +27,38 @@
 #
 # @NETFPGA_LICENSE_HEADER_END@
 #
-GIT VERSION 1.5.0
+GIT VERSION 1.6.0
 
-Before using this code, please check the release notes for 1.5.0 below
+Before using this code, please check the release notes for 1.6.0rc below
 
 This release contains:
 
 
 1. Update
-   - nf_10ge_attachment_v1_0_0	:  Fix the state machine conditions in tx and rx queue modules to revolve the interface stall issues
-				   Fix the reset signal connection in tx and rx queue modules
+    - Xilinx Core
+   	-- cam_v1_1_0			: Change CAM type to BRAM to improve timing
+    - Projects
+   	-- reference_nic		: Migrate to Vivado v2016.4
+   	-- reference_switch		: Migrate to Vivado v2016.4
+   	-- reference_switch_lite	: Migrate to Vivado v2016.4	
+   	-- reference_router		: Migrate to Vivado v2016.4
+   	-- acceptance_test		: Migrate to Vivado v2016.4
 
 2. Bug Fix
-   - reference_switch_lite	: Fix the reset signal which caused negative slack in the reference_switch_lite bitfile
-   - axitools.py		: Fix a typo, an undefined variable was crashing the script 
+   - switch_output_port_lookup_v1_0_1	: Fix tuser signal handling
+   - output_queues_v1_0_0		: Fix output queues handling of tuser
+   - cam_v1_1_0				: Fix ternary mode 
 
+3. Contrib Projects
+   - encap_decap			: encap/decap VLAN tag
+   - reference_switch_lcam		: reference_switch with large CAM
+   
+4. Contrib Cores
+   - vlan_adder_v1_0_0			: used in encap_decap contrib-project
+   - vlan_remover_v1_0_0		: used in encap_decap contrib-project
+   - nic_output_port_lookup_v4_0_0	: used in encap_decap contrib-project
+   - lcam_output_port_lookup_v1_0_0	: used in reference_switch_lcam contrib-project
 
-3. For known issues please visit the following link:    https://github.com/NetFPGA/NetFPGA-SUME-public/wiki/Known-issues
+5. For known issues please visit the following link:    https://github.com/NetFPGA/NetFPGA-SUME-public/wiki/Known-issues
    The open issues can also be seen on:                 https://github.com/NetFPGA/NetFPGA-SUME-live/issues
    The procedure to open new issue tickets:             https://github.com/NetFPGA/NetFPGA-SUME-public/wiki/Before-opening-issues
