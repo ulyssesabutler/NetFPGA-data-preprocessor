@@ -26,7 +26,7 @@
 # @NETFPGA_LICENSE_HEADER_END@
 
 set ws "SDK_Workspace"
-set design "reference_switch"
+set design "reference_switch_lite"
 
 setws ./$ws/$design
 createhw -name hw_platform -hwspec ./$design.hdf

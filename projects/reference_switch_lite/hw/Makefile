@@ -57,7 +57,7 @@ all:
 .PHONY: clean project export_to_sdk load_elf  
 
 project: identifier
-	echo "Create reference project under folder /project"; \
+	echo "Create reference project under folder /project";
 	@if test -d project/; then \
 		echo "Project already exists"; \
 	else \
@@ -68,7 +68,7 @@ project: identifier
 	fi
 
 projectgui:
-	echo "Create reference project under folder /project"; \
+	echo "Create reference project under folder /project";
 	@if test -d project/; then \
 		echo "Project already exists"; \
 	else \
