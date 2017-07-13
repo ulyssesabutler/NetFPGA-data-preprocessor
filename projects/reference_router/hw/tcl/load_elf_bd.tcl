@@ -44,7 +44,7 @@ set ws "SDK_Workspace"
 puts "\nOpening $design XPR project\n"
 open_project project/$design.xpr
 
-set bd_file [get_files -regexp -nocase {.*nic\.bd}]
+set bd_file [get_files -regexp -nocase {.*router.*\.bd}]
 set elf_file ../sw/embedded/$ws/$design/app/Debug/app.elf
 
 puts "\nOpening $design BD project\n"

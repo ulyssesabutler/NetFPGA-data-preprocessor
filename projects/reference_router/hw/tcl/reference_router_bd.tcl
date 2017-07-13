@@ -237,11 +237,11 @@ wait_on_run inverter_0_synth_1
 create_ip_run [get_files ./${proj_dir}/${design}.srcs/sources_1/ip/axi_10g_ethernet_shared/axi_10g_ethernet_shared.xci]
 launch_runs axi_10g_ethernet_shared_synth_1
 wait_on_run axi_10g_ethernet_shared_synth_1
-###
 create_ip_run [get_files ./${proj_dir}/${design}.srcs/sources_1/ip/fifo_generator_1_9/fifo_generator_1_9.xci]
 launch_runs fifo_generator_1_9_synth_1
 wait_on_run fifo_generator_1_9_synth_1
 
+set_property synth_checkpoint_mode None [get_files ./${proj_dir}/${design}.srcs/sources_1/bd/${design}/${design}.bd]
 generate_target all [get_files ./${proj_dir}/${design}.srcs/sources_1/bd/${design}/${design}.bd]
 
 #### Start synthesis and implementation
@@ -249,7 +249,7 @@ synth_design -rtl -name rtl_1
 set_property BITSTREAM.GENERAL.COMPRESS TRUE [get_designs rtl_1]
 save_constraints
 
-set_property strategy Performance_LateBlockPlacement [get_runs impl_1]
+set_property strategy Performance_Explore [get_runs impl_1]
 set_property steps.phys_opt_design.is_enabled true [get_runs impl_1]
 set_property STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE AlternateFlowWithRetiming [get_runs impl_1]
 set_property STEPS.PLACE_DESIGN.ARGS.DIRECTIVE Explore [get_runs impl_1]

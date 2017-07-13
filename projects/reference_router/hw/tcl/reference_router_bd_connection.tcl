@@ -42,13 +42,13 @@ connect_bd_net [get_bd_ports reset] [get_bd_pins sys_clock_0/reset]
 connect_bd_net [get_bd_ports reset] [get_bd_pins proc_sys_reset_0/ext_reset_in]
 connect_bd_net [get_bd_ports reset] [get_bd_pins nf_10g_interface_0/rst]
 
-connect_bd_net [get_bd_ports fpga_sysclk_n] [get_bd_pins sysclk_buf/IBUF_DS_N]
-connect_bd_net [get_bd_ports fpga_sysclk_p] [get_bd_pins sysclk_buf/IBUF_DS_P]
+#connect_bd_net [get_bd_ports fpga_sysclk_n] [get_bd_pins sysclk_buf/IBUF_DS_N]
+#connect_bd_net [get_bd_ports fpga_sysclk_p] [get_bd_pins sysclk_buf/IBUF_DS_P]
 
 connect_bd_net [get_bd_ports sfp_refclk_n] [get_bd_pins nf_10g_interface_0/refclk_n]
 connect_bd_net [get_bd_ports sfp_refclk_p] [get_bd_pins nf_10g_interface_0/refclk_p]
 
-connect_bd_net [get_bd_pins sys_clock_0/clk_in1] [get_bd_pins sysclk_buf/IBUF_OUT]
+#connect_bd_net [get_bd_pins sys_clock_0/clk_in1] [get_bd_pins sysclk_buf/IBUF_OUT]
 connect_bd_net [get_bd_pins sys_clock_0/locked] [get_bd_pins proc_sys_reset_0/dcm_locked]
 
 connect_bd_net [get_bd_ports eth0_tx_disable] [get_bd_pins nf_10g_interface_0/tx_disable]
