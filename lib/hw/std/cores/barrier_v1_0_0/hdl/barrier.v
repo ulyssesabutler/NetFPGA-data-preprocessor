@@ -40,6 +40,7 @@
  *
  *  Author:
  *        Modified by Georgina Kalogeridou
+ *        Modified by Yuta Tokusashi
  * 		
  *  Description:
  *        Barrier control module. Aggregates barrier good notifications
@@ -52,7 +53,10 @@
 `timescale 1ns/1ps
 
 module barrier #(
-   parameter NUM_PORTS = 4
+   parameter NUM_PORTS = 4,
+// Time to wait before declaring the system "stuck" when we have a barrier
+// and not all modules are ready to proceed.
+   parameter INACTIVITY_TIMEOUT = 4000
 )
 (
    input [NUM_PORTS:0] activity_stim, 
@@ -64,10 +68,6 @@ module barrier #(
    output reg barrier_proceed
 );
 
-// Time to wait before declaring the system "stuck" when we have a barrier
-// and not all modules are ready to proceed.
-//
-parameter INACTIVITY_TIMEOUT = 4000;
 time req_time;
 reg timeout;
 wire [NUM_PORTS:0] activity;
