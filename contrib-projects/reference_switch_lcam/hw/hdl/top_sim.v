@@ -1019,8 +1019,7 @@ nf_datapath_0
         .barrier_proceed (barrier_proceed)
 	);
 
-	barrier_ip barrier_i
-	(
+	barrier_ip barrier_i (
 	.activity_stim ({activity_stim4, activity_stim3, activity_stim2, activity_stim1, activity_stim0}), 
    	.activity_rec ({activity_rec4, activity_rec3, activity_rec2, activity_rec1, activity_rec0}),
    	.activity_trans_sim (activity_trans_sim),
