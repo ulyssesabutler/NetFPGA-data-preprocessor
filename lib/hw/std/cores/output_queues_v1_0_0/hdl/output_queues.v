@@ -3,7 +3,6 @@
 //                          Junior University
 // Copyright (C) 2010, 2011 Adam Covington
 // Copyright (C) 2015 Noa Zilberman
-// Modified by Salvator Galea
 // All rights reserved.
 //
 // This software was developed by
@@ -43,8 +42,8 @@
  *
  *  Author:
  *        Adam Covington
- *        Modified by Noa Zilberman, Salvator Galea
- * 
+ *        Modified by Noa Zilberman
+ * 		
  *  Description:
  *        BRAM Output queues
  *        Outputs have a parameterizable width
@@ -79,7 +78,7 @@ module output_queues
     input [((C_S_AXIS_DATA_WIDTH / 8)) - 1:0] s_axis_tkeep,
     input [C_S_AXIS_TUSER_WIDTH-1:0] s_axis_tuser,
     input s_axis_tvalid,
-    output reg s_axis_tready,
+    output s_axis_tready,
     input s_axis_tlast,
 
     // Master Stream Ports (interface to TX queues)
@@ -204,10 +203,10 @@ module output_queues
    wire [NUM_QUEUES-1:0] 	           fifo_out_tlast;
 
    wire [NUM_QUEUES-1:0]               rd_en;
-   reg [NUM_QUEUES-1:0]                wr_en;
+   wire [NUM_QUEUES-1:0]                wr_en;
 
    reg [NUM_QUEUES-1:0]                metadata_rd_en;
-   reg [NUM_QUEUES-1:0]                metadata_wr_en;
+   wire [NUM_QUEUES-1:0]                metadata_wr_en;
 
    reg [NUM_QUEUES-1:0]          cur_queue;
    reg [NUM_QUEUES-1:0]          cur_queue_next;
@@ -218,8 +217,6 @@ module output_queues
 
    reg [NUM_METADATA_STATES-1:0]       metadata_state[NUM_QUEUES-1:0];
    reg [NUM_METADATA_STATES-1:0]       metadata_state_next[NUM_QUEUES-1:0];
-
-   reg								   first_word, first_word_next;
 
    reg [NUM_QUEUES-1:0] pkt_stored_next;
    reg [C_S_AXI_DATA_WIDTH-1:0] bytes_stored_next;
@@ -400,12 +397,7 @@ module output_queues
 
    always @(*) begin
       state_next     = state;
-      cur_queue_next = cur_queue;
-      wr_en          = 0;
-      metadata_wr_en = 0;
-      s_axis_tready  = 0;
-      first_word_next = first_word;
-     
+      cur_queue_next = cur_queue;    
       bytes_stored_next = 0;
       pkt_stored_next = 0;
       pkt_dropped_next = 0;
@@ -416,10 +408,9 @@ module output_queues
         /* cycle between input queues until one is not empty */
         IDLE: begin
            cur_queue_next = oq;
-           if(s_axis_tvalid) begin
+           if(s_axis_tvalid & s_axis_tready) begin
               if(~|((nearly_full | metadata_nearly_full) & oq)) begin // All interesting oqs are NOT _nearly_ full (able to fit in the maximum pacekt).
                   state_next = WR_PKT;
-                  first_word_next = 1'b1;
 		  pkt_stored_next = oq;
 		  bytes_stored_next = s_axis_tuser[15:0];
               end
@@ -433,13 +424,7 @@ module output_queues
 
         /* wait until eop */
         WR_PKT: begin
-           s_axis_tready = 1;
-           if(s_axis_tvalid) begin
-           		first_word_next = 1'b0;
-				wr_en = cur_queue;
-				if(first_word) begin
-					metadata_wr_en = cur_queue;
-				end
+            if(s_axis_tvalid & s_axis_tready) begin
 				if(s_axis_tlast) begin
 					state_next = IDLE;
 				end
@@ -447,8 +432,7 @@ module output_queues
         end // case: WR_PKT
 
         DROP: begin
-           s_axis_tready = 1;
-           if(s_axis_tvalid & s_axis_tlast) begin
+           if(s_axis_tvalid & s_axis_tlast & s_axis_tready) begin
            	  state_next = IDLE;
            end
         end
@@ -457,13 +441,18 @@ module output_queues
    end // always @ (*)
 
 
+assign s_axis_tready = ((~|(nearly_full | metadata_nearly_full) ) | (state == DROP)); 
+assign wr_en = !(s_axis_tvalid & s_axis_tready)  ? 0 : 
+               (state == IDLE) ? oq : 
+               (state == WR_PKT) ? cur_queue : 
+               0 ;
+assign metadata_wr_en = s_axis_tvalid & s_axis_tready & ((state == IDLE)) ? oq : 0;
+
 
    always @(posedge axis_aclk) begin
       if(~axis_resetn) begin
          state <= IDLE;
          cur_queue <= 0;
-         first_word <= 0;
-
  	 bytes_stored <= 0;
          pkt_stored <= 0;
          pkt_dropped <=0;
@@ -472,9 +461,7 @@ module output_queues
       else begin
          state <= state_next;
          cur_queue <= cur_queue_next;
-         first_word <= first_word_next;
-
-	 bytes_stored <= bytes_stored_next;
+ 	 bytes_stored <= bytes_stored_next;
          pkt_stored <= pkt_stored_next;
          pkt_dropped<= pkt_dropped_next;
          bytes_dropped<= bytes_dropped_next;

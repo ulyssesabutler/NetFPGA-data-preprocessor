@@ -217,7 +217,7 @@ module op_lut_process_sm
                           rd_preprocess_info            = 1;
                           to_from_cpu_next              = 1;
                           dst_port_next                 = to_cpu_output_port;
-                          state_next                    = MOVE_TUSER;
+                          state_next                    = SEND_PKT;
 
                           // Note: care must be taken to ensure that only
                           // *one* of the counters will be incremented at any
@@ -239,7 +239,7 @@ module op_lut_process_sm
                        else if (!is_broadcast) begin
                           to_from_cpu_next   = 0;
                           dst_port_next      = output_port;
-                          state_next         = MOVE_TUSER;
+                          state_next         = CHANGE_PKT;
                           pkt_forwarded      = 1;
                        end // else: !if(ip_hdr_has_options | !ip_ttl_is_good)
                        else begin
@@ -261,7 +261,7 @@ module op_lut_process_sm
                     rd_preprocess_info       = 1;
                     to_from_cpu_next         = 1;
                     dst_port_next            = to_cpu_output_port;
-                    state_next               = MOVE_TUSER;
+                    state_next               = SEND_PKT;
                  end // else: !if(is_ip_pkt)
               end // if (is_for_us)
               else begin // pkt not for us
@@ -273,19 +273,20 @@ module op_lut_process_sm
            end // if (preprocess_vld & out_rdy)
         end // case: WAIT_PREPROCESS_RDY
 
-        MOVE_TUSER: begin
-           if(in_fifo_vld) begin
-	      out_tvalid_next  = 1;
-              out_tuser_next[C_AXIS_DST_PORT_POS+7:C_AXIS_DST_PORT_POS] = dst_port;
-	      if(to_from_cpu)
-		state_next = SEND_PKT;
-	      else
-	      	state_next = CHANGE_PKT;
-	    end
-	end
+//        MOVE_TUSER: begin
+//           if(in_fifo_vld) begin
+//	      out_tvalid_next  = 1;
+//              out_tuser_next[C_AXIS_DST_PORT_POS+7:C_AXIS_DST_PORT_POS] = dst_port;
+//	      if(to_from_cpu)
+//		state_next = SEND_PKT;
+//	      else
+//	      	state_next = CHANGE_PKT;
+//	    end
+//	end
 
 	CHANGE_PKT: begin
 	   if(in_fifo_vld && out_tready) begin
+	      out_tuser_next[C_AXIS_DST_PORT_POS+7:C_AXIS_DST_PORT_POS] = dst_port;
 	      out_tvalid_next	= 1;
 	      in_fifo_rd_en	= 1;
 	      // don't decrement the TTL and don't recalculate checksum for local pkts
