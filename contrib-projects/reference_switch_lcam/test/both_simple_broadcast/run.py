@@ -66,11 +66,10 @@ nftest_start()
 
 routerMAC = []
 routerIP = []
-for i in range(4):
+num_broadcast = 20
+for i in range(num_broadcast):
     routerMAC.append("00:ca:fe:00:00:0%d"%(i+1))
     routerIP.append("192.168.%s.40"%i)
-
-num_broadcast = 20
 
 if not isHW():
     simReg.regDelay(9000)
@@ -78,7 +77,7 @@ if not isHW():
 
 pkts = []
 for i in range(num_broadcast):
-    pkt = make_IP_pkt(src_MAC="aa:bb:cc:dd:ee:ff", dst_MAC=routerMAC[0],
+    pkt = make_IP_pkt(src_MAC="aa:bb:cc:dd:ee:ff", dst_MAC=routerMAC[i],
                       EtherType=0x800, src_IP="192.168.0.1",
                       dst_IP="192.168.1.1", pkt_len=60)
 
@@ -87,7 +86,7 @@ for i in range(num_broadcast):
     if isHW():
         nftest_expect_phy('nf1', pkt)
         nftest_send_phy('nf0', pkt)
-    
+
 if not isHW():
     nftest_send_phy('nf0', pkts)
     nftest_expect_phy('nf1', pkts)

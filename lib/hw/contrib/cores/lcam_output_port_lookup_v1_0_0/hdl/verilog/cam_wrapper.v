@@ -57,7 +57,8 @@ cam_top
 #(
    .C_ADDR_TYPE               (  C_TCAM_ADDR_TYPE           ),
    .C_DEPTH                   (  C_TCAM_DATA_DEPTH          ),
-   .C_FAMILY                  (  "virtex5"                  ),
+   //.C_FAMILY                  (  "virtex7l"                 ),
+   .C_FAMILY                  (  "virtex5"                 ),
    .C_HAS_CMP_DIN             (  1                          ),
    .C_HAS_EN                  (  0                          ),
    .C_HAS_MULTIPLE_MATCH      (  0                          ),
