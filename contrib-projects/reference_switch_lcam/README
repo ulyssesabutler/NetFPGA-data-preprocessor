@@ -35,7 +35,10 @@
 
 	@NETFPGA_LICENSE_HEADER_END@
 
-
+Requirement
+----
+NetFPGA-SUME release 1.6.1
+vivado version 2016.04
 
 Instruction for Reference Switch with Large CAM on NetFPGA-SUME
 ----
@@ -47,10 +50,6 @@ export PROJECTS=${SUME_FOLDER}/contrib-projects
 export NF_DESIGN_DIR=${SUME_FOLDER}/contrib-projects/${NF_PROJECT_NAME}
 
 For simulation, you have to modify barrier_v1_0_0 rtl for increasing timeout.
-
-$ vim $SUME_FOLDER/lib/hw/std/cores/barrier_v1_0_0/hdl/barrier.v 
-+ parameter INACTIVITY_TIMEOUT = 12000;
-- parameter INACTIVITY_TIMEOUT = 4000;
 
 Executing simulation and synthesis for hardware testing
 
