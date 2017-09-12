@@ -8,6 +8,16 @@
   Project		: reference_switch_lcam 
 
   Author		: Yuta Tokusashi
+  
+  E-mail	: toku1938@gmail.com
+
+  NetFPGA-SUME release compatibility	: release_1.6.1
+
+  Vivado Version : Vivado 2016.04
+
+
+
+
 
 
   Licence:
@@ -34,11 +44,6 @@
 	specific language governing permissions and limitations under the License.
 
 	@NETFPGA_LICENSE_HEADER_END@
-
-Requirement
-----
-NetFPGA-SUME release 1.6.1
-vivado version 2016.04
 
 Instruction for Reference Switch with Large CAM on NetFPGA-SUME
 ----
