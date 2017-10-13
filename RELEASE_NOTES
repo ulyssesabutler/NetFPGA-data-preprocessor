@@ -27,18 +27,23 @@
 #
 # @NETFPGA_LICENSE_HEADER_END@
 #
-GIT VERSION 1.6.1
+GIT VERSION 1.7.0
 
-Before using this code, please check the release notes for 1.6.1 below
+Before using this code, please check the release notes for 1.7.0rc below
 
 This release contains:
 
 
-1. Hot Fix
-   - router_output_port_lookup_v1_0_0   : Fix tuser signal handling 
-   - switch_output_port_lookup_v1_0_1	: Fix tuser signal handling
-   - output_queues_v1_0_0		        : Fix output queues handling of tuser
+1. Update
+   - Ubuntu 16.04 -- Operating System Setup Guide (wiki-page) has been updated
 
-2. For known issues please visit the following link:    https://github.com/NetFPGA/NetFPGA-SUME-public/wiki/Known-issues
+2. Cores
+   - nf_10ge_interface_v1_0_0 : Enabled deficit idle count on TX MAC in 10G ports
+   - barrier_v1_0_0 : move the inactivity timeout inside barrier definition
+
+3. Contrib Projects
+   - reference_switch_lcam : increase CAM size 982 to 1024 entries
+
+4. For known issues please visit the following link:    https://github.com/NetFPGA/NetFPGA-SUME-public/wiki/Known-issues
    The open issues can also be seen on:                 https://github.com/NetFPGA/NetFPGA-SUME-live/issues
    The procedure to open new issue tickets:             https://github.com/NetFPGA/NetFPGA-SUME-public/wiki/Before-opening-issues
