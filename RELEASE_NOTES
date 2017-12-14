@@ -27,16 +27,16 @@
 #
 # @NETFPGA_LICENSE_HEADER_END@
 #
-GIT VERSION 1.7.1rc
+GIT VERSION 1.7.1
 
-Before using this code, please check the release notes for 1.7.1rc below
+Before using this code, please check the release notes for 1.7.1 below
 
 This release contains:
 
 
 1. Hot fix
    (Cores)
-   - nf_10ge_interface_v1_0_0 : Disabled deficit idle count on TX MAC in 10G ports. More info here: https://github.com/NetFPGA/NetFPGA-SUME-dev/pull/38
+   - nf_10ge_interface_v1_0_0 : Disabled deficit idle count on TX MAC in 10G ports as enabling it causes packet drop under some scenarios. 
  
 2. For known issues please visit the following link:    https://github.com/NetFPGA/NetFPGA-SUME-public/wiki/Known-issues
    The open issues can also be seen on:                 https://github.com/NetFPGA/NetFPGA-SUME-live/issues
