@@ -56,7 +56,7 @@ if {[llength [get_files app.elf]]} {
 } else {
 	add_files -norecurse -force ${elf_file} 
 	set_property SCOPED_TO_REF [current_bd_design] [get_files -all -of_objects [get_fileset sources_1] ${elf_file}]
-	set_property SCOPED_TO_CELLS mbsys/microblaze_0 [get_files -all -of_objects [get_fileset sources_1] ${elf_file}]
+	set_property SCOPED_TO_CELLS nf_mbsys/mbsys/microblaze_0 [get_files -all -of_objects [get_fileset sources_1] ${elf_file}]
 }
 
 # Create bitstream with up-to-date elf files
