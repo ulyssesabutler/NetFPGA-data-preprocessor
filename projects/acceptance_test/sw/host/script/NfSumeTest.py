@@ -354,7 +354,8 @@ class NfSumeTest(object):
             else:
                 self.TestInterface(testName)
         self.localLogger.debug('Destroy Progress Bar as all tests finished')
-        wx.CallAfter(self.mainFrame.DestroyProgress)
+        if(self.mainFrame != None):
+            wx.CallAfter(self.mainFrame.DestroyProgress)
         #if len(self.compileWorkerThreads) != 0:
         #	logger.info('See if All ')
         #	for workerStruct in self.compileWorkerThreads:
@@ -419,7 +420,7 @@ class NfSumeTest(object):
         if self.TestAndCompileProject(testName, projName):
             if not self.serialCon.isOpen():
                 self.serialCon.open()
-            if self.mainFrame.progressDlg == None:
+            if self.mainFrame != None and self.mainFrame.progressDlg == None:
                 print '---------------------------------------------'
                 print '[%s]: write bitstream to Flash section %d' % (projName, 1)
                 print '---------------------------------------------'
