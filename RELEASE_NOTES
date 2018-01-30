@@ -27,17 +27,22 @@
 #
 # @NETFPGA_LICENSE_HEADER_END@
 #
-GIT VERSION 1.7.1
+GIT VERSION 1.8.0rc
 
-Before using this code, please check the release notes for 1.7.1 below
+Before using this code, please check the release notes for 1.8.0rc below
 
 This release contains:
 
 
-1. Hot fix
-   (Cores)
-   - nf_10ge_interface_v1_0_0 : Disabled deficit idle count on TX MAC in 10G ports as enabling it causes packet drop under some scenarios. 
+1. Fix for manual test via uart not working
+   - Using UART to run manual test did not work previously for reference_switch and reference_switch_lite. This has been fixed. See https://github.com/NetFPGA/NetFPGA-SUME-live/issues/37
+
+2. Fix for acceptance test crash in headless mode
+   - NfSumeTest.py is run during acceptance test. This script assumed the presence of a display which caused a crash. The fix now allows the script to be run without a display.
+
+3. New contribution - script to generate the regs_gen.py file
+   - The new file csv_gen.py can be used instead of running the excel macro inside module_generation.xlsm
  
-2. For known issues please visit the following link:    https://github.com/NetFPGA/NetFPGA-SUME-public/wiki/Known-issues
+4. For known issues please visit the following link:    https://github.com/NetFPGA/NetFPGA-SUME-public/wiki/Known-issues
    The open issues can also be seen on:                 https://github.com/NetFPGA/NetFPGA-SUME-live/issues
    The procedure to open new issue tickets:             https://github.com/NetFPGA/NetFPGA-SUME-public/wiki/Before-opening-issues
