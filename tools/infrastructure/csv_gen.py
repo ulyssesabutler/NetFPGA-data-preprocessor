@@ -105,7 +105,7 @@ with open(outputFileName, "a") as myfile:
 		reg_type = result[rowNum][type_col]
 		reg_bits = result[rowNum][bits_col]
 		reg_width = get_width(reg_bits)
-		reg_endian_type = result[rowNum][endian_col]
+		reg_endian_type = result[rowNum][endian_col].lower()
 		reg_access = result[rowNum][access_col]
 		reg_submodule = result[rowNum][submodule_col]
 		reg_default = result[rowNum][default_col]
@@ -113,7 +113,7 @@ with open(outputFileName, "a") as myfile:
 		eol = "\n\r"
 		
 		if(reg_type.lower() == "reg"):
-			myfile.write("{'reg':\"%s\",'type':\"%s\",'endian':\"%s\", 'name':\"%s\",'bits':\"%s\",'width':\"%s\",'addr':\"%s\",'default':\"%s\"},\n" % (reg_name,reg_access,reg_endian_type,reg_name,reg_bits,reg_width,reg_addr,reg_default))
+			myfile.write("{'reg':\"%s\",'type':\"%s\",'endian':\"%s\", 'name':\"%s\",'bits':\"%s\",'width':\"%s\",'addr':\"%s\",'default':\"%s\"},\n" % (reg_name,reg_access,reg_endian_type,reg_name.lower(),reg_bits,reg_width,reg_addr,reg_default))
 		elif(reg_type.lower() == "mem"):
 			if(prev_is_reg == 1):
 				prev_is_reg = 0
