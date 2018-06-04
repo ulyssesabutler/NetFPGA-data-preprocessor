@@ -191,10 +191,12 @@ module output_queues
 
    reg [NUM_QUEUES-1:0]                nearly_full;
    wire [NUM_QUEUES-1:0]               nearly_full_fifo;
+   wire [NUM_QUEUES-1:0]               full_fifo;
    wire [NUM_QUEUES-1:0]               empty;
 
    reg [NUM_QUEUES-1:0]                metadata_nearly_full;
    wire [NUM_QUEUES-1:0]               metadata_nearly_full_fifo;
+   wire [NUM_QUEUES-1:0]               metadata_full_fifo;
    wire [NUM_QUEUES-1:0]               metadata_empty;
 
    wire [C_M_AXIS_TUSER_WIDTH-1:0]             fifo_out_tuser[NUM_QUEUES-1:0];
@@ -311,6 +313,8 @@ module output_queues
    wire clear_counters;
    wire reset_registers;
 
+   reg tready;
+
 
    // ------------ Modules -------------
 
@@ -324,7 +328,7 @@ module output_queues
       output_fifo
         (// Outputs
          .dout                           ({fifo_out_tlast[i], fifo_out_tkeep[i], fifo_out_tdata[i]}),
-         .full                           (),
+         .full                           (full_fifo[i]),
          .nearly_full                    (),
 	 	 .prog_full                      (nearly_full_fifo[i]),
          .empty                          (empty[i]),
@@ -341,7 +345,7 @@ module output_queues
       metadata_fifo
         (// Outputs
          .dout                           (fifo_out_tuser[i]),
-         .full                           (),
+         .full                           (metadata_full_fifo[i]),
          .nearly_full                    (metadata_nearly_full_fifo[i]),
 	 	 .prog_full                      (),
          .empty                          (metadata_empty[i]),
@@ -402,13 +406,14 @@ module output_queues
       pkt_stored_next = 0;
       pkt_dropped_next = 0;
       bytes_dropped_next = 0;
+     
 
       case(state)
 
         /* cycle between input queues until one is not empty */
         IDLE: begin
            cur_queue_next = oq;
-           if(s_axis_tvalid & s_axis_tready) begin
+           if(s_axis_tvalid ) begin
               if(~|((nearly_full | metadata_nearly_full) & oq)) begin // All interesting oqs are NOT _nearly_ full (able to fit in the maximum pacekt).
                   state_next = WR_PKT;
 		  pkt_stored_next = oq;
@@ -424,15 +429,15 @@ module output_queues
 
         /* wait until eop */
         WR_PKT: begin
-            if(s_axis_tvalid & s_axis_tready) begin
+            if(s_axis_tvalid ) begin
 				if(s_axis_tlast) begin
 					state_next = IDLE;
 				end
-           end
+           end 
         end // case: WR_PKT
 
         DROP: begin
-           if(s_axis_tvalid & s_axis_tlast & s_axis_tready) begin
+           if (s_axis_tvalid & s_axis_tlast ) begin
            	  state_next = IDLE;
            end
         end
@@ -441,10 +446,10 @@ module output_queues
    end // always @ (*)
 
 
-assign s_axis_tready = ((~|(nearly_full | metadata_nearly_full) ) | (state == DROP)); 
+assign s_axis_tready =  1;//((~|(full_fifo | metadata_full_fifo) )); | (state == DROP)); 
 assign wr_en = !(s_axis_tvalid & s_axis_tready)  ? 0 : 
-               (state == IDLE) ? oq : 
-               (state == WR_PKT) ? cur_queue : 
+               (state == IDLE) ? (~|((full_fifo | metadata_full_fifo) & oq) ? oq : 0 ) :
+               (state == WR_PKT) ? (~|((full_fifo | metadata_full_fifo) & cur_queue)? cur_queue : 0 ) :
                0 ;
 assign metadata_wr_en = s_axis_tvalid & s_axis_tready & ((state == IDLE)) ? oq : 0;
 
