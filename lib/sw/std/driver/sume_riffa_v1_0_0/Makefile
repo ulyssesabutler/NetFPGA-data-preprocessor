@@ -64,7 +64,7 @@ all: modules
 
 .PHONY: modules
 modules:
-	make -C $(KERNEL_DIR) M=$(PWD) modules
+	make -C $(KERNEL_DIR) M=$(shell pwd) modules
 
 .PHONY: modules_install
 modules_install: modules

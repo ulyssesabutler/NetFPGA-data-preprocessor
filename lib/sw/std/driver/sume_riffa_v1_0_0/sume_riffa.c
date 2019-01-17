@@ -74,6 +74,7 @@
 #include <linux/etherdevice.h>
 #include <linux/interrupt.h>
 #include <linux/sysctl.h>
+#include <linux/version.h>
 
 #include "nf_sume.h"
 
@@ -847,7 +848,11 @@ sume_tx_timeout(struct net_device *netdev)
 }
 
 /* Statistics.  Everyone likes numbers. */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0)
+static void
+#else
 static struct rtnl_link_stats64 *
+#endif
 sume_get_stats64(struct net_device *netdev, struct rtnl_link_stats64 *storage)
 {
 
@@ -882,7 +887,11 @@ sume_get_stats64(struct net_device *netdev, struct rtnl_link_stats64 *storage)
 	COPY_STAT(tx_compressed);
 #undef	COPY_STAT
 
+#if LINUX_VERSION_CODE > KERNEL_VERSION(4,11,0)
+	return;
+#else
 	return (storage);
+#endif
 }
 
 #ifdef CONFIG_NET_POLL_CONTROLLER
