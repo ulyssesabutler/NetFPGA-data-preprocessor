@@ -102,6 +102,8 @@ sume:
 #	make -C $(LIB_HW_DIR)/contrib/cores/vlan_adder_v1_0_0/
 #	make -C $(LIB_HW_DIR)/contrib/cores/vlan_remover_v1_00/
 #	make -C $(LIB_HW_DIR)/contrib/cores/nic_output_port_lookup_v4_0_0/
+#	make -C $(LIB_HW_DIR)/contrib/cores/nf_sume_pktgen_v1_0_0/
+#	make -C $(LIB_HW_DIR)/contrib/cores/input_arbiter_6in_v1_0_0/
 #	make -C $(LIB_HW_DIR)/contrib/cores/nf_naudit_dma_v1_0_0/
 	@echo "/////////////////////////////////////////";
 	@echo "//\tLibrary cores created.";
