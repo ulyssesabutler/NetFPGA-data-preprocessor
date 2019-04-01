@@ -108,6 +108,7 @@ sume:
 #	make -C $(LIB_HW_DIR)/contrib/cores/nf_sume_pktgen_v1_0_0/
 #	make -C $(LIB_HW_DIR)/contrib/cores/input_arbiter_6in_v1_0_0/
 #	make -C $(LIB_HW_DIR)/contrib/cores/nf_naudit_dma_v1_0_0/
+#	make -C $(LIB_HW_DIR)/contrib/cores/emudns_output_port_lookup_v1_0_0/
 	@echo "/////////////////////////////////////////";
 	@echo "//\tLibrary cores created.";
 	@echo "/////////////////////////////////////////";
