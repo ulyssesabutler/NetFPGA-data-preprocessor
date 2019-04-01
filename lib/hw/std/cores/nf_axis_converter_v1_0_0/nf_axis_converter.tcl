@@ -56,6 +56,7 @@ puts "Creating AXIS Converter IP"
 update_ip_catalog
 
 read_verilog "./hdl/nf_axis_converter.v"
+read_verilog "./hdl/nf_axis_converter_main.v"
 update_compile_order -fileset sources_1
 
 update_compile_order -fileset sim_1
@@ -71,6 +72,8 @@ set_property version ${ip_version} [ipx::current_core]
 set_property display_name ${design} [ipx::current_core]
 set_property description ${design} [ipx::current_core]
 
+ipx::add_subcore NetFPGA:NetFPGA:axis_fifo:1.00 [ipx::get_file_groups xilinx_anylanguagesynthesis -of_objects [ipx::current_core]]
+ipx::add_subcore NetFPGA:NetFPGA:axis_fifo:1.00 [ipx::get_file_groups xilinx_anylanguagebehavioralsimulation -of_objects [ipx::current_core]]
 ipx::add_subcore NetFPGA:NetFPGA:fallthrough_small_fifo:1.00 [ipx::get_file_groups xilinx_anylanguagesynthesis -of_objects [ipx::current_core]]
 ipx::add_subcore NetFPGA:NetFPGA:fallthrough_small_fifo:1.00 [ipx::get_file_groups xilinx_anylanguagebehavioralsimulation -of_objects [ipx::current_core]]
 ipx::infer_user_parameters [ipx::current_core]
