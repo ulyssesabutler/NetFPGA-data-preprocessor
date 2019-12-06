@@ -1,0 +1,38 @@
+--- a/corundum/fpga/mqnic/NetFPGA_SUME/fpga/ip/pcie3_7x_0.xci	2019-12-06 13:21:42.980044101 +0000
++++ b/corundum/fpga/mqnic/NetFPGA_SUME/fpga/ip/pcie3_7x_0.xci	2019-12-06 14:39:26.912050538 +0000
+@@ -123,7 +123,7 @@
+         <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.PF0_BAR5_CONTROL">0b000</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.PF0_CAPABILITY_POINTER">0x80</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.PF0_CLASS_CODE">0x020000</spirit:configurableElementValue>
+-        <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.PF0_DEVICE_ID">0x0001</spirit:configurableElementValue>
++        <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.PF0_DEVICE_ID">0x1001</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.PF0_DEV_CAP2_128B_CAS_ATOMIC_COMPLETER_SUPPORT">FALSE</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.PF0_DEV_CAP2_32B_ATOMIC_COMPLETER_SUPPORT">FALSE</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.PF0_DEV_CAP2_64B_ATOMIC_COMPLETER_SUPPORT">FALSE</spirit:configurableElementValue>
+@@ -189,7 +189,7 @@
+         <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.PF0_SRIOV_FUNC_DEP_LINK">0x0000</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.PF0_SRIOV_SUPPORTED_PAGE_SIZE">0x00000553</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.PF0_SRIOV_VF_DEVICE_ID">0x0000</spirit:configurableElementValue>
+-        <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.PF0_SUBSYSTEM_ID">0x0001</spirit:configurableElementValue>
++        <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.PF0_SUBSYSTEM_ID">0x1001</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.PF0_SUBSYSTEM_VENDOR_ID">0x1234</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.PF0_TPHR_CAP_DEV_SPECIFIC_MODE">TRUE</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.PF0_TPHR_CAP_ENABLE">FALSE</spirit:configurableElementValue>
+@@ -406,7 +406,7 @@
+         <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.PF0_AER_CAP_ECRC_CHECK_CAPABLE">false</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.PF0_AER_CAP_ECRC_GEN_CAPABLE">false</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.PF0_CLASS_CODE">020000</spirit:configurableElementValue>
+-        <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.PF0_DEVICE_ID">0001</spirit:configurableElementValue>
++        <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.PF0_DEVICE_ID">1001</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.PF0_DEV_CAP2_128B_CAS_ATOMIC_COMPLETER_SUPPORT">false</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.PF0_DEV_CAP2_32B_ATOMIC_COMPLETER_SUPPORT">false</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.PF0_DEV_CAP2_64B_ATOMIC_COMPLETER_SUPPORT">false</spirit:configurableElementValue>
+@@ -431,7 +431,7 @@
+         <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.PF0_SRIOV_FUNC_DEP_LINK">0000</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.PF0_SRIOV_SUPPORTED_PAGE_SIZE">00000553</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.PF0_SRIOV_VF_DEVICE_ID">0000</spirit:configurableElementValue>
+-        <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.PF0_SUBSYSTEM_ID">0001</spirit:configurableElementValue>
++        <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.PF0_SUBSYSTEM_ID">1001</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.PF0_SUBSYSTEM_VENDOR_ID">1234</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.PF0_Use_Class_Code_Lookup_Assistant">false</spirit:configurableElementValue>
+         <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.PF1_AER_CAP_ECRC_CHECK_CAPABLE">false</spirit:configurableElementValue>

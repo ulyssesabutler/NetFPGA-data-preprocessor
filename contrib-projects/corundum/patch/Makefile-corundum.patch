@@ -1,0 +1,67 @@
+--- a/corundum/fpga/mqnic/NetFPGA_SUME/fpga/fpga/Makefile	2019-12-03 16:54:31.220037848 +0000
++++ b/corundum/fpga/mqnic/NetFPGA_SUME/fpga/fpga/Makefile	2019-12-03 17:11:23.724068173 +0000
+@@ -1,15 +1,15 @@
+ 
+ # FPGA settings
+-FPGA_PART = xcku035-fbva676-2-e
++FPGA_PART = xc7vx690t-3-ffg1761
+ FPGA_TOP = fpga
+-FPGA_ARCH = kintexu
++FPGA_ARCH = virtex7
+ 
+ # Files for synthesis
+ SYN_FILES = rtl/fpga.v
+ SYN_FILES += rtl/fpga_core.v
+-SYN_FILES += rtl/debounce_switch.v
+-SYN_FILES += rtl/sync_reset.v
+-SYN_FILES += rtl/sync_signal.v
++SYN_FILES += rtl/pcs_pma_10g.v
++SYN_FILES += rtl/pcs_pma_10g_shared.v
++SYN_FILES += rtl/pcie3_7x.v
+ SYN_FILES += rtl/common/interface.v
+ SYN_FILES += rtl/common/port.v
+ SYN_FILES += rtl/common/cpl_write.v
+@@ -20,7 +20,6 @@
+ SYN_FILES += rtl/common/cpl_queue_manager.v
+ SYN_FILES += rtl/common/event_mux.v
+ SYN_FILES += rtl/common/tx_scheduler_rr.v
+-SYN_FILES += rtl/common/tdma_scheduler.v
+ SYN_FILES += rtl/common/tx_engine.v
+ SYN_FILES += rtl/common/rx_engine.v
+ SYN_FILES += rtl/common/tx_checksum.v
+@@ -29,15 +28,6 @@
+ SYN_FILES += lib/eth/rtl/eth_mac_10g_fifo.v
+ SYN_FILES += lib/eth/rtl/axis_xgmii_rx_64.v
+ SYN_FILES += lib/eth/rtl/axis_xgmii_tx_64.v
+-SYN_FILES += lib/eth/rtl/eth_phy_10g.v
+-SYN_FILES += lib/eth/rtl/eth_phy_10g_rx.v
+-SYN_FILES += lib/eth/rtl/eth_phy_10g_rx_if.v
+-SYN_FILES += lib/eth/rtl/eth_phy_10g_rx_frame_sync.v
+-SYN_FILES += lib/eth/rtl/eth_phy_10g_rx_ber_mon.v
+-SYN_FILES += lib/eth/rtl/eth_phy_10g_tx.v
+-SYN_FILES += lib/eth/rtl/eth_phy_10g_tx_if.v
+-SYN_FILES += lib/eth/rtl/xgmii_baser_dec_64.v
+-SYN_FILES += lib/eth/rtl/xgmii_baser_enc_64.v
+ SYN_FILES += lib/eth/rtl/lfsr.v
+ SYN_FILES += lib/eth/rtl/ptp_clock.v
+ SYN_FILES += lib/eth/rtl/ptp_clock_cdc.v
+@@ -49,7 +39,6 @@
+ SYN_FILES += lib/axis/rtl/axis_adapter.v
+ SYN_FILES += lib/axis/rtl/axis_async_fifo.v
+ SYN_FILES += lib/axis/rtl/axis_async_fifo_adapter.v
+-SYN_FILES += lib/axis/rtl/axis_arb_mux.v
+ SYN_FILES += lib/axis/rtl/axis_fifo.v
+ SYN_FILES += lib/axis/rtl/axis_register.v
+ SYN_FILES += lib/pcie/rtl/pcie_us_axil_master.v
+@@ -73,8 +62,9 @@
+ XDC_FILES += lib/eth/syn/ptp_clock_cdc.tcl
+ 
+ # IP
+-XCI_FILES = ip/pcie3_ultrascale_0.xci
+-XCI_FILES += ip/gtwizard_ultrascale_0.xci
++XCI_FILES = ip/ten_gig_eth_pcs_pma_shared.xci
++XCI_FILES += ip/ten_gig_eth_pcs_pma.xci
++XCI_FILES += ip/pcie3_7x_0.xci
+ 
+ include ../common/vivado.mk
+ 

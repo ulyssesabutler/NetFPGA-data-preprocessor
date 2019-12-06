@@ -1,0 +1,32 @@
+--- a/verilog-pcie/example/NetFPGA_SUME/fpga_axi/fpga/Makefile	2019-12-03 13:34:05.538075887 +0000
++++ b/verilog-pcie/example/NetFPGA_SUME/fpga_axi/fpga/Makefile	2019-12-03 16:19:43.356023207 +0000
+@@ -1,17 +1,15 @@
+ 
+ # FPGA settings
+-FPGA_PART = xcku035-fbva676-2-e
++FPGA_PART = xc7vx690t-3-ffg1761
+ FPGA_TOP = fpga
+-FPGA_ARCH = kintexu
++FPGA_ARCH = virtex7
+ 
+ # Files for synthesis
+ SYN_FILES = rtl/fpga.v
+ SYN_FILES += rtl/fpga_core.v
+-SYN_FILES += rtl/debounce_switch.v
+-SYN_FILES += rtl/sync_reset.v
+-SYN_FILES += rtl/sync_signal.v
+ SYN_FILES += rtl/axi_ram.v
+ SYN_FILES += rtl/axis_register.v
++SYN_FILES += rtl/pcie3_7x.v
+ SYN_FILES += lib/pcie/rtl/axis_arb_mux.v
+ SYN_FILES += lib/pcie/rtl/pcie_us_axil_master.v
+ SYN_FILES += lib/pcie/rtl/pcie_us_axi_dma.v
+@@ -32,7 +30,7 @@
+ XDC_FILES = fpga.xdc
+ 
+ # IP
+-XCI_FILES = ip/pcie3_ultrascale_0.xci
++XCI_FILES = ip/pcie3_7x_0.xci
+ 
+ include ../common/vivado.mk
+ 
