@@ -72,7 +72,7 @@ clean: libclean toolsclean projectsclean hwtestlibclean swclean
 	@find . -type f -name '*.pyc' -delete
 	@find . -type f -name '*.jou' -delete
 	@find . -type f -name '*.log' -delete
-	@find . -type f -name '*.coe' -delete
+	@find lib/ -type f -name '*.coe' -delete
 	@find . -type f -name '*.mif' -delete
 
 sume:
