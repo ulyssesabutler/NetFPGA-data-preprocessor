@@ -32,4 +32,4 @@ all: clean
 	vivado -mode batch -source axi_sim_transactor.tcl
 
 clean:
-	rm -rf ip_* vivado*.* *.xml xgui/ .Xil* ip_pro* *.*~ *.zip hdl/axis_sim_pkg/ hdl/lib_srl_fifo hdl/lib_srl_fifo_v1_0 hdl/lib_pkg hdl/lib_pkg_v1_0
+	rm -rf ip_* vivado*.* *.xml xgui/ .Xil* ip_pro* *.*~ *.zip hdl/axis_sim_pkg/ hdl/lib*
