@@ -32,7 +32,7 @@
 import subprocess
 cmd=[""" cat rom_data.txt | wc -l """]
 no_of_lines=subprocess.check_output(cmd,shell=True)
-print no_of_lines
+print(no_of_lines)
 
 input_file = open("rom_data.txt", "r")
 output_file = open("id_rom16x32.coe", "w")
