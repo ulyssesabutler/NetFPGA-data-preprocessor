@@ -46,29 +46,29 @@ set repo_dir 		../
 
 ## include all .xci files
 set xil_ip  		{axis_fifo_2clk_32d_4u}	
-	
+ 
 set axis_fifo_params [dict create CONFIG.INTERFACE_TYPE {AXI_STREAM} \
-			 	  CONFIG.Clock_Type_AXI {Independent_Clock} \
-			 	  CONFIG.TDATA_NUM_BYTES {4} \
-		  		  CONFIG.FIFO_Implementation_axis {Independent_Clocks_Distributed_RAM} \
-			 	  CONFIG.Input_Depth_axis {16} \
-	  			  CONFIG.TSTRB_WIDTH {4} \
-			 	  CONFIG.TKEEP_WIDTH {4} \
-	  			  CONFIG.FIFO_Implementation_wach {Independent_Clocks_Distributed_RAM} \
-	 			  CONFIG.Full_Threshold_Assert_Value_wach {15} \
-				  CONFIG.Empty_Threshold_Assert_Value_wach {13} \
-				  CONFIG.FIFO_Implementation_wdch {Independent_Clocks_Block_RAM} \
+ 		 	  CONFIG.Clock_Type_AXI {Independent_Clock} \
+ 		 	  CONFIG.TDATA_NUM_BYTES {4} \
+ 	  		  CONFIG.FIFO_Implementation_axis {Independent_Clocks_Distributed_RAM} \
+ 		 	  CONFIG.Input_Depth_axis {16} \
+   			  CONFIG.TSTRB_WIDTH {4} \
+ 		 	  CONFIG.TKEEP_WIDTH {4} \
+   			  CONFIG.FIFO_Implementation_wach {Independent_Clocks_Distributed_RAM} \
+  			  CONFIG.Full_Threshold_Assert_Value_wach {15} \
+ 			  CONFIG.Empty_Threshold_Assert_Value_wach {13} \
+ 			  CONFIG.FIFO_Implementation_wdch {Independent_Clocks_Block_RAM} \
  			 	  CONFIG.Empty_Threshold_Assert_Value_wdch {1021} \
-				  CONFIG.FIFO_Implementation_wrch {Independent_Clocks_Distributed_RAM} \
-				  CONFIG.Full_Threshold_Assert_Value_wrch {15} \
+ 			  CONFIG.FIFO_Implementation_wrch {Independent_Clocks_Distributed_RAM} \
+ 			  CONFIG.Full_Threshold_Assert_Value_wrch {15} \
   				  CONFIG.Empty_Threshold_Assert_Value_wrch {13} \
-	  			  CONFIG.FIFO_Implementation_rach {Independent_Clocks_Distributed_RAM} \
-				  CONFIG.Full_Threshold_Assert_Value_rach {15} \
-				  CONFIG.Empty_Threshold_Assert_Value_rach {13} \
-				  CONFIG.FIFO_Implementation_rdch {Independent_Clocks_Block_RAM} \
-				  CONFIG.Empty_Threshold_Assert_Value_rdch {1021} \
-	  			  CONFIG.Full_Threshold_Assert_Value_axis {15} \
-		  		  CONFIG.Empty_Threshold_Assert_Value_axis {13}]
+   			  CONFIG.FIFO_Implementation_rach {Independent_Clocks_Distributed_RAM} \
+ 			  CONFIG.Full_Threshold_Assert_Value_rach {15} \
+ 			  CONFIG.Empty_Threshold_Assert_Value_rach {13} \
+ 			  CONFIG.FIFO_Implementation_rdch {Independent_Clocks_Block_RAM} \
+ 			  CONFIG.Empty_Threshold_Assert_Value_rdch {1021} \
+   			  CONFIG.Full_Threshold_Assert_Value_axis {15} \
+ 	  		  CONFIG.Empty_Threshold_Assert_Value_axis {13}]
 
 ## # of added files
 set_param project.singleFileAddWarning.Threshold 500
@@ -76,26 +76,26 @@ set_param project.singleFileAddWarning.Threshold 500
 
 ### SubCore Reference
 set subcore_names {\
-		fallthrough_small_fifo\
+ 	fallthrough_small_fifo\
 }
 #### nf_axis_converter\
 
 ### Source Files List
 # Here for all directory
 set source_dir { \
-		hdl\
+ 	hdl\
 }		
 
 ## quick way, there is a cleaner way
 set VerilogFiles [list]
 set VerilogFiles [concat \
-			[glob -nocomplain hdl/sume/*]\
-			[glob -nocomplain hdl/riffa/*]]
+ 		[glob -nocomplain hdl/sume/*]\
+ 		[glob -nocomplain hdl/riffa/*]]
 
 set rtl_dirs	[list]
 set rtl_dirs	[concat \
-			hdl/sume \
-			hdl/riffa ]
+ 		hdl/sume \
+ 		hdl/riffa ]
 
 
 # Top Module Name
@@ -106,12 +106,12 @@ puts "top_file: $top_module_file \n"
 
 # Inferred Bus Interface
 set bus_interfaces {\
-	xilinx.com:interface:aximm_rtl:1.0\
-	xilinx.com:interface:axis_rtl:1.0\
-	xilinx.com:interface:pcie3_cfg_msi_rtl:1.0\
-	xilinx.com:interface:pcie_cfg_fc_rtl:1.0\
-	xilinx.com:interface:pcie3_cfg_status_rtl:1.0\
-	xilinx.com:interface:pcie3_cfg_interrupt_rtl:1.0\
+ xilinx.com:interface:aximm_rtl:1.0\
+ xilinx.com:interface:axis_rtl:1.0\
+ xilinx.com:interface:pcie3_cfg_msi_rtl:1.0\
+ xilinx.com:interface:pcie_cfg_fc_rtl:1.0\
+ xilinx.com:interface:pcie3_cfg_status_rtl:1.0\
+ xilinx.com:interface:pcie3_cfg_interrupt_rtl:1.0\
 }
 
 #############################################
@@ -133,15 +133,15 @@ foreach rtl_dir $rtl_dirs {
 # Add verilog sources here
 # Add Verilog Files to The IP Core
 foreach verilog_file $VerilogFiles {
-	add_files ${verilog_file}
+ add_files ${verilog_file}
 }
 #add_files -scan_for_includes -norecurse ${verilog_file}
 
 # Generate Xilinx AXIS-FIFO (xci)
 create_ip -name fifo_generator -vendor xilinx.com -library ip -version 13.2 -module_name ${xil_ip}
 foreach item [dict keys $axis_fifo_params] {
-	set val [dict get $axis_fifo_params $item]
-	set_property $item $val [get_ips ${xil_ip}]
+ set val [dict get $axis_fifo_params $item]
+ set_property $item $val [get_ips ${xil_ip}]
 }
 #puts "( $item , $val ) pair \n"
 set xil_ip_xci [append xil_ip ".xci"]
@@ -165,12 +165,12 @@ set_property description 		${ip_description} [ipx::current_core]
 
 # Add SubCore Reference
 foreach subcore ${subcore_names} {
-	set subcore_regex NAME=~*$subcore*
-	set subcore_ipdef [get_ipdefs -filter ${subcore_regex}]
+ set subcore_regex NAME=~*$subcore*
+ set subcore_ipdef [get_ipdefs -filter ${subcore_regex}]
 
-	ipx::add_subcore ${subcore_ipdef} [ipx::get_file_groups xilinx_anylanguagesynthesis -of_objects [ipx::current_core]]
-	ipx::add_subcore ${subcore_ipdef}  [ipx::get_file_groups xilinx_anylanguagebehavioralsimulation -of_objects [ipx::current_core]]
-	puts "Adding the following subcore: $subcore_ipdef \n"
+ ipx::add_subcore ${subcore_ipdef} [ipx::get_file_groups xilinx_anylanguagesynthesis -of_objects [ipx::current_core]]
+ ipx::add_subcore ${subcore_ipdef}  [ipx::get_file_groups xilinx_anylanguagebehavioralsimulation -of_objects [ipx::current_core]]
+ puts "Adding the following subcore: $subcore_ipdef \n"
 
 }
 
@@ -190,7 +190,7 @@ ipx::add_ports_from_hdl [ipx::current_core] -top_level_hdl_file $top_module_file
 
 # Auto Infer Bus Interfaces
 foreach bus_standard ${bus_interfaces} {
-	ipx::infer_bus_interfaces ${bus_standard} [ipx::current_core]
+ ipx::infer_bus_interfaces ${bus_standard} [ipx::current_core]
 }
 
 # Manually infer the other interfaces
@@ -274,6 +274,8 @@ set_property value 250000000 [ipx::get_bus_parameters FREQ_HZ -of_objects [ipx::
 ipx::add_bus_parameter FREQ_HZ [ipx::get_bus_interfaces s_axis_xge_rx -of_objects [ipx::current_core]]
 set_property description {Clock frequency (Hertz)} [ipx::get_bus_parameters FREQ_HZ -of_objects [ipx::get_bus_interfaces s_axis_xge_rx -of_objects [ipx::current_core]]]
 set_property value 250000000 [ipx::get_bus_parameters FREQ_HZ -of_objects [ipx::get_bus_interfaces s_axis_xge_rx -of_objects [ipx::current_core]]]
+
+set_property interface_mode master [ipx::get_bus_interfaces cfg_interrupt -of_objects [ipx::current_core]]
 
 # Write IP Core xml to File system
 ipx::check_integrity [ipx::current_core]
