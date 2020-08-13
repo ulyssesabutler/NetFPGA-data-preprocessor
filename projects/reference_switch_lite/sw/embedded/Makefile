@@ -63,17 +63,7 @@ all:
 project:
 	@if [ -d ./${WS} ]; then rm -rf ./${WS}; fi
 	mkdir ./${WS}
-	xsdk -batch -source ./tcl/${PROJ}_xsdk.tcl
-
-# Compile Command needs to run twice to get sw compiled correctly in DEBUG mode
-compile:
-	@if [ -d ./${WS} ]; then \
-		cp -a ./src/. ./${WS}/${PROJ}/app/src/; \
-		xsdk -wait -eclipseargs -nosplash -application org.eclipse.cdt.managedbuilder.core.headlessbuild -build all -data ./${WS}/${PROJ} -vmargs -Dorg.eclipse.cdt.core.console=org.eclipse.cdt.core.systemConsole; \
-		xsdk -wait -eclipseargs -nosplash -application org.eclipse.cdt.managedbuilder.core.headlessbuild -build all -data ./${WS}/${PROJ} -vmargs -Dorg.eclipse.cdt.core.console=org.eclipse.cdt.core.systemConsole; \
-	else \
-		echo "SDK_Workspace not found"; \
-	fi
+	xsct ./tcl/${PROJ}_xsdk.tcl
 
 download:
 	@if [ -d ./../bitfiles ]; then \
