@@ -38,8 +38,6 @@ open_project project/$design.xpr
 puts "\nOpening $design Implementation design\n"
 open_run impl_1
 
-puts "\nCopying top.sysdef\n"
-file copy -force ./project/$design.runs/impl_1/top.sysdef ../sw/embedded/$design.hdf
-
+write_hw_platform -fixed -include_bit -force -file ../sw/embedded/$design.xsa
 exit
 
