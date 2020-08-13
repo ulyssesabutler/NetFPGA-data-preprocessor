@@ -171,5 +171,6 @@ clean:	simclean
 	rm -rfv ip_repo;\
 	rm -rfv ip_proj;\
 	rm -rfv std;\
-                
+        rm -rfv create_ip/id_rom16x32.coe
+	rm -rfv	create_ip/rom_data.txt
 
