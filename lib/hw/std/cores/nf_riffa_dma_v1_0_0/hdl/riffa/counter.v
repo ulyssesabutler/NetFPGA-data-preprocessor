@@ -53,11 +53,11 @@ module counter
      input                              RST_IN,
 
      input                              ENABLE,
-     output [clog2s(C_MAX_VALUE+1)-1:0] VALUE
+     output [`clog2s(C_MAX_VALUE+1)-1:0] VALUE
      );
     wire                                wEnable;
-    reg [clog2s(C_MAX_VALUE+1)-1:0]     wCtrValue;
-    reg [clog2s(C_MAX_VALUE+1)-1:0]     rCtrValue;
+    reg [`clog2s(C_MAX_VALUE+1)-1:0]     wCtrValue;
+    reg [`clog2s(C_MAX_VALUE+1)-1:0]     rCtrValue;
     /* verilator lint_off WIDTH */
     assign wEnable = ENABLE & (C_SAT_VALUE > rCtrValue);
     /* verilator lint_on WIDTH */

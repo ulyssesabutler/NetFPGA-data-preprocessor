@@ -127,7 +127,7 @@ module tx_data_fifo
     wire                            wPacketDecrement; 
     wire                            wPacketIncrement;
 
-    reg [clog2(C_DEPTH_PACKETS+1)-1:0] rPacketCounter,_rPacketCounter;
+    reg [$clog2(C_DEPTH_PACKETS+1)-1:0] rPacketCounter,_rPacketCounter;
 
     /*AUTOINPUT*/
     /*AUTOWIRE*/

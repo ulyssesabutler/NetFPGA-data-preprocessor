@@ -71,9 +71,9 @@ module tx_data_pipeline
      input                               WR_TX_DATA_VALID,
      input [C_DATA_WIDTH-1:0]            WR_TX_DATA,
      input                               WR_TX_DATA_START_FLAG,
-     input [clog2s(C_DATA_WIDTH/32)-1:0] WR_TX_DATA_START_OFFSET,
+     input [`clog2s(C_DATA_WIDTH/32)-1:0] WR_TX_DATA_START_OFFSET,
      input                               WR_TX_DATA_END_FLAG,
-     input [clog2s(C_DATA_WIDTH/32)-1:0] WR_TX_DATA_END_OFFSET,
+     input [`clog2s(C_DATA_WIDTH/32)-1:0] WR_TX_DATA_END_OFFSET,
      output                              WR_TX_DATA_READY,
 
      // Interface: TX DATA FIFOS
@@ -116,9 +116,9 @@ module tx_data_pipeline
          .WR_TX_DATA                    (WR_TX_DATA[C_DATA_WIDTH-1:0]),
          .WR_TX_DATA_VALID              (WR_TX_DATA_VALID),
          .WR_TX_DATA_START_FLAG         (WR_TX_DATA_START_FLAG),
-         .WR_TX_DATA_START_OFFSET       (WR_TX_DATA_START_OFFSET[clog2s(C_DATA_WIDTH/32)-1:0]),
+         .WR_TX_DATA_START_OFFSET       (WR_TX_DATA_START_OFFSET[`clog2s(C_DATA_WIDTH/32)-1:0]),
          .WR_TX_DATA_END_FLAG           (WR_TX_DATA_END_FLAG),
-         .WR_TX_DATA_END_OFFSET         (WR_TX_DATA_END_OFFSET[clog2s(C_DATA_WIDTH/32)-1:0]),
+         .WR_TX_DATA_END_OFFSET         (WR_TX_DATA_END_OFFSET[`clog2s(C_DATA_WIDTH/32)-1:0]),
          .RD_TX_DATA_READY              (wRdTxDataReady),
          /*AUTOINST*/
          // Inputs

@@ -122,20 +122,20 @@ module tx_alignment_pipeline
      input                                TX_PKT_READY,
      output [C_DATA_WIDTH-1:0]            TX_PKT,
      output                               TX_PKT_START_FLAG,
-     output [clog2s(C_DATA_WIDTH/32)-1:0] TX_PKT_START_OFFSET,
+     output [`clog2s(C_DATA_WIDTH/32)-1:0] TX_PKT_START_OFFSET,
      output                               TX_PKT_END_FLAG,
-     output [clog2s(C_DATA_WIDTH/32)-1:0] TX_PKT_END_OFFSET,
+     output [`clog2s(C_DATA_WIDTH/32)-1:0] TX_PKT_END_OFFSET,
      output                               TX_PKT_VALID
      );
 
-    localparam C_OFFSET_WIDTH = clog2s(C_DATA_WIDTH/32);
+    localparam C_OFFSET_WIDTH = `clog2s(C_DATA_WIDTH/32);
     localparam C_AGGREGATE_WIDTH = (C_DATA_WIDTH+C_MAX_HDR_WIDTH);
     localparam C_MASK_WIDTH = (C_DATA_WIDTH/32);
     localparam C_NUM_MUXES = (C_DATA_WIDTH/32);
     localparam C_MUX_INPUTS = (C_DATA_WIDTH == 32)?5:4;
-    localparam C_CLOG_MUX_INPUTS = clog2s(C_MUX_INPUTS);
+    localparam C_CLOG_MUX_INPUTS = `clog2s(C_MUX_INPUTS);
     localparam C_MAX_SCHEDULE = (C_DATA_WIDTH == 256)? 2 : (C_DATA_WIDTH == 128)? 3: (C_DATA_WIDTH == 64)? 4: (C_DATA_WIDTH == 32)? 6 : 0;
-    localparam C_CLOG_MAX_SCHEDULE = clog2s(C_MAX_SCHEDULE);
+    localparam C_CLOG_MAX_SCHEDULE = `clog2s(C_MAX_SCHEDULE);
 
     genvar                                i;
 
@@ -145,7 +145,7 @@ module tx_alignment_pipeline
     wire [C_DATA_WIDTH-1:0]               wTxData;
     wire                                  wTxDataStartFlag;
     wire [(C_DATA_WIDTH/32)-1:0]          wTxDataEndFlags;
-    wire [clog2s(C_DATA_WIDTH/32)-1:0]    wTxDataEndOffset;
+    wire [`clog2s(C_DATA_WIDTH/32)-1:0]    wTxDataEndOffset;
 
     // Wires from the header interface input register
     wire                                  wTxHdrReady,_wTxHdrReady,__wTxHdrReady;
@@ -231,10 +231,10 @@ module tx_alignment_pipeline
     assign wReadyMux[2] = _wTxHdrEndReady;
     assign wReadyMux[3] = _wTxHdrStartEndReady;
     assign _wTxMuxSelectValid = _wTxHdrValid;
-    assign _wTxMuxSelectDataReady = wReadyMux[wReadyMuxSelect] & {C_NUM_MUXES{(wPktCtr >= _wTxHdrNonpayLen[`SIG_NONPAY_W-1:clog2s(C_NUM_MUXES)])}};
+    assign _wTxMuxSelectDataReady = wReadyMux[wReadyMuxSelect] & {C_NUM_MUXES{(wPktCtr >= _wTxHdrNonpayLen[`SIG_NONPAY_W-1:`clog2s(C_NUM_MUXES)])}};
     assign _wTxMuxSelectPktStartFlag = wPktCtr == 0;
-    assign _wTxMuxSelectDataStartFlag = wPktCtr == _wTxHdrNonpayLen[`SIG_NONPAY_W-1:clog2s(C_NUM_MUXES)];
-    assign _wTxMuxSelectDataEndFlag   = ({wPktCtr,{clog2s(C_NUM_MUXES){1'b0}}} + C_NUM_MUXES) >= _wTxHdrPacketLen;// TODO: Simplify
+    assign _wTxMuxSelectDataStartFlag = wPktCtr == _wTxHdrNonpayLen[`SIG_NONPAY_W-1:`clog2s(C_NUM_MUXES)];
+    assign _wTxMuxSelectDataEndFlag   = ({wPktCtr,{`clog2s(C_NUM_MUXES){1'b0}}} + C_NUM_MUXES) >= _wTxHdrPacketLen;// TODO: Simplify
 
     // Assignments for the ready stage
     assign wTxHdrReady = (wTxMuxSelectDataEndFlag & wTxMuxSelectValid & wTxMuxSelectReady) | ~wTxMuxSelectValid;
@@ -268,7 +268,7 @@ module tx_alignment_pipeline
          .MASK                          (__wTxHdrPacketMask),
          // Inputs
          .OFFSET_ENABLE                 (1),
-         .OFFSET                        (__wTxHdrPacketLenMinus1[clog2s(C_NUM_MUXES)-1:0])
+         .OFFSET                        (__wTxHdrPacketLenMinus1[`clog2s(C_NUM_MUXES)-1:0])
          /*AUTOINST*/);
 
     offset_to_mask
@@ -281,7 +281,7 @@ module tx_alignment_pipeline
          .MASK                          (__wTxHdrLenMask),
          // Inputs
          .OFFSET_ENABLE                 (1),
-         .OFFSET                        (__wTxHdrPayloadLen[clog2s(C_NUM_MUXES)-1:0]-1)
+         .OFFSET                        (__wTxHdrPayloadLen[`clog2s(C_NUM_MUXES)-1:0]-1)
          /*AUTOINST*/);
 
     rotate

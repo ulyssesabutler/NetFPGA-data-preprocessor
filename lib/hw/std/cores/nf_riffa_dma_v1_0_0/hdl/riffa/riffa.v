@@ -55,9 +55,9 @@ module riffa
      input                                      RXC_DATA_VALID,
      input [(C_PCI_DATA_WIDTH/32)-1:0]          RXC_DATA_WORD_ENABLE,
      input                                      RXC_DATA_START_FLAG,
-     input [clog2s(C_PCI_DATA_WIDTH/32)-1:0]    RXC_DATA_START_OFFSET,
+     input [`clog2s(C_PCI_DATA_WIDTH/32)-1:0]    RXC_DATA_START_OFFSET,
      input                                      RXC_DATA_END_FLAG,
-     input [clog2s(C_PCI_DATA_WIDTH/32)-1:0]    RXC_DATA_END_OFFSET,
+     input [`clog2s(C_PCI_DATA_WIDTH/32)-1:0]    RXC_DATA_END_OFFSET,
 
      input [`SIG_LBE_W-1:0]                     RXC_META_LDWBE,
      input [`SIG_FBE_W-1:0]                     RXC_META_FDWBE,
@@ -74,9 +74,9 @@ module riffa
      input                                      RXR_DATA_VALID,
      input [(C_PCI_DATA_WIDTH/32)-1:0]          RXR_DATA_WORD_ENABLE,
      input                                      RXR_DATA_START_FLAG,
-     input [clog2s(C_PCI_DATA_WIDTH/32)-1:0]    RXR_DATA_START_OFFSET,
+     input [`clog2s(C_PCI_DATA_WIDTH/32)-1:0]    RXR_DATA_START_OFFSET,
      input                                      RXR_DATA_END_FLAG,
-     input [clog2s(C_PCI_DATA_WIDTH/32)-1:0]    RXR_DATA_END_OFFSET,
+     input [`clog2s(C_PCI_DATA_WIDTH/32)-1:0]    RXR_DATA_END_OFFSET,
     
      input [`SIG_FBE_W-1:0]                     RXR_META_FDWBE,
      input [`SIG_LBE_W-1:0]                     RXR_META_LDWBE,
@@ -94,9 +94,9 @@ module riffa
      output [C_PCI_DATA_WIDTH-1:0]              TXC_DATA,
      output                                     TXC_DATA_VALID,
      output                                     TXC_DATA_START_FLAG,
-     output [clog2s(C_PCI_DATA_WIDTH/32)-1:0]   TXC_DATA_START_OFFSET,
+     output [`clog2s(C_PCI_DATA_WIDTH/32)-1:0]   TXC_DATA_START_OFFSET,
      output                                     TXC_DATA_END_FLAG,
-     output [clog2s(C_PCI_DATA_WIDTH/32)-1:0]   TXC_DATA_END_OFFSET,
+     output [`clog2s(C_PCI_DATA_WIDTH/32)-1:0]   TXC_DATA_END_OFFSET,
      input                                      TXC_DATA_READY,
 
      output                                     TXC_META_VALID,
@@ -118,9 +118,9 @@ module riffa
      output                                     TXR_DATA_VALID,
      output [C_PCI_DATA_WIDTH-1:0]              TXR_DATA,
      output                                     TXR_DATA_START_FLAG,
-     output [clog2s(C_PCI_DATA_WIDTH/32)-1:0]   TXR_DATA_START_OFFSET,
+     output [`clog2s(C_PCI_DATA_WIDTH/32)-1:0]   TXR_DATA_START_OFFSET,
      output                                     TXR_DATA_END_FLAG,
-     output [clog2s(C_PCI_DATA_WIDTH/32)-1:0]   TXR_DATA_END_OFFSET,
+     output [`clog2s(C_PCI_DATA_WIDTH/32)-1:0]   TXR_DATA_END_OFFSET,
      input                                      TXR_DATA_READY,
 
      output                                     TXR_META_VALID,
@@ -172,9 +172,9 @@ module riffa
      output [C_NUM_CHNL-1:0]                    CHNL_TX_DATA_REN
 
      );
-    localparam C_MAX_READ_REQ = clog2s(C_MAX_READ_REQ_BYTES)-7;    // Max read: 000=128B; 001=256B; 010=512B; 011=1024B; 100=2048B; 101=4096B
-    localparam C_NUM_CHNL_WIDTH = clog2s(C_NUM_CHNL);
-    localparam C_PCI_DATA_WORD_WIDTH = clog2s((C_PCI_DATA_WIDTH/32)+1);
+    localparam C_MAX_READ_REQ = `clog2s(C_MAX_READ_REQ_BYTES)-7;    // Max read: 000=128B; 001=256B; 010=512B; 011=1024B; 100=2048B; 101=4096B
+    localparam C_NUM_CHNL_WIDTH = `clog2s(C_NUM_CHNL);
+    localparam C_PCI_DATA_WORD_WIDTH = `clog2s((C_PCI_DATA_WIDTH/32)+1);
     localparam C_NUM_VECTORS = 2;
     localparam C_VECTOR_WIDTH = 32;
 
@@ -283,9 +283,9 @@ module riffa
          .RST                           (rRst),
          .VALID                         (RXC_DATA_VALID),
          .DATA_START_FLAG               (RXC_DATA_START_FLAG),
-         .DATA_START_OFFSET             (RXC_DATA_START_OFFSET[clog2s(C_PCI_DATA_WIDTH/32)-1:0]),
+         .DATA_START_OFFSET             (RXC_DATA_START_OFFSET[`clog2s(C_PCI_DATA_WIDTH/32)-1:0]),
          .DATA_END_FLAG                 (RXC_DATA_END_FLAG),
-         .DATA_END_OFFSET               (RXC_DATA_END_OFFSET[clog2s(C_PCI_DATA_WIDTH/32)-1:0]),
+         .DATA_END_OFFSET               (RXC_DATA_END_OFFSET[`clog2s(C_PCI_DATA_WIDTH/32)-1:0]),
          .DATA                          (RXC_DATA),
          .DATA_EN                       (RXC_DATA_WORD_ENABLE),
          .DONE                          (wRxEngRdComplete),
@@ -356,9 +356,9 @@ module riffa
          .TXC_DATA_VALID                (TXC_DATA_VALID),
          .TXC_DATA                      (TXC_DATA[C_PCI_DATA_WIDTH-1:0]),
          .TXC_DATA_START_FLAG           (TXC_DATA_START_FLAG),
-         .TXC_DATA_START_OFFSET         (TXC_DATA_START_OFFSET[clog2s(C_PCI_DATA_WIDTH/32)-1:0]),
+         .TXC_DATA_START_OFFSET         (TXC_DATA_START_OFFSET[`clog2s(C_PCI_DATA_WIDTH/32)-1:0]),
          .TXC_DATA_END_FLAG             (TXC_DATA_END_FLAG),
-         .TXC_DATA_END_OFFSET           (TXC_DATA_END_OFFSET[clog2s(C_PCI_DATA_WIDTH/32)-1:0]),
+         .TXC_DATA_END_OFFSET           (TXC_DATA_END_OFFSET[`clog2s(C_PCI_DATA_WIDTH/32)-1:0]),
          .TXC_META_VALID                (TXC_META_VALID),
          .TXC_META_FDWBE                (TXC_META_FDWBE[`SIG_FBE_W-1:0]),
          .TXC_META_LDWBE                (TXC_META_LDWBE[`SIG_LBE_W-1:0]),
@@ -376,10 +376,10 @@ module riffa
          .RXR_DATA                      (RXR_DATA[C_PCI_DATA_WIDTH-1:0]),
          .RXR_DATA_VALID                (RXR_DATA_VALID),
          .RXR_DATA_START_FLAG           (RXR_DATA_START_FLAG),
-         .RXR_DATA_START_OFFSET         (RXR_DATA_START_OFFSET[clog2s(C_PCI_DATA_WIDTH/32)-1:0]),
+         .RXR_DATA_START_OFFSET         (RXR_DATA_START_OFFSET[`clog2s(C_PCI_DATA_WIDTH/32)-1:0]),
          .RXR_META_FDWBE                (RXR_META_FDWBE[`SIG_FBE_W-1:0]),
          .RXR_DATA_END_FLAG             (RXR_DATA_END_FLAG),
-         .RXR_DATA_END_OFFSET           (RXR_DATA_END_OFFSET[clog2s(C_PCI_DATA_WIDTH/32)-1:0]),
+         .RXR_DATA_END_OFFSET           (RXR_DATA_END_OFFSET[`clog2s(C_PCI_DATA_WIDTH/32)-1:0]),
          .RXR_META_LDWBE                (RXR_META_LDWBE[`SIG_LBE_W-1:0]),
          .RXR_META_TC                   (RXR_META_TC[`SIG_TC_W-1:0]),
          .RXR_META_ATTR                 (RXR_META_ATTR[`SIG_ATTR_W-1:0]),
@@ -472,9 +472,9 @@ module riffa
          .TXR_DATA_VALID                (TXR_DATA_VALID),
          .TXR_DATA                      (TXR_DATA[C_PCI_DATA_WIDTH-1:0]),
          .TXR_DATA_START_FLAG           (TXR_DATA_START_FLAG),
-         .TXR_DATA_START_OFFSET         (TXR_DATA_START_OFFSET[clog2s(C_PCI_DATA_WIDTH/32)-1:0]),
+         .TXR_DATA_START_OFFSET         (TXR_DATA_START_OFFSET[`clog2s(C_PCI_DATA_WIDTH/32)-1:0]),
          .TXR_DATA_END_FLAG             (TXR_DATA_END_FLAG),
-         .TXR_DATA_END_OFFSET           (TXR_DATA_END_OFFSET[clog2s(C_PCI_DATA_WIDTH/32)-1:0]),
+         .TXR_DATA_END_OFFSET           (TXR_DATA_END_OFFSET[`clog2s(C_PCI_DATA_WIDTH/32)-1:0]),
          .TXR_META_VALID                (TXR_META_VALID),
          .TXR_META_FDWBE                (TXR_META_FDWBE[`SIG_FBE_W-1:0]),
          .TXR_META_LDWBE                (TXR_META_LDWBE[`SIG_LBE_W-1:0]),

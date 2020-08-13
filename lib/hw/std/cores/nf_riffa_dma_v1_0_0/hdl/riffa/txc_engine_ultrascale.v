@@ -78,9 +78,9 @@ module txc_engine_ultrascale
      input                                   TXC_DATA_VALID,
      input [C_PCI_DATA_WIDTH-1:0]            TXC_DATA,
      input                                   TXC_DATA_START_FLAG,
-     input [clog2s(C_PCI_DATA_WIDTH/32)-1:0] TXC_DATA_START_OFFSET,
+     input [`clog2s(C_PCI_DATA_WIDTH/32)-1:0] TXC_DATA_START_OFFSET,
      input                                   TXC_DATA_END_FLAG,
-     input [clog2s(C_PCI_DATA_WIDTH/32)-1:0] TXC_DATA_END_OFFSET,
+     input [`clog2s(C_PCI_DATA_WIDTH/32)-1:0] TXC_DATA_END_OFFSET,
      output                                  TXC_DATA_READY,
 
      input                                   TXC_META_VALID,
@@ -123,7 +123,7 @@ module txc_engine_ultrascale
 
     wire                                     wTxDataReady;
     wire [C_PCI_DATA_WIDTH-1:0]              wTxData;
-    wire [clog2s(C_PCI_DATA_WIDTH/32)-1:0]   wTxDataEndOffset;
+    wire [`clog2s(C_PCI_DATA_WIDTH/32)-1:0]   wTxDataEndOffset;
     wire                                     wTxDataStartFlag;
     wire [(C_PCI_DATA_WIDTH/32)-1:0]         wTxDataEndFlags;
     wire [(C_PCI_DATA_WIDTH/32)-1:0]         wTxDataWordValid;
@@ -131,9 +131,9 @@ module txc_engine_ultrascale
 
     wire [C_PCI_DATA_WIDTH-1:0]              wTxcPkt;
     wire                                     wTxcPktEndFlag;
-    wire [clog2s(C_PCI_DATA_WIDTH/32)-1:0]   wTxcPktEndOffset;
+    wire [`clog2s(C_PCI_DATA_WIDTH/32)-1:0]   wTxcPktEndOffset;
     wire                                     wTxcPktStartFlag;
-    wire [clog2s(C_PCI_DATA_WIDTH/32)-1:0]   wTxcPktStartOffset;
+    wire [`clog2s(C_PCI_DATA_WIDTH/32)-1:0]   wTxcPktStartOffset;
     wire                                     wTxcPktValid;
     wire                                     wTxcPktReady;
 
@@ -195,9 +195,9 @@ module txc_engine_ultrascale
          .TX_DATA_READY                 (TXC_DATA_READY),
          .TX_PKT                        (wTxcPkt[C_DATA_WIDTH-1:0]),
          .TX_PKT_START_FLAG             (wTxcPktStartFlag),
-         .TX_PKT_START_OFFSET           (wTxcPktStartOffset[clog2s(C_DATA_WIDTH/32)-1:0]),
+         .TX_PKT_START_OFFSET           (wTxcPktStartOffset[`clog2s(C_DATA_WIDTH/32)-1:0]),
          .TX_PKT_END_FLAG               (wTxcPktEndFlag),
-         .TX_PKT_END_OFFSET             (wTxcPktEndOffset[clog2s(C_DATA_WIDTH/32)-1:0]),
+         .TX_PKT_END_OFFSET             (wTxcPktEndOffset[`clog2s(C_DATA_WIDTH/32)-1:0]),
          .TX_PKT_VALID                  (wTxcPktValid),
          // Inputs
          .TX_HDR_VALID                  (wTxHdrValid),
@@ -209,9 +209,9 @@ module txc_engine_ultrascale
          .TX_DATA_VALID                 (TXC_DATA_VALID),
          .TX_DATA                       (TXC_DATA[C_DATA_WIDTH-1:0]),
          .TX_DATA_START_FLAG            (TXC_DATA_START_FLAG),
-         .TX_DATA_START_OFFSET          (TXC_DATA_START_OFFSET[clog2s(C_DATA_WIDTH/32)-1:0]),
+         .TX_DATA_START_OFFSET          (TXC_DATA_START_OFFSET[`clog2s(C_DATA_WIDTH/32)-1:0]),
          .TX_DATA_END_FLAG              (TXC_DATA_END_FLAG),
-         .TX_DATA_END_OFFSET            (TXC_DATA_END_OFFSET[clog2s(C_DATA_WIDTH/32)-1:0]),
+         .TX_DATA_END_OFFSET            (TXC_DATA_END_OFFSET[`clog2s(C_DATA_WIDTH/32)-1:0]),
          .TX_PKT_READY                  (wTxcPktReady),
          /*AUTOINST*/
          // Inputs
@@ -391,9 +391,9 @@ module txc_translation_layer
      input [C_PCI_DATA_WIDTH-1:0]            TXC_PKT,
      input                                   TXC_PKT_VALID,
      input                                   TXC_PKT_START_FLAG,
-     input [clog2s(C_PCI_DATA_WIDTH/32)-1:0] TXC_PKT_START_OFFSET,
+     input [`clog2s(C_PCI_DATA_WIDTH/32)-1:0] TXC_PKT_START_OFFSET,
      input                                   TXC_PKT_END_FLAG,
-     input [clog2s(C_PCI_DATA_WIDTH/32)-1:0] TXC_PKT_END_OFFSET,
+     input [`clog2s(C_PCI_DATA_WIDTH/32)-1:0] TXC_PKT_END_OFFSET,
 
      // Interface: CC
      input                                   S_AXIS_CC_TREADY,
@@ -411,9 +411,9 @@ module txc_translation_layer
     wire [C_PCI_DATA_WIDTH-1:0]              wTxcPkt;
     wire                                     wTxcPktValid;
     wire                                     wTxcPktStartFlag;
-    wire [clog2s(C_PCI_DATA_WIDTH/32)-1:0]   wTxcPktStartOffset;
+    wire [`clog2s(C_PCI_DATA_WIDTH/32)-1:0]   wTxcPktStartOffset;
     wire                                     wTxcPktEndFlag;
-    wire [clog2s(C_PCI_DATA_WIDTH/32)-1:0]   wTxcPktEndOffset;
+    wire [`clog2s(C_PCI_DATA_WIDTH/32)-1:0]   wTxcPktEndOffset;
 
     wire                                     wSAxisCcTReady;
     wire                                     wSAxisCcTValid;
@@ -433,7 +433,7 @@ module txc_translation_layer
         #(
           // Parameters
           .C_DEPTH                         (C_INPUT_STAGES),
-          .C_WIDTH                         (C_PCI_DATA_WIDTH + 2*(1+clog2s(C_PCI_DATA_WIDTH/32))),
+          .C_WIDTH                         (C_PCI_DATA_WIDTH + 2*(1+`clog2s(C_PCI_DATA_WIDTH/32))),
           .C_USE_MEMORY                    (0)
           /*AUTOINSTPARAM*/)
     input_inst
