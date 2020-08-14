@@ -450,7 +450,7 @@ def identifyTests():
 	for test in dirs:
 		if test.endswith(test_name) or test.endswith(both_test_name):
 			tests.append(test)
-	if len(tests) is 0:
+	if len(tests) == 0:
 		print('=== Error: No tests match ' + test_name + ' - exiting')
 		sys.exit(0)
 
@@ -512,12 +512,12 @@ def buildSim():
         dumpfile = ''
 
 def verifyCI():
-    if args.ci and args.ci is not 'testcheck':
+    if args.ci and args.ci != 'testcheck':
         print('Unknown continuous integration ' + args.ci + '. Supported CI programs: testcheck')
     if args.ci and not args.citest:
         print('The name of the test was not specified in \'citest\'')
 
-    if args.ci is not 'testcheck':
+    if args.ci != 'testcheck':
         testcheck.tcDisableOutput()
 
 ###### hw specific functions
@@ -600,7 +600,7 @@ def runScript(project, subdir, script, required):
     finally:
         os.chdir(origDir)
 
-    if status is not 0:
+    if status != 0:
         print(cmd + ' exited with value ' + str(status))
 
     return (status == 0, output)
