@@ -490,16 +490,16 @@ def prepareTestWorkDir(testName):
 	if args.type == 'sim':
 		for file in glob.glob(src_dir + '/*'):
 			subprocess.call(['cp', '-r', '-p', file, dst_dir])
-	for i in range(4):
-		subprocess.call(['cp', '-r', '-p', src_test_dir + '/nf_interface_%d_log.axi' %i, dst_dir])
-		subprocess.call(['cp', '-r', '-p', src_test_dir + '/nf_interface_%d_stim.axi' %i, dst_dir])
-		subprocess.call(['cp', '-r', '-p', src_test_dir + '/nf_interface_%d_expected.axi' %i, dst_dir])
-	subprocess.call(['cp', '-r', '-p', src_test_dir + '/dma_0_log.axi', dst_dir])
-	subprocess.call(['cp', '-r', '-p', src_test_dir + '/dma_0_expected.axi', dst_dir])
-	subprocess.call(['cp', '-r', '-p', src_test_dir + '/Makefile', dst_dir])
-	subprocess.call(['cp', '-r', '-p', src_test_dir + '/reg_stim.log', dst_dir])
-	subprocess.call(['cp', '-r', '-p', src_test_dir + '/reg_expect.axi', dst_dir])
-	subprocess.call(['cp', '-r', '-p', src_test_dir + '/reg_stim.axi', dst_dir])
+		for i in range(4):
+			subprocess.call(['cp', '-r', '-p', src_test_dir + '/nf_interface_%d_log.axi' %i, dst_dir])
+			subprocess.call(['cp', '-r', '-p', src_test_dir + '/nf_interface_%d_stim.axi' %i, dst_dir])
+			subprocess.call(['cp', '-r', '-p', src_test_dir + '/nf_interface_%d_expected.axi' %i, dst_dir])
+		subprocess.call(['cp', '-r', '-p', src_test_dir + '/dma_0_log.axi', dst_dir])
+		subprocess.call(['cp', '-r', '-p', src_test_dir + '/dma_0_expected.axi', dst_dir])
+		subprocess.call(['cp', '-r', '-p', src_test_dir + '/Makefile', dst_dir])
+		subprocess.call(['cp', '-r', '-p', src_test_dir + '/reg_stim.log', dst_dir])
+		subprocess.call(['cp', '-r', '-p', src_test_dir + '/reg_expect.axi', dst_dir])
+		subprocess.call(['cp', '-r', '-p', src_test_dir + '/reg_stim.axi', dst_dir])
 
 def buildSim():
     project = os.path.basename(os.path.abspath(os.environ['NF_DESIGN_DIR']))
