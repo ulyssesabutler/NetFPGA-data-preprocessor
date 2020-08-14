@@ -58,10 +58,10 @@ for line in input_file:
     match_width = re.match(r'\s*#define .*_WIDTH ([a-zA-Z_0-9])', line)
     match_offset = re.match(r'\s*#define (.*)_OFFSET (0x[a-zA-Z_0-9]+)', line)
     match_comment = re.match(r'\s*//', line)
-	
+    
     if match_baseaddr:
         baseaddr = match_baseaddr.group(1)
-    	baseaddr_int= int(baseaddr,16)	
+        baseaddr_int= int(baseaddr,16)	
         output_file.write(line)
 
     elif match_highaddr:

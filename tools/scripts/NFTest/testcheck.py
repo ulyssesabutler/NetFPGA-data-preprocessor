@@ -38,7 +38,7 @@ def tcGetTestSeparator():
 
 def tcTestStarted(test):
     if oe:
-        print "##testcheck[testStarted name='" + str(test) + "']"
+        print("##testcheck[testStarted name='" + str(test) + "']")
 
 def tcTestFailed(test, msg, details):
     if oe:
@@ -53,11 +53,11 @@ def tcTestFailed(test, msg, details):
         if details == '':
             details = msg
 
-        print "##testcheck[testFailed name='" + str(test) + "' message='" + str(msg) + "' details='" + str(details) + "']"
+        print("##testcheck[testFailed name='" + str(test) + "' message='" + str(msg) + "' details='" + str(details) + "']")
 
 def tcTestFinished(test):
     if oe:
-        print "##testcheck[testFinished name='" + str(test) + "']"
+        print("##testcheck[testFinished name='" + str(test) + "']")
 
 def tcEnableOutput():
     global oe

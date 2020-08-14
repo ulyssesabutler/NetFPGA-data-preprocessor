@@ -42,17 +42,17 @@ for line in input_file:
     match_defines = re.match(r'\s*#define ([a-zA-Z_0-9]+) (.*)', line)
     match_comments = re.match(r'\s*[/\*][\s*\*](.*)', line)
     match_slash = re.match(r'\s*[/*](.*)', line)
- 	
+    
     if match_defines:
         newline1= "\ndef %s():\n    return %s" % (match_defines.group(1),match_defines.group(2))
-	output_file.write(newline1)
+        output_file.write(newline1)
 
     elif match_comments:
-	newline2= "\n# %s" % (match_comments.group(1))
+        newline2= "\n# %s" % (match_comments.group(1))
         output_file.write(newline2)
 
     elif match_slash:
-	newline3= "\n# %s" % (match_slash.group(1))
+        newline3= "\n# %s" % (match_slash.group(1))
         output_file.write(newline3)
 
     else:
