@@ -166,6 +166,8 @@ def run_hw_test():
             if not lsResult:
                 output += lsOutput
             if not testResult:
+                print("output: " + str(output))
+                print("testout: " + str(testOutput))
                 output += testOutput
             if not ltResult:
                 output += ltOutput

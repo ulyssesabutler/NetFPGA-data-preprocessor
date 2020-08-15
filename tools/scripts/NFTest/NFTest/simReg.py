@@ -34,8 +34,8 @@
 
 from NFTest import *
 
-import simLib
-import simPkt
+from . import simLib
+from . import simPkt
 
 # IOCTL Commands
 SIOCREGREAD = 0x89F0

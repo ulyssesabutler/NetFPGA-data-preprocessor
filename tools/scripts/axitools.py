@@ -74,13 +74,13 @@ def axis_dump( packets, f, bus_width, period, tuser_width = 128 ):
         """
         Returns a full, tuser-width mask from partial_mask
         """
-        return int( ('%x' % partial_mask).rjust( tuser_width/4, 'f' ), 16 )
+        return int( ('%x' % partial_mask).rjust( tuser_width//4, 'f' ), 16 )
 
     if bus_width % 8 != 0:
-        print "bus_width must be a multiple of 8!"
+        print("bus_width must be a multiple of 8!")
         return
 
-    bus_width = bus_width / 8
+    bus_width = bus_width // 8
     strb_mask = (1 << bus_width) - 1
     last_ts   = None
     period    = int(period * 1e9)
@@ -94,7 +94,7 @@ def axis_dump( packets, f, bus_width, period, tuser_width = 128 ):
         if last_ts is not None:
             if (int(packet.time * 1e9)-last_ts) > 0 :
                 f.write( '+ %d\n' % (int(packet.time * 1e9)-last_ts) )
-	else:
+        else:
             f.write( '@ %d\n' % (int(packet.time * 1e9)))
         last_ts = int(packet.time * 1e9)
 
@@ -139,8 +139,8 @@ def axis_dump( packets, f, bus_width, period, tuser_width = 128 ):
             tuser.append(0)
             f.write( '%s, %s, %s%s\n' % (
                     ''.join( '%02x' % x for x in word ),                # TDATA
-                    ('%x' % (strb_mask >> padding)).zfill(bus_width/4), # TSTRB
-                    ('%x' % tuser.pop(0)).zfill(tuser_width/4),         # TUSER
+                    ('%x' % (strb_mask >> padding)).zfill(bus_width//4), # TSTRB
+                    ('%x' % tuser.pop(0)).zfill(tuser_width//4),         # TUSER
                     terminal ) )                                        # TLAST
 
             # one clock tick
@@ -150,12 +150,12 @@ def axis_dump( packets, f, bus_width, period, tuser_width = 128 ):
 def axis_reg( packets, f ):
     last_ts   = None
     for packet in packets:
-	if last_ts is not None:
+        if last_ts is not None:
             if (int(packet.time * 1e9)-last_ts) > 0 :
-	        	f.write( '+ %d\n' % (int(packet.time * 1e9)-last_ts) )
-	else:
+                f.write( '+ %d\n' % (int(packet.time * 1e9)-last_ts) )
+        else:
             f.write( '@ %d\n' % (int(packet.time * 1e9)))
-	last_ts = int(packet.time * 1e9)
+        last_ts = int(packet.time * 1e9)
 
 
 def axis_load( f, period ):
@@ -196,7 +196,7 @@ def axis_load( f, period ):
         # Handle delay specs
         if   line[0] == '@':
             a = line.lstrip('@')
-	    b = a.lstrip(' ')
+            b = a.lstrip(' ')
             time = int(b)
         elif line[0] == '+':
             time += int(line[1:])/1e9
@@ -217,7 +217,7 @@ def axis_load( f, period ):
             if bus_width is None:
                 bus_width = len(line[0]) * 4
                 if math.log(bus_width,2) - int(math.log(bus_width,2)) != 0:
-                    print '%s: data bus not a power of two in width' % f.name
+                    print('%s: data bus not a power of two in width' % f.name)
             # accumulate packet and TUSER data
             pkt_data += reversed( as_bytes( line[0].zfill( bus_width/4 ) ) )
             tuser.append( int( line[2], 16 ) )
@@ -235,6 +235,6 @@ def axis_load( f, period ):
                 pkt_data = []
                 tuser    = []
                 if len(pkts[-1]) != pkts[-1].tuser_len:
-                    print '*** warning: meta length (%d) disagrees with actual length (%d) -- %s, line: %d' % ( pkts[-1].tuser_len , len(pkts[-1]), f.name, lno)
+                    print('*** warning: meta length (%d) disagrees with actual length (%d) -- %s, line: %d' % ( pkts[-1].tuser_len , len(pkts[-1]), f.name, lno))
             time += period
     return pkts

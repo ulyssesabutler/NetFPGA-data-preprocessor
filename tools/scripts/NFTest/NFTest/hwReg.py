@@ -35,7 +35,7 @@ from fcntl import *
 from ctypes import *
 
 # Loading the SUME shared library
-print "loading libsume.."
+print("loading libsume..")
 lib_path=os.path.join(os.environ['SUME_FOLDER'],'lib','sw','std','hwtestlib','libsume.so')
 libsume=cdll.LoadLibrary(lib_path)
 

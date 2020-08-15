@@ -29,12 +29,12 @@
 # @NETFPGA_LICENSE_HEADER_END@
 #
 
-import hwPktLib
-from hwPktLib import scapy
-import hwRegLib
-import simLib
-import simReg
-import simPkt
+from . import hwPktLib
+from .hwPktLib import scapy
+from . import hwRegLib
+from . import simLib
+from . import simReg
+from . import simPkt
 import sys
 import os
 
@@ -93,7 +93,7 @@ def nftest_init(sim_loop = [], hw_config=None):
         looped = [False, False, False, False]
         for iface in sim_loop:
             if not iface.startswith('nf'):
-                print "Error1: Only nfX interfaces can be put in loopback"
+                print("Error1: Only nfX interfaces can be put in loopback")
                 sys.exit(1)
             else:
                 looped[int(iface[2])] = True
@@ -110,9 +110,9 @@ def nftest_init(sim_loop = [], hw_config=None):
 
     # running a hardware test, check connections
     else:
-	ifaceTuple = ('nf0', 'nf1', 'nf2', 'nf3')
+        ifaceTuple = ('nf0', 'nf1', 'nf2', 'nf3')
         if hw_config is None:
-            print "Error: trying to run hardware test without specifying hardware configurations.  Verify the keyword argument hw_config is being used in nftest_init"
+            print("Error: trying to run hardware test without specifying hardware configurations.  Verify the keyword argument hw_config is being used in nftest_init")
             sys.exit(1)
         sim = False
 	
@@ -121,11 +121,11 @@ def nftest_init(sim_loop = [], hw_config=None):
         if '--conn' in sys.argv:
             specified_connections = {}
             # read specified connections
-	    fp = open(sys.argv[sys.argv.index('--conn')+1], 'r')
-	    for lineNum, tmp_line in enumerate(fp):
-	    	if tmp_line.startswith(ifaceTuple):		
-			break
-	    fp.close()
+            fp = open(sys.argv[sys.argv.index('--conn')+1], 'r')
+            for lineNum, tmp_line in enumerate(fp):
+                if tmp_line.startswith(ifaceTuple):		
+                    break
+            fp.close()
 
 	    # lines = open(sys.argv[sys.argv.index('--conn')+1], 'r').readlines()[29:]
             lines = open(sys.argv[sys.argv.index('--conn')+1], 'r').readlines()[lineNum:] 	
@@ -153,25 +153,25 @@ def nftest_init(sim_loop = [], hw_config=None):
                         if iface.startswith('nf'):
                             hwRegLib.phy_loopback(iface)
                         else:
-                            print "Error2: Only nfX interfaces can be put in loopback"
+                            print("Error2: Only nfX interfaces can be put in loopback")
                             sys.exit(1)
                     break
                 # incompatible configuration
                 elif portConfig == len(hw_config) - 1:
-                    print "Specified connections file incompatible with this test."
+                    print("Specified connections file incompatible with this test.")
                     sys.exit(1)
 
         else:
             portConfig = 0
             # use the first valid_conn_file if not specified
             #lines = open(hw_config[0][0], 'r').readlines()[29:]
-	    fp = open(hw_config[0][0], 'r')
-	    for lineNum, tmp_line in enumerate(fp):
-	    	if tmp_line.startswith(ifaceTuple):		
-			break
-	    fp.close()
+            fp = open(hw_config[0][0], 'r')
+            for lineNum, tmp_line in enumerate(fp):
+                if tmp_line.startswith(ifaceTuple):		
+                    break
+            fp.close()
 
-	    lines = open(hw_config[0][0], 'r').readlines()[lineNum:]    
+            lines = open(hw_config[0][0], 'r').readlines()[lineNum:]    
             for line in lines:
                 conn = line.strip().split(':')
                 connections[conn[0]] = conn[1]
@@ -185,20 +185,20 @@ def nftest_init(sim_loop = [], hw_config=None):
                         else:
                             looped[int(iface[2])] = True
                     else:
-                        print "Error3: Only nfX interfaces can be put in loopback"
+                        print("Error3: Only nfX interfaces can be put in loopback")
                         sys.exit(1)
 
         # avoid duplicating interfaces
-        ifaces = list(set(connections.keys() + connections.values() + list(hw_config[portConfig][1])) - set(['']))
+        ifaces = list(set(list(connections.keys()) + list(connections.values()) + list(hw_config[portConfig][1])) - set(['']))
 
         global iface_map
         # populate iface_map
         if '--map' in sys.argv:
-	    fp = open(sys.argv[sys.argv.index('--map')+1], 'r')
-	    for lineNum, tmp_line in enumerate(fp):
-	    	if tmp_line.startswith(ifaceTuple):		
-			break
-	    fp.close()
+            fp = open(sys.argv[sys.argv.index('--map')+1], 'r')
+            for lineNum, tmp_line in enumerate(fp):
+                if tmp_line.startswith(ifaceTuple):		
+                    break
+            fp.close()
 
             mapfile = open(sys.argv[sys.argv.index('--map')+1], 'r')
             lines = mapfile.readlines()[lineNum:]
@@ -222,17 +222,17 @@ def nftest_init(sim_loop = [], hw_config=None):
 
         hwPktLib.init(ifaces)
         # print setup for inspection
-        print 'Running test using the following physical connections:'
-        for connection in connections.items():
+        print('Running test using the following physical connections:')
+        for connection in list(connections.items()):
             try:
-                print iface_map[connection[0]] + ':' + iface_map[connection[1]]
+                print(iface_map[connection[0]] + ':' + iface_map[connection[1]])
             except KeyError:
-                print iface_map[connection[0]] + ' initialized but not connected'
+                print(iface_map[connection[0]] + ' initialized but not connected')
         if len(list(hw_config[portConfig][1])) > 0:
-            print 'Ports in loopback:'
+            print('Ports in loopback:')
             for iface in list(hw_config[portConfig][1]):
-                print iface_map[iface]
-        print '------------------------------------------------------'
+                print(iface_map[iface])
+        print('------------------------------------------------------')
 
         return portConfig
 
@@ -261,17 +261,17 @@ def nftest_start():
 ############################
 def nftest_send_phy(ifaceName, pkt):
     if connections[ifaceName] == ifaceName:
-        print "Error: cannot send on phy of a port in loopback"
+        print("Error: cannot send on phy of a port in loopback")
         sys.exit(1)
     sent_phy[ifaceName].append(pkt)
     if sim:
         for pkt_s in pkt:
-	    pkt_s.tuser_sport = 1 << (int(ifaceName[2:3])*2) # physical ports are even-numbered
+            pkt_s.tuser_sport = 1 << (int(ifaceName[2:3])*2) # physical ports are even-numbered
 
         for i in range(len(pkt)):
             simPkt.pktSendPHY(int(ifaceName[2:3])+1, pkt)
-	f = simLib.fPort(int(ifaceName[2]) + 1)
-	axitools.axis_dump( pkt, f, 256, 1e-9 )
+        f = simLib.fPort(int(ifaceName[2]) + 1)
+        axitools.axis_dump( pkt, f, 256, 1e-9 )
     else:
         hwPktLib.send(iface_map[connections[ifaceName]], pkt)
 
@@ -285,12 +285,12 @@ def nftest_send_dma(ifaceName, pkt):
     sent_dma[ifaceName].append(pkt)
     if sim:
         for pkt_s in pkt:
-	    pkt_s.tuser_sport = 1 << (int(ifaceName[2:3])%4*2 + 1) # PCI ports are odd-numbered
+            pkt_s.tuser_sport = 1 << (int(ifaceName[2:3])%4*2 + 1) # PCI ports are odd-numbered
 
         for i in range(len(pkt)):
             simPkt.pktSendDMA(int(ifaceName[2:3])+1, pkt)
         f = simLib.fDMA()
-	axitools.axis_dump( pkt, f, 256, 1e-9 )
+        axitools.axis_dump( pkt, f, 256, 1e-9 )
     else:
         hwPktLib.send(iface_map[ifaceName], pkt)
 
@@ -305,8 +305,8 @@ def nftest_expect_phy(ifaceName, pkt, mask = None):
     expected_phy[ifaceName].append(pkt)
     if sim:
         for i in range(len(pkt)):
-	    simPkt.pktExpectPHY(int(ifaceName[2:3])+1, pkt, mask)
-	f = simLib.fExpectPHY(int(ifaceName[2]) + 1)
+            simPkt.pktExpectPHY(int(ifaceName[2:3])+1, pkt, mask)
+        f = simLib.fExpectPHY(int(ifaceName[2]) + 1)
         axitools.axis_dump( pkt, f, 256, 1e-9 )
     else:
         hwPktLib.expect(iface_map[connections[ifaceName]], pkt, mask)
@@ -323,7 +323,7 @@ def nftest_expect_dma(ifaceName, pkt, mask = None):
     if sim:
         for i in range(len(pkt)):
             simPkt.pktExpectDMA(int(ifaceName[2:3])+1, pkt, mask)
-	f = simLib.fExpectDMA(int(ifaceName[2]) + 1)
+        f = simLib.fExpectDMA(int(ifaceName[2]) + 1)
         axitools.axis_dump( pkt, f, 256, 1e-9 )
     else:
         hwPktLib.expect(iface_map[ifaceName], pkt, mask)
@@ -358,38 +358,38 @@ def nftest_finish(reg_list):
     else:
 
 	# write out the sent/expected pcaps for easy viewing
-	if not os.path.isdir("./source_pcaps"):
-	    os.mkdir("./source_pcaps")
-	for iface in ifaceArray:
-	    if len(sent_phy[iface]) > 0:
-		scapy.wrpcap("./source_pcaps/%s_sent_phy.pcap"%iface,
+        if not os.path.isdir("./source_pcaps"):
+            os.mkdir("./source_pcaps")
+        for iface in ifaceArray:
+            if len(sent_phy[iface]) > 0:
+                scapy.wrpcap("./source_pcaps/%s_sent_phy.pcap"%iface,
 		                 sent_phy[iface])
-	    if len(sent_dma[iface]) > 0:
-		scapy.wrpcap("./source_pcaps/%s_sent_dma.pcap"%iface,
+            if len(sent_dma[iface]) > 0:
+                scapy.wrpcap("./source_pcaps/%s_sent_dma.pcap"%iface,
 		                 sent_dma[iface])
-	    if len(expected_phy[iface]) > 0:
-		scapy.wrpcap("./source_pcaps/%s_expected_phy.pcap"%iface,
+            if len(expected_phy[iface]) > 0:
+                scapy.wrpcap("./source_pcaps/%s_expected_phy.pcap"%iface,
 		                 expected_phy[iface])
-	    if len(expected_dma[iface]) > 0:
-		scapy.wrpcap("./source_pcaps/%s_expected_dma.pcap"%iface,
+            if len(expected_dma[iface]) > 0:
+                scapy.wrpcap("./source_pcaps/%s_expected_dma.pcap"%iface,
 		                 expected_dma[iface])
 
         total_errors += hwPktLib.finish()
-	for i in range(len(reg_list)):
-		if(reg_list[i]!=1):
-			reg_errors += 1	
-	reg_status = reg_read_result(reg_list)
-	print'\n'+'*****************'
-        print'HW Test results'
-	print'*****************'
+        for i in range(len(reg_list)):
+            if(reg_list[i]!=1):
+                reg_errors += 1	
+        reg_status = reg_read_result(reg_list)
+        print('\n'+'*****************')
+        print('HW Test results')
+        print('*****************')
         if total_errors == 0 and reg_status == 1:
-            print 'Test status : SUCCESS!'
+            print('Test status : SUCCESS!')
             sys.exit(0)
         else:
-            print '\n'+'Test status : FAIL'
-            print 'packet_missed errors : '+str(total_errors)
-            print 'register_read errors : '+str(reg_errors)
-            print 'Please check '+hwlog_path+' for details'
+            print('\n'+'Test status : FAIL')
+            print('packet_missed errors : '+str(total_errors))
+            print('register_read errors : '+str(reg_errors))
+            print('Please check '+hwlog_path+' for details')
             sys.exit(1)
 
 ############################

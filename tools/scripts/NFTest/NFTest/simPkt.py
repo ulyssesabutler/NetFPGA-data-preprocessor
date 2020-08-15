@@ -34,8 +34,8 @@
 
 from NFTest import *
 
-import simLib
-import simReg
+from . import simLib
+from . import simReg
 import os
 import sys
 
@@ -126,12 +126,12 @@ def resetBarrier():
 ############################
 def barrier():
     for i in range(NUM_PORTS): # 0,1,2,3
-	simLib.fPort(i + 1).write("# BARRIER\n")
-	simLib.fPort(i + 1).write("B " + "%d\n"%CMD_BARRIER)   
-	simLib.fPort(i + 1).write("# EXPECTED\n") 
-	simLib.fPort(i + 1).write("N " + "%d\n"%(numExpectedPktsPHY[i]))
-	simLib.fPort(i + 1).write("# SENT\n") 
-	simLib.fPort(i + 1).write("S " + "%d\n\n"%(numSendPktsPHY[i]))
+        simLib.fPort(i + 1).write("# BARRIER\n")
+        simLib.fPort(i + 1).write("B " + "%d\n"%CMD_BARRIER)   
+        simLib.fPort(i + 1).write("# EXPECTED\n") 
+        simLib.fPort(i + 1).write("N " + "%d\n"%(numExpectedPktsPHY[i]))
+        simLib.fPort(i + 1).write("# SENT\n") 
+        simLib.fPort(i + 1).write("S " + "%d\n\n"%(numSendPktsPHY[i]))
     simLib.fDMA().write("# BARRIER\n")
     simLib.fDMA().write("B " + "%d\n"%CMD_BARRIER)   
     simLib.fDMA().write("# EXPECTED\n") 
@@ -141,9 +141,9 @@ def barrier():
     simLib.fregstim().write("# BARRIER\n")
     simLib.fregstim().write("B " + "%d\n"%CMD_BARRIER_REG)
     for i in range(NUM_PORTS):
-	simLib.fregstim().write("# Interface " + "%d\n"%(i)) 
+        simLib.fregstim().write("# Interface " + "%d\n"%(i)) 
         simLib.fregstim().write("N " + "%d\n"%(numExpectedPktsPHY[i]))
-	simLib.fregstim().write("S " + "%d\n"%(numSendPktsPHY[i]))
+        simLib.fregstim().write("S " + "%d\n"%(numSendPktsPHY[i]))
     simLib.fregstim().write("# DMA\n")
     simLib.fregstim().write("N " + "%d\n"%(numExpectedPktsDMA[i])) 
     simLib.fregstim().write("S " + "%d\n"%(numSendPktsDMA[i]))

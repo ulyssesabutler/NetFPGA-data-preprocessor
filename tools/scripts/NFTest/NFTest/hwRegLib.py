@@ -29,10 +29,10 @@
 # @NETFPGA_LICENSE_HEADER_END@
 #
 
-import hwReg
+from . import hwReg
 import time
 
-from hwPktLib import ifaceArray 
+from .hwPktLib import ifaceArray 
 
 import sys
 import os
@@ -97,7 +97,7 @@ def phy_loopback(ifaceName):
     if ifaceName.startswith('nf') and ifaceName[2].isdigit():
         portNum = int(ifaceName[2])
     else:
-        print 'Interface has to be an nfX interface\n'
+        print('Interface has to be an nfX interface\n')
         return
     addr = (reg_defines.MDIO_PHY_0_CONTROL_REG(),
             reg_defines.MDIO_PHY_1_CONTROL_REG(),
@@ -113,7 +113,7 @@ def phy_isolate(ifaceName):
     if ifaceName.startswith('nf') and ifaceName[2].isdigit():
         portNum = int(ifaceName[2])
     else:
-        print 'Interface has to be an nfX interface\n'
+        print('Interface has to be an nfX interface\n')
         return
     addr = (reg_defines.MDIO_PHY_0_CONTROL_REG(),
             reg_defines.MDIO_PHY_1_CONTROL_REG(),
@@ -129,7 +129,7 @@ def phy_reset(ifaceName):
     if ifaceName.startswith('nf') and ifaceName[2].isdigit():
         portNum = int(ifaceName[2])
     else:
-        print 'Interface has to be an nfX interface\n'
+        print('Interface has to be an nfX interface\n')
         return
     addr = (reg_defines.MDIO_PHY_0_CONTROL_REG(),
             reg_defines.MDIO_PHY_1_CONTROL_REG(),

@@ -29,7 +29,7 @@
 # @NETFPGA_LICENSE_HEADER_END@
 #
 
-import hwPkt
+from . import hwPkt
 import sys
 import os
 
@@ -107,7 +107,7 @@ def send(ifaceName, pkt, exp = True):
     try:
         openSockets[ifaceName].sendPkt(pkt)
     except(KeyError):
-        print 'Error: invalid interface name'
+        print('Error: invalid interface name')
     if exp:
         expect(ifaceName, pkt)
 
@@ -178,17 +178,17 @@ def barrier(timeout = 10):
     #        break
 
     if not good:
-        print 'Error: barrier timed out after', str(timeout), 'seconds'
+        print('Error: barrier timed out after', str(timeout), 'seconds')
         for iface in ifaceArray:
             numUnexp = captureThreads[iface].pkts.__len__()
             numExp = captureThreads[iface].exp_pkts.__len__()
             if numUnexp > 0:
-                print 'Error: device', iface, 'saw',
-                print  str(numUnexp), 'unexpected packets'
+                print('Error: device', iface, 'saw', end=' ')
+                print(str(numUnexp), 'unexpected packets')
             if numExp > 0:
-                print 'Error: device', iface, 'missed',
-                print str(numExp), 'expected packets'
-        print ''
+                print('Error: device', iface, 'missed', end=' ')
+                print(str(numExp), 'expected packets')
+        print('')
         global barrier_timeouts
         barrier_timeouts += 1
     return good
@@ -207,22 +207,22 @@ def compare(exp, unexp):
     if numExp is 0 and numUnexp is 0:
         return 0
     elif numExp is 0:
-        print 'Error:', str(numUnexp), 'unexpected packets seen'
+        print('Error:', str(numUnexp), 'unexpected packets seen')
         return numUnexp
     elif numUnexp is 0:
-        print 'Error:', str(numExp), 'expected packets not seen'
+        print('Error:', str(numExp), 'expected packets not seen')
         return numExp
 
     # print differences between exp and unexp pkts
-    print str(numExp), 'expected packets not seen'
-    print str(numUnexp), 'unexpected packets'
+    print(str(numExp), 'expected packets not seen')
+    print(str(numUnexp), 'unexpected packets')
     for i in range(numExp):
-        print 'Expected packet', str(i)
+        print('Expected packet', str(i))
         for j in range(numUnexp):
             if len(exp[i]) != len(unexp[j]):
-                print '   Unexpected packet ' + str(j),
-                print ': Packet lengths do not match, expecting',
-                print str(len(exp[i])), 'but saw', str(len(unexp[j]))
+                print('   Unexpected packet ' + str(j), end=' ')
+                print(': Packet lengths do not match, expecting', end=' ')
+                print(str(len(exp[i])), 'but saw', str(len(unexp[j])))
             else:
                 str_exp_pkt = ''
                 str_unexp_pkt = ''
@@ -233,11 +233,11 @@ def compare(exp, unexp):
                     str_unexp_pkt += "%02X"%ord(x)
                 for k in range(len(str_exp_pkt)):
                     if str_unexp_pkt[k] is not str_exp_pkt[k]:
-                        print '   Unexpected packet ' + str(j) + ': byte',
-                        print str(k/2),
-                        print '(starting from 0) not equivalent (EXP:',
-                        print str_exp_pkt[i:i+2] + ', ACTUAL:',
-                        print str_unexp_pkt[k:k+2] + ')'
+                        print('   Unexpected packet ' + str(j) + ': byte', end=' ')
+                        print(str(k/2), end=' ')
+                        print('(starting from 0) not equivalent (EXP:', end=' ')
+                        print(str_exp_pkt[i:i+2] + ', ACTUAL:', end=' ')
+                        print(str_unexp_pkt[k:k+2] + ')')
                         break
 
     return numExp + numUnexp
@@ -251,7 +251,7 @@ def compare(exp, unexp):
 def finish():
     pkts = ()
     ignored = []
-    from hwRegLib import get_bad_reads
+    from .hwRegLib import get_bad_reads
     bad_reads = get_bad_reads()
     error_count = 0
 
@@ -266,9 +266,9 @@ def finish():
         packets[iface]['Matched'] = pkts[0]
         packets[iface]['Unexpected'] = pkts[1]
         packets[iface]['Expected'] = pkts[2]
-        filter(packets[iface]['Matched'], ignored)
-        filter(packets[iface]['Unexpected'], ignored)
-        filter(packets[iface]['Expected'], ignored)
+        list(filter(packets[iface]['Matched'], ignored))
+        list(filter(packets[iface]['Unexpected'], ignored))
+        list(filter(packets[iface]['Expected'], ignored))
 
         # show differences between packets
         error_count += compare(packets[iface]['Expected'],

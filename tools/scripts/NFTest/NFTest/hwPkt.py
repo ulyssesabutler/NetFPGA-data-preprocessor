@@ -46,7 +46,7 @@ except:
         import scapy as scapy
     except:
         sys.exit("Error: need to install scapy for packet handling")
-from scapy_sniff_patch import sniff
+from .scapy_sniff_patch import sniff
 
 class pktExpect(Thread):
     ############################
@@ -158,9 +158,9 @@ class pktExpect(Thread):
             pkta = [ord(x) for x in pkta]
             pktb = [ord(x) for x in pktb]
             mask = [ord(x) for x in mask]
-            for i in xrange(min(len(pkta), len(mask))):
+            for i in range(min(len(pkta), len(mask))):
                 pkta[i] = pkta[i] & ~mask[i]
-            for i in xrange(min(len(pktb), len(mask))):
+            for i in range(min(len(pktb), len(mask))):
                 pktb[i] = pktb[i] & ~mask[i]
 
             pkta = ''.join([chr(x) for x in pkta])
@@ -201,7 +201,7 @@ class pktExpect(Thread):
                         break
                 i += 1
         self.lock.release()
-        if (len(self.exp_pkts) is 0):
+        if (len(self.exp_pkts) == 0):
             self.barrierEvent.set()
             return True
         return False
@@ -226,7 +226,7 @@ class pktExpect(Thread):
     #              returns packets
     ############################
     def finish(self):
-        print self.device, 'finishing up'
+        print(self.device, 'finishing up')
         self.done = True
         self.lock.acquire()
         exp_pkts = [ exp for (exp, mask) in self.exp_pkts ]

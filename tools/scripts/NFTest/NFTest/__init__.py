@@ -32,6 +32,8 @@
 Library for NetFPGA simulation and hardware testing
 """
 
-from NFTestLib import *
-from NFTestHeader import scapy
-from PacketLib import *
+print("loading ...")
+
+from NFTest.NFTestLib import *
+from NFTest.NFTestHeader import scapy
+from NFTest.PacketLib import *
