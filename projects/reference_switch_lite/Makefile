@@ -42,6 +42,7 @@
 
 HW = hw
 SW = sw/embedded/
+SH = sw/host/apps
 TEST = test
 
 all:    clean
@@ -54,6 +55,7 @@ all:    clean
 clean:
 	make -C ${HW} distclean
 	make -C ${SW} distclean
+	make -C ${SH} clean
 	rm -rfv vivado*;\
 
 
