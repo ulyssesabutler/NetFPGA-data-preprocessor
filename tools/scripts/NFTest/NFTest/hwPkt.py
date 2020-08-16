@@ -38,14 +38,7 @@ import socket
 import os
 from collections import deque
 from select import select
-
-try:
-    import scapy.all as scapy
-except:
-    try:
-        import scapy as scapy
-    except:
-        sys.exit("Error: need to install scapy for packet handling")
+from scapy.all import *
 from .scapy_sniff_patch import sniff
 
 class pktExpect(Thread):
@@ -251,7 +244,7 @@ class pktSend(Thread):
         self.sock = socket.socket(family, type, proto)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 0)
         while True:
-            r,w,x = select([self.sock.fileno()], [], [], 0)
+            r,w,x = select.select([self.sock.fileno()], [], [], 0)
             if r:
                 os.read(self.sock.fileno(),1600)
             else:

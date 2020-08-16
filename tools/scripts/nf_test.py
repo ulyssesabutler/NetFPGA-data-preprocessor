@@ -166,9 +166,8 @@ def run_hw_test():
             if not lsResult:
                 output += lsOutput
             if not testResult:
-                print("output: " + str(output))
-                print("testout: " + str(testOutput))
-                output += testOutput
+                if testOutput != None:
+                    output += testOutput
             if not ltResult:
                 output += ltOutput
             if not ctResult:
@@ -590,7 +589,8 @@ def runScript(project, subdir, script, required):
 
     try:
         os.chdir(proj_test_dir + '/' + subdir)
-        process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        # process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(cmd.split(), stderr=subprocess.STDOUT)
         output = process.communicate()[0]
         status = process.returncode
     except OSError as exc:

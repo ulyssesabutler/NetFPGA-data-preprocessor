@@ -204,12 +204,12 @@ def compare(exp, unexp):
     numExp = exp.__len__()
     numUnexp = unexp.__len__()
     # check if there is anything to compare
-    if numExp is 0 and numUnexp is 0:
+    if numExp == 0 and numUnexp == 0:
         return 0
-    elif numExp is 0:
+    elif numExp == 0:
         print('Error:', str(numUnexp), 'unexpected packets seen')
         return numUnexp
-    elif numUnexp is 0:
+    elif numUnexp == 0:
         print('Error:', str(numExp), 'expected packets not seen')
         return numExp
 
@@ -232,7 +232,7 @@ def compare(exp, unexp):
                 for x in str(unexp[j]):
                     str_unexp_pkt += "%02X"%ord(x)
                 for k in range(len(str_exp_pkt)):
-                    if str_unexp_pkt[k] is not str_exp_pkt[k]:
+                    if str_unexp_pkt[k] != str_exp_pkt[k]:
                         print('   Unexpected packet ' + str(j) + ': byte', end=' ')
                         print(str(k/2), end=' ')
                         print('(starting from 0) not equivalent (EXP:', end=' ')
@@ -261,14 +261,13 @@ def finish():
         openSockets[iface].close()
         # close capture threads, record packets
         pkts = captureThreads[iface].finish()
-
         # filter packets
         packets[iface]['Matched'] = pkts[0]
         packets[iface]['Unexpected'] = pkts[1]
         packets[iface]['Expected'] = pkts[2]
-        list(filter(packets[iface]['Matched'], ignored))
-        list(filter(packets[iface]['Unexpected'], ignored))
-        list(filter(packets[iface]['Expected'], ignored))
+        # list(filter(packets[iface]['Matched'], ignored))
+        # list(filter(packets[iface]['Unexpected'], ignored))
+        # list(filter(packets[iface]['Expected'], ignored))
 
         # show differences between packets
         error_count += compare(packets[iface]['Expected'],
@@ -306,7 +305,7 @@ def filter(pktlist, ignorelist):
             if pkt.haslayer(layer):
                 duplicate = False
                 for ignorepkt in ignored:
-                    if pkt is ignorepkt:
+                    if pkt == ignorepkt:
                         duplicate = True
                 if not duplicate:
                     ignored.append(pkt)
@@ -315,7 +314,7 @@ def filter(pktlist, ignorelist):
             if method(pkt):
                 duplicate = False
                 for ignorepkt in ignored:
-                    if pkt is ignorepkt:
+                    if pkt == ignorepkt:
                         duplicate = True
                 if not duplicate:
                     ignored.append(pkt)

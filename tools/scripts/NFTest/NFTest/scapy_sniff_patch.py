@@ -29,14 +29,8 @@
 
 import sys
 import time
-
-try:
-    import scapy.all as scapy
-except:
-    try:
-        import scapy as scapy
-    except:
-        sys.exit("Error: need to install scapy for packet handling")
+import select
+from scapy.all import *
 
 # Override sniff from scapy to implement custom stopper
 # from http://trac.secdev.org/scapy/wiki/PatchSelectStopperTimeout
@@ -63,8 +57,8 @@ L2socket: use the provided L2socket
 
     if offline is None:
         if L2socket is None:
-            L2socket = scapy.conf.L2listen
-        s = L2socket(type=scapy.ETH_P_ALL, *arg, **karg)
+            L2socket = conf.L2listen
+        s = L2socket(type=ETH_P_ALL, *arg, **karg)
     else:
         s = PcapReader(offline)
 
@@ -90,15 +84,15 @@ L2socket: use the provided L2socket
                     stopperStoptime = time.time()+stopperTimeout
                     remainStopper = stopperStoptime-time.time()
 
-                sel = scapy.select([s],[],[],remainStopper)
+                sel = select.select([s],[],[],remainStopper)
                 if s not in sel[0]:
                     if stopper and stopper():
                         break
             else:
-                sel = scapy.select([s],[],[],remain)
+                sel = select.select([s],[],[],remain)
 
             if s in sel[0]:
-                p = s.recv(scapy.MTU)
+                p = s.recv(MTU)
                 if p is None:
                     break
                 if lfilter and not lfilter(p):
@@ -108,7 +102,7 @@ L2socket: use the provided L2socket
                 c += 1
                 if prn:
                     r = prn(p)
-                    if r is not None:
+                    if r != None:
                         print(r)
                 if count > 0 and c >= count:
                     break
