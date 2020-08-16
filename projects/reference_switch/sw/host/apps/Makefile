@@ -33,8 +33,7 @@
 all:	rwaxi
 
 rwaxi:
-	cc -Wall -Werror -o rwaxi rwaxi.c \
-		-I../driver
+	cc -Wall -Werror -o rwaxi rwaxi.c -I${DRIVER_FOLDER}
 
 clean:
 	rm -f rwaxi
