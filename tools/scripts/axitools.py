@@ -219,13 +219,13 @@ def axis_load( f, period ):
                 if math.log(bus_width,2) - int(math.log(bus_width,2)) != 0:
                     print('%s: data bus not a power of two in width' % f.name)
             # accumulate packet and TUSER data
-            pkt_data += reversed( as_bytes( line[0].zfill( bus_width/4 ) ) )
+            pkt_data += reversed( as_bytes( line[0].zfill( bus_width//4 ) ) )
             tuser.append( int( line[2], 16 ) )
             # handle end of packet
             if terminal == '.':
                 valid_bytes = int( math.log( int( line[1], 16 ) + 1, 2 ) )
-                if valid_bytes < bus_width/8: # trim off any padding
-                    del pkt_data[valid_bytes-bus_width/8:]
+                if valid_bytes < bus_width//8: # trim off any padding
+                    del pkt_data[valid_bytes-bus_width//8:]
                 pkts.append( Ether( ''.join( [chr(x) for x in pkt_data] ) ) )
                 pkts[-1].time        =  SoP_time
                 pkts[-1].tuser       =  tuser

@@ -29,8 +29,8 @@
 # @NETFPGA_LICENSE_HEADER_END@
 #
 
-from __future__ import with_statement
-from __future__ import generators
+
+
 
 import glob
 import os
@@ -51,71 +51,71 @@ def expected():
 
 def main():
     reg_stim = '%s' % (REG_STIM)
-    print 'Check registers'
+    print('Check registers')
 
     with open(REG_EXPECT) as g:
-	r = 0
-	w = 0
+        r = 0
+        w = 0
         for line in g.readlines():
-	    if 'R 00000001' in line:
-		r = r + 1 # read
-	    elif 'W 00000002' in line:
-		w = w + 1 # write
-
+            if 'R 00000001' in line:
+                r = r + 1 # read
+            elif 'W 00000002' in line:
+                w = w + 1 # write
+    
     with open(REG_AXI) as k:
-	h = 0
-	t = 0
+        h = 0
+        t = 0
         for line in k.readlines():
-	    if 'R 00000001' in line:
-		h = 1 # read
-	    elif 'W 00000002' in line:
-		t = 1 # write
+            if 'R 00000001' in line:
+                h = 1 # read
+            elif 'W 00000002' in line:
+                t = 1 # write
 
     with open( reg_stim ) as output:
-      	f = output.readlines()    	
-	a = 0
-	b = 0
- 	c = 0
-	d = 0
-	e = 0 
+        f = output.readlines()    	
+        a = 0
+        b = 0
+        c = 0
+        d = 0
+        e = 0 
         lines = 0
 
-	for line in f:
-	    lines = lines + 1
-	    if 'Error' in line:
-		e = 1
-		if '<' in line: 
-		    c = c + 1 # write
-		elif '>' in line:
-		    d = d + 1 # read
-		else:
-		    c = c
-		    d = d
+        for line in f:
+            lines = lines + 1
+            if 'Error' in line:
+                e = 1
+                if '<' in line: 
+                    c = c + 1 # write
+                elif '>' in line:
+                    d = d + 1 # read
+                else:
+                    c = c
+                    d = d
 
-	    elif 'WARNING' in line:
-		e = 2	   
+            elif 'WARNING' in line:
+                e = 2
 
-	    else:
-		if '<' in line:
-		    a = a + 1 # write
-		elif '>' in line:
-		    b = b + 1 # read
-		else:
-		    a = a
-		    b = b		
+            else:
+                if '<' in line:
+                    a = a + 1 # write
+                elif '>' in line:
+                    b = b + 1 # read
+                else:
+                    a = a
+                    b = b		
 
-	if e == 1 or w != a or r != b:	
-	    print '\tFAIL ( Check reg_stim.log file!!!! )'
-	elif e == 2:
-	    print '\tPASS ( WARNING! Check reg_stim.log file!!!! )'
-	elif lines == 0 and expected() != 0:
-	    print '\tFAIL ( Did not get any results! )'
-	elif h != 1 and t != 1:
-	    print '\tPASS ( No registers checked )'
-	else:
-	    print '\tPASS'
+        if e == 1 or w != a or r != b:	
+            print('\tFAIL ( Check reg_stim.log file!!!! )')
+        elif e == 2:
+            print('\tPASS ( WARNING! Check reg_stim.log file!!!! )')
+        elif lines == 0 and expected() != 0:
+            print('\tFAIL ( Did not get any results! )')
+        elif h != 1 and t != 1:
+            print('\tPASS ( No registers checked )')
+        else:
+            print('\tPASS')
 
-    print
+    print()
     return 0
 
 if __name__ == '__main__':
