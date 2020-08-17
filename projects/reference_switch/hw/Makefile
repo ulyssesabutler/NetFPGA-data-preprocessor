@@ -158,17 +158,19 @@ simclean:
 distclean: clean
 
 clean:	simclean
-		rm -rfv project;\
-		rm -rfv ../sw/embedded/project;\
-		rm -rfv vivado*;\
-		rm -rfv *.log;\
-		rm -rfv .Xil;\
-		rm -rfv ..rej;\
-		rm -rfv .srcs;\
-		rm -rfv webtalk*;\
-		rm -rfv *.*~;\
-		rm -rfv ip_repo;\
-		rm -rfv ip_proj;\
-		rm -rfv std;\
-                
+	rm -rfv project;\
+	rm -rfv ../sw/embedded/project;\
+	rm -rfv vivado*;\
+	rm -rfv *.log;\
+	rm -rfv .Xil;\
+	rm -rfv ..rej;\
+	rm -rfv .srcs;\
+	rm -rfv webtalk*;\
+	rm -rfv *.*~;\
+	rm -rfv ip_repo;\
+	rm -rfv ip_proj;\
+	rm -rfv std;\
+	rm -rfv create_ip/id_rom16x32.coe;\
+	rm -rfv	create_ip/rom_data.txt;
+ 
 
