@@ -31,7 +31,6 @@
 
 
 set design [lindex $argv 0] 
-set wrapper "_wrapper"
 
 puts "\nOpening $design XPR project\n"
 open_project project/$design.xpr
@@ -39,8 +38,7 @@ open_project project/$design.xpr
 puts "\nOpening $design Implementation design\n"
 open_run impl_1
 
-puts "\nCopying $design$wrapper.sysdef\n"
-file copy -force ./project/$design.runs/impl_1/$design$wrapper.sysdef ../sw/embedded/$design.hdf
+write_hw_platform -fixed -include_bit -force -file ../sw/embedded/$design.xsa
 
 exit
 

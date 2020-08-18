@@ -163,10 +163,13 @@ set_property compxlib.xsim_compiled_library_dir {} [current_project]
 set_property top_lib xil_defaultlib [get_filesets sim_1]
 update_compile_order -fileset sim_1
 
+# workaround to avoid invoking default python2 in vivado
+#unset env(PYTHONPATH)
+unset env(PYTHONHOME)
 set output [exec python $::env(NF_DESIGN_DIR)/test/${test_name}/run.py]
 puts $output
 
-launch_xsim -simset sim_1 -mode behavioral
+launch_simulation -simset sim_1 -mode behavioral
 if {$test_name == "both_loopback_random"} {run 200us}\
 elseif {$test_name == "both_inc_size"} {run 300us}\
 else {run 10us}
