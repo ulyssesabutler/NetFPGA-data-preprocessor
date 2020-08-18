@@ -1,6 +1,5 @@
 #
 # Copyright (c) 2015 Noa Zilberman
-# Modified by Salvator Galea
 # All rights reserved.
 #
 #  File:
@@ -43,18 +42,20 @@
 
 HW = hw
 SW = sw/embedded/
+SH = sw/host/apps
 TEST = test
 
 all:    clean
 	make -C ${HW} project
 	make -C ${HW} export_to_sdk
 	make -C ${SW} project
-	make -C ${SW} compile
 	make -C ${HW} load_elf
+
 
 clean:
 	make -C ${HW} distclean
 	make -C ${SW} distclean
-	rm -rfv vivado*
+	make -C ${SH} clean
+	rm -rfv vivado*;\
 
 
