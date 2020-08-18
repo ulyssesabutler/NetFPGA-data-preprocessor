@@ -68,7 +68,7 @@ set_property synth_checkpoint_mode None [get_files nf_10g_interface_shared_ip.xc
 reset_target all [get_ips nf_10g_interface_shared_ip]
 generate_target all [get_ips nf_10g_interface_shared_ip]
 
-create_ip -name blk_mem_gen -vendor xilinx.com -library ip -version 8.3 -module_name identifier_ip
+create_ip -name blk_mem_gen -vendor xilinx.com -library ip -version 8.4 -module_name identifier_ip
 set_property -dict [list CONFIG.Interface_Type {AXI4} CONFIG.AXI_Type {AXI4_Lite} CONFIG.AXI_Slave_Type {Memory_Slave} CONFIG.Use_AXI_ID {false} CONFIG.Load_Init_File {true} CONFIG.Coe_File {/../../../../../../create_ip/id_rom16x32.coe} CONFIG.Fill_Remaining_Memory_Locations {true} CONFIG.Remaining_Memory_Locations {DEADDEAD} CONFIG.Memory_Type {Simple_Dual_Port_RAM} CONFIG.Use_Byte_Write_Enable {true} CONFIG.Byte_Size {8} CONFIG.Assume_Synchronous_Clk {true} CONFIG.Write_Width_A {32} CONFIG.Write_Depth_A {4096} CONFIG.Read_Width_A {32} CONFIG.Operating_Mode_A {READ_FIRST} CONFIG.Write_Width_B {32} CONFIG.Read_Width_B {32} CONFIG.Operating_Mode_B {READ_FIRST} CONFIG.Enable_B {Use_ENB_Pin} CONFIG.Register_PortA_Output_of_Memory_Primitives {false} CONFIG.Register_PortB_Output_of_Memory_Primitives {false} CONFIG.Use_RSTB_Pin {true} CONFIG.Reset_Type {ASYNC} CONFIG.Port_A_Write_Rate {50} CONFIG.Port_B_Clock {100} CONFIG.Port_B_Enable_Rate {100}] [get_ips identifier_ip]
 set_property generate_synth_checkpoint false [get_files identifier_ip.xci]
 set_property synth_checkpoint_mode None [get_files identifier_ip.xci]
@@ -80,10 +80,10 @@ create_bd_design ${design}
 add_files -fileset constrs_1 -norecurse ${project_constraints} ${nf_10g_constraints}
 import_files -fileset constrs_1 ${project_constraints} ${nf_10g_constraints}
 
-create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_identifier:1.00 nf_identifier_0
+create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_identifier:1.0 nf_identifier_0
 
 # System clock generator, clock1 for bus registers, clock2 for axi-stream data path.
-create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:5.3 sys_clock_0
+create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 sys_clock_0
 set_property -dict [list CONFIG.PRIM_IN_FREQ {200.000}] [get_bd_cells sys_clock_0]
 set_property -dict [list CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100.000}] [get_bd_cells sys_clock_0]
 set_property -dict [list CONFIG.CLKOUT2_USED {true}] [get_bd_cells sys_clock_0]
@@ -126,14 +126,14 @@ set_property -dict [list CONFIG.C_SDA_INERTIAL_DELAY {5}] [get_bd_cells axi_iic_
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_uartlite:2.0 axi_uartlite_0
 set_property -dict [list CONFIG.C_BAUDRATE {115200}] [get_bd_cells axi_uartlite_0]
 
-create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:input_arbiter:1.00 input_arbiter_0
-create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nic_output_port_lookup:1.00 nic_output_port_lookup_0
-create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:output_queues:1.00 output_queues_0
+create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:input_arbiter:1.0 input_arbiter_0
+create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nic_output_port_lookup:1.0 nic_output_port_lookup_0
+create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:output_queues:1.0 output_queues_0
 
-create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_10ge_interface_shared:1.00 nf_10g_interface_0
-create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_10ge_interface:1.00 nf_10g_interface_1
-create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_10ge_interface:1.00 nf_10g_interface_2
-create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_10ge_interface:1.00 nf_10g_interface_3
+create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_10ge_interface_shared:1.0 nf_10g_interface_0
+create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_10ge_interface:1.0 nf_10g_interface_1
+create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_10ge_interface:1.0 nf_10g_interface_2
+create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_10ge_interface:1.0 nf_10g_interface_3
 
 source tcl/bd_nf_sume_dma_engine.tcl
 create_hier_cell_nf_sume_dma_engine [current_bd_instance .] nf_sume_dma 256

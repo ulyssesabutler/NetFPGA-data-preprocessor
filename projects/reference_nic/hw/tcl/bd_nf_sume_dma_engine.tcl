@@ -127,13 +127,13 @@ proc create_hier_cell_nf_sume_dma_engine { parentCell coreName tdataWidth } {
    create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_riffa_dma:1.0 nf_riffa_dma_0
 
    # This async fifo is connected to dma tx and rx.
-   create_bd_cell -type ip -vlnv xilinx.com:ip:axis_data_fifo:1.1 axis_data_fifo_0
+   create_bd_cell -type ip -vlnv xilinx.com:ip:axis_data_fifo:2.0 axis_data_fifo_0
    set_property -dict [list CONFIG.TDATA_NUM_BYTES {16}] [get_bd_cells axis_data_fifo_0]
    set_property -dict [list CONFIG.TUSER_WIDTH {128}] [get_bd_cells axis_data_fifo_0]
    set_property -dict [list CONFIG.IS_ACLK_ASYNC {1}] [get_bd_cells axis_data_fifo_0]
    set_property -dict [list CONFIG.FIFO_DEPTH {32}] [get_bd_cells axis_data_fifo_0]
    
-   create_bd_cell -type ip -vlnv xilinx.com:ip:axis_data_fifo:1.1 axis_data_fifo_1
+   create_bd_cell -type ip -vlnv xilinx.com:ip:axis_data_fifo:2.0 axis_data_fifo_1
    set_property -dict [list CONFIG.TDATA_NUM_BYTES {16}] [get_bd_cells axis_data_fifo_1]
    set_property -dict [list CONFIG.TUSER_WIDTH {128}] [get_bd_cells axis_data_fifo_1]
    set_property -dict [list CONFIG.IS_ACLK_ASYNC {1}] [get_bd_cells axis_data_fifo_1]

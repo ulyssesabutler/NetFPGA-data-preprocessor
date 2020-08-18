@@ -127,15 +127,15 @@ proc create_hier_cell_nf_sume_sim_dma { parentCell coreName fstimName frecName f
 
    # create data path blocks
    # TX - AXIS
-   set axis_sim_stim_ip [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:axis_sim_stim:1.00 axis_sim_stim_ip]
+   set axis_sim_stim_ip [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:axis_sim_stim:1.0 axis_sim_stim_ip]
    set_property -dict [list CONFIG.input_file $::env(NF_DESIGN_DIR)/test/$fstimName] $axis_sim_stim_ip
   
    # RX - AXIS
-   set axis_sim_record_ip [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:axis_sim_record:1.00 axis_sim_record_ip]
+   set axis_sim_record_ip [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:axis_sim_record:1.0 axis_sim_record_ip]
    set_property -dict [list CONFIG.OUTPUT_FILE $::env(NF_DESIGN_DIR)/test/$frecName] $axis_sim_record_ip
    
    # TX AXI-Lite     
-   set axi_sim_transactor_ip [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:axi_sim_transactor:1.00 axi_sim_transactor_ip]
+   set axi_sim_transactor_ip [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:axi_sim_transactor:1.0 axi_sim_transactor_ip]
    set_property -dict [list CONFIG.STIM_FILE $::env(NF_DESIGN_DIR)/test/$ftranStimName] $axi_sim_transactor_ip
    set_property -dict [list CONFIG.EXPECT_FILE $::env(NF_DESIGN_DIR)/test/$ftranExpctName] $axi_sim_transactor_ip
    set_property -dict [list CONFIG.LOG_FILE $::env(NF_DESIGN_DIR)/test/$ftranLogName] $axi_sim_transactor_ip
