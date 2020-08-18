@@ -29,9 +29,7 @@ set ws "SDK_Workspace"
 set design "reference_nic"
 
 setws ./$ws/$design
-createhw -name hw_platform -hwspec ./$design.hdf
-createbsp -name bsp -hwproject hw_platform -proc mbsys_microblaze_0 -os standalone
-createapp -name app -hwproject hw_platform -proc mbsys_microblaze_0 -os standalone -lang C -app {Hello World} -bsp bsp
+app create -name app -hw $::env(NF_DESIGN_DIR)/sw/embedded/$design.xsa -proc mbsys_microblaze_0 -os standalone -lang C -template {Hello World}
 #importsources -name app -path ./src/
 projects -build
 exit
