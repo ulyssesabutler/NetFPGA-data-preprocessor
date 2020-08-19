@@ -63,7 +63,7 @@ all:
 project:
 	@if [ -d ./${WS} ]; then rm -rf ./${WS}; fi
 	mkdir ./${WS}
-	xsdk -batch -source ./tcl/${PROJ}_xsdk.tcl
+	xsct ./tcl/${PROJ}_xsdk.tcl
 
 # Compile Command needs to run twice to get sw compiled correctly in DEBUG mode
 compile:
