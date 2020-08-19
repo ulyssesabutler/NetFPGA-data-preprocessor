@@ -86,9 +86,19 @@ clean:
 	rm -rf ./${WS}
 	rm -rf *.log
 	rm -rf *.jou
+	rm -rf *.bit
+	rm -rf *.mmi
+	rm -rf *.xsa
+	rm -rf reg_defines.h
+	rm -rf tcl/*.str
 
 distclean:
 	rm -rf `find . -name "${WS}"`
 	rm -rf `find . -name "*.log"`
 	rm -rf `find . -name "*.jou"`
+	rm -rf `find . -name "*.bit"`
+	rm -rf `find . -name "*.mmi"`
+	rm -rf `find . -name "*.xsa"`
+	rm -rf `find . -name "reg_defines.h"`
+	rm -rf `find . -name "*.str"`
 
