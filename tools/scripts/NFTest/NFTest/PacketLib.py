@@ -33,14 +33,8 @@ import sys
 import os
 from random import randint
 from random import seed
-
-try:
-    import scapy.all as scapy
-except:
-    try:
-        import scapy as scapy
-    except:
-        sys.exit("Error: Need to install scapy for packet handling")
+from scapy.all import Raw, RandString
+import scapy.all as scapy
 
 ############################
 # Function: make_MAC_hdr
@@ -211,10 +205,7 @@ def make_ARP_reply_pkt(**kwargs):
 # Description: creates and returns a payload of the specified length
 ############################
 def generate_load(length):
-    load = ''
-    for i in range(length):
-        load += chr(randint(0,255))
-    return load
+    return Raw(RandString(length))
 
 ############################
 # Function: set_seed
