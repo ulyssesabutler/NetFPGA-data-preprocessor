@@ -108,7 +108,7 @@ proc create_hier_cell_nf_sume_dma_engine { parentCell coreName tdataWidth } {
    set_property -dict [list CONFIG.C_OPERATION {not}] [get_bd_cells user_pcie_inverter_0]
 
    # load pcie endpoint.
-   create_bd_cell -type ip -vlnv xilinx.com:ip:pcie3_7x:4.2 pcie3_7x_1
+   create_bd_cell -type ip -vlnv xilinx.com:ip:pcie3_7x:4.3 pcie3_7x_1
    set_property -dict [list CONFIG.xlnx_ref_board {None}] [get_bd_cells pcie3_7x_1]
    set_property -dict [list CONFIG.pcie_blk_locn {X0Y1} CONFIG.PL_LINK_CAP_MAX_LINK_WIDTH {X8}] [get_bd_cells pcie3_7x_1]
    set_property -dict [list CONFIG.PL_LINK_CAP_MAX_LINK_SPEED {5.0_GT/s} CONFIG.axisten_if_width {128_bit}] [get_bd_cells pcie3_7x_1]
@@ -127,13 +127,13 @@ proc create_hier_cell_nf_sume_dma_engine { parentCell coreName tdataWidth } {
    create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_riffa_dma:1.0 nf_riffa_dma_0
 
    # This async fifo is connected to dma tx and rx.
-   create_bd_cell -type ip -vlnv xilinx.com:ip:axis_data_fifo:1.1 axis_data_fifo_0
+   create_bd_cell -type ip -vlnv xilinx.com:ip:axis_data_fifo:2.0 axis_data_fifo_0
    set_property -dict [list CONFIG.TDATA_NUM_BYTES {16}] [get_bd_cells axis_data_fifo_0]
    set_property -dict [list CONFIG.TUSER_WIDTH {128}] [get_bd_cells axis_data_fifo_0]
    set_property -dict [list CONFIG.IS_ACLK_ASYNC {1}] [get_bd_cells axis_data_fifo_0]
    set_property -dict [list CONFIG.FIFO_DEPTH {32}] [get_bd_cells axis_data_fifo_0]
    
-   create_bd_cell -type ip -vlnv xilinx.com:ip:axis_data_fifo:1.1 axis_data_fifo_1
+   create_bd_cell -type ip -vlnv xilinx.com:ip:axis_data_fifo:2.0 axis_data_fifo_1
    set_property -dict [list CONFIG.TDATA_NUM_BYTES {16}] [get_bd_cells axis_data_fifo_1]
    set_property -dict [list CONFIG.TUSER_WIDTH {128}] [get_bd_cells axis_data_fifo_1]
    set_property -dict [list CONFIG.IS_ACLK_ASYNC {1}] [get_bd_cells axis_data_fifo_1]
@@ -177,7 +177,7 @@ proc create_hier_cell_nf_sume_dma_engine { parentCell coreName tdataWidth } {
    connect_bd_net [get_bd_pins axis_aclk] [get_bd_pins axis_data_fifo_0/m_axis_aclk]
    connect_bd_net [get_bd_pins axis_aclk] [get_bd_pins axis_data_fifo_1/s_axis_aclk]
    
-   connect_bd_net [get_bd_pins axis_aresetn] [get_bd_pins axis_data_fifo_0/m_axis_aresetn]
+   connect_bd_net [get_bd_pins axis_aresetn] [get_bd_pins axis_data_fifo_0/s_axis_aresetn]
    connect_bd_net [get_bd_pins axis_aresetn] [get_bd_pins axis_data_fifo_1/s_axis_aresetn]
    
    if { $tdataWidth ne "128" } {
@@ -197,7 +197,6 @@ proc create_hier_cell_nf_sume_dma_engine { parentCell coreName tdataWidth } {
    
    connect_bd_net [get_bd_pins pcie3_7x_1/user_clk] [get_bd_pins nf_riffa_dma_0/user_clk]
    connect_bd_net [get_bd_pins pcie3_7x_1/user_reset] [get_bd_pins nf_riffa_dma_0/user_reset]
-   connect_bd_net [get_bd_pins pcie3_7x_1/user_reset] [get_bd_pins user_pcie_inverter_0/Op1]
    connect_bd_net [get_bd_pins pcie3_7x_1/user_lnk_up] [get_bd_pins nf_riffa_dma_0/user_lnk_up]
    
    connect_bd_intf_net [get_bd_intf_pins pcie3_7x_1/m_axis_cq] [get_bd_intf_pins nf_riffa_dma_0/m_axis_cq]
@@ -271,9 +270,6 @@ proc create_hier_cell_nf_sume_dma_engine { parentCell coreName tdataWidth } {
    
    connect_bd_net [get_bd_pins pcie3_7x_1/user_clk] [get_bd_pins axis_data_fifo_0/s_axis_aclk]
    connect_bd_net [get_bd_pins pcie3_7x_1/user_clk] [get_bd_pins axis_data_fifo_1/m_axis_aclk]
-   
-   connect_bd_net [get_bd_pins user_pcie_inverter_0/Res] [get_bd_pins axis_data_fifo_0/s_axis_aresetn]
-   connect_bd_net [get_bd_pins user_pcie_inverter_0/Res] [get_bd_pins axis_data_fifo_1/m_axis_aresetn]
    
    if { $tdataWidth ne "128" } {
       connect_bd_intf_net [get_bd_intf_pins axis_data_fifo_0/M_AXIS] [get_bd_intf_pins axis_dwidth_converter_0/S_AXIS]
