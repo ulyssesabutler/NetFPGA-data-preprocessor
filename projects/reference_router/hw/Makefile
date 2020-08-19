@@ -69,7 +69,7 @@ project: identifier
 		fi; \
 	fi
 
-projectgui:
+projectgui: identifier
 	echo "Create reference project under folder /project";
 	@if test -d project/; then \
 		echo "Project already exists"; \
