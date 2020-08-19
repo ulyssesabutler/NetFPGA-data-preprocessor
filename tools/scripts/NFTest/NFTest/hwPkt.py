@@ -265,10 +265,7 @@ class pktSend(Thread):
             try:
                 if len(self.toSend) > 0:
                     self.lock.acquire()
-                    # hack to use scapy function instead of socket
-                    # this makes a lot of dead code here to clean up 
-                    sendp(self.toSend.popleft(), iface=self.device, verbose=False)
-                    #self.sock.send(a)
+                    self.sock.send(bytes(self.toSend.popleft()))
                     self.sentcount += 1
                     self.lock.release()
             except(KeyboardInterrupt):
