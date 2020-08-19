@@ -56,7 +56,7 @@ update_ip_catalog
 create_bd_design ${design}
 
 # System clock generator, clock1 for bus registers, clock2 for axi-stream data path.
-create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:5.3 sys_clock_0
+create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 sys_clock_0
 set_property -dict [list CONFIG.PRIM_IN_FREQ {200.000}] [get_bd_cells sys_clock_0]
 set_property -dict [list CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100.000}] [get_bd_cells sys_clock_0]
 set_property -dict [list CONFIG.CLKOUT2_USED {true} ] [get_bd_cells sys_clock_0]
@@ -106,11 +106,11 @@ source $::env(NF_DESIGN_DIR)/hw/tcl/bd_nf_sume_sim_dma.tcl
 create_hier_cell_nf_sume_sim_dma [current_bd_instance .] nf_sim_dma "dma_0_stim.axi" "dma_0_log.axi" "reg_stim.axi" "reg_expect.axi" "reg_stim.log"
 
 # barrier
-set barrier_ip [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:barrier:1.00 barrier_ip]
+set barrier_ip [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:barrier:1.0 barrier_ip]
 # glue logic
-set activity_stim_glogic [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:barrier_gluelogic:1.00 activity_stim_glogic]
-set activity_rec_glogic [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:barrier_gluelogic:1.00 activity_rec_glogic]
-set barrier_rec_glogic [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:barrier_gluelogic:1.00 barrier_rec_glogic]
+set activity_stim_glogic [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:barrier_gluelogic:1.0 activity_stim_glogic]
+set activity_rec_glogic [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:barrier_gluelogic:1.0 activity_rec_glogic]
+set barrier_rec_glogic [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:barrier_gluelogic:1.0 barrier_rec_glogic]
 
 # axi_interconnect
 set axi_interconnect_0 [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_0]

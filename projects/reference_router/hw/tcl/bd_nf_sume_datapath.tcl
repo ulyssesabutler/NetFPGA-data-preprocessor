@@ -95,19 +95,19 @@ proc create_hier_cell_nf_sume_datapath { parentCell coreName tdataWidth} {
  
 
    # create data path blocks
-   set input_arbiter_0 [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:input_arbiter:1.00 input_arbiter_0]
+   set input_arbiter_0 [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:input_arbiter:1.0 input_arbiter_0]
    set_property -dict [list CONFIG.C_M_AXIS_DATA_WIDTH $tdataWidth] $input_arbiter_0
    set_property -dict [list CONFIG.C_S_AXIS_DATA_WIDTH $tdataWidth] $input_arbiter_0
 
-   set endianess_manager_0 [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_endianess_manager:1.00 endianess_manager_0]
+   set endianess_manager_0 [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_endianess_manager:1.0 endianess_manager_0]
    set_property -dict [list CONFIG.C_M_AXIS_DATA_WIDTH $tdataWidth] $endianess_manager_0
    set_property -dict [list CONFIG.C_S_AXIS_DATA_WIDTH $tdataWidth] $endianess_manager_0
 
-   set router_output_port_lookup_0 [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:router_output_port_lookup:1.00 router_output_port_lookup_0]
+   set router_output_port_lookup_0 [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:router_output_port_lookup:1.0 router_output_port_lookup_0]
    set_property -dict [list CONFIG.C_M_AXIS_DATA_WIDTH $tdataWidth] $router_output_port_lookup_0
    set_property -dict [list CONFIG.C_S_AXIS_DATA_WIDTH $tdataWidth] $router_output_port_lookup_0
 
-   set output_queues_0 [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:output_queues:1.00 output_queues_0]
+   set output_queues_0 [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:output_queues:1.0 output_queues_0]
    set_property -dict [list CONFIG.C_M_AXIS_DATA_WIDTH $tdataWidth] $output_queues_0
    set_property -dict [list CONFIG.C_S_AXIS_DATA_WIDTH $tdataWidth] $output_queues_0
  
