@@ -73,7 +73,7 @@ RD_IND_COM		= 0x0011
 def set_router_MAC(port, MAC):
 	port = int(port)
 	if port < 1 or port > 4:
-		print 'bad port number'
+		print('bad port number')
 		sys.exit(1)
 	mac = MAC.split(':')
 	mac_hi = int(mac[0],16)<<8 | int(mac[1],16)
@@ -87,16 +87,16 @@ def set_router_MAC(port, MAC):
 def get_router_MAC(port, MAC):
 	port = int(port)
 	if port < 1 or port > 4:
-		print 'bad port number'
+		print('bad port number')
 	port -= 1
 	mac_hi = nftest_regread(SUME_OUTPUT_PORT_LOOKUP_0_MAC_0_HI() + port * 8)
 	mac_lo = nftest_regread(SUME_OUTPUT_PORT_LOOKUP_0_MAC_0_LOW() + port * 8)
 	mac_tmp = "%04x%08x"%(mac_hi, mac_lo)
-        grp_mac = re.search("^(..)(..)(..)(..)(..)(..)$", mac_tmp).groups()
-        str_mac = ''
-        for octet in grp_mac:
-            str_mac += grp_mac + ":"
-        str_mac.rstrip(':')
+	grp_mac = re.search("^(..)(..)(..)(..)(..)(..)$", mac_tmp).groups()
+	str_mac = ''
+	for octet in grp_mac:
+		str_mac += grp_mac + ":"
+	str_mac.rstrip(':')
 	return str_mac
 
 ################################################################
@@ -105,15 +105,15 @@ def get_router_MAC(port, MAC):
 #
 ################################################################
 def add_LPM_table_entry(index, IP, mask, next_IP, next_port):
-        if index < 0 or index > LPM_LUT_ROWS - 1 or next_port < 0 or next_port > 255:
-                print 'Bad data'
-                sys.exit(1)
-        if re.match("(\d+)\.", IP):
-                IP = dotted(IP)
-        if re.match("(\d+)\.", mask):
-                mask = dotted(mask)
-        if re.match("(\d+)\.", next_IP):
-                next_IP = dotted(next_IP)
+	if index < 0 or index > LPM_LUT_ROWS - 1 or next_port < 0 or next_port > 255:
+		print('Bad data')
+		sys.exit(1)
+	if re.match("(\d+)\.", IP):
+		IP = dotted(IP)
+	if re.match("(\d+)\.", mask):
+		mask = dotted(mask)
+	if re.match("(\d+)\.", next_IP):
+		next_IP = dotted(next_IP)
 
 	# Configuration for the Register Table (write data)
 	# |-- 						INDIRECTWRDATA 128bit							--|
@@ -128,7 +128,7 @@ def add_LPM_table_entry(index, IP, mask, next_IP, next_port):
 
 def invalidate_LPM_table_entry(index):
 	if index < 0 or index > LPM_LUT_ROWS-1:
-		print 'Bad data'
+		print('Bad data')
 		sys.exit(1)
 	nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTWRDATA_A_HI(),	0)
 	nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTWRDATA_B_HI(),	0xffffffff)
@@ -143,7 +143,7 @@ def invalidate_LPM_table():
 
 def get_LPM_table_entry(index):
 	if index < 0 or index > LPM_LUT_ROWS - 1:
-		print 'get_LPM_table_entry_generic: Bad data'
+		print('get_LPM_table_entry_generic: Bad data')
 		sys.exit(1)
 
 	# Configuration for the Register Table (read data)
@@ -168,11 +168,11 @@ def get_LPM_table_entry(index):
 #
 ################################################################
 def add_dst_ip_filter_entry(index, IP):
-        if index < 0 or index > FILTER_ROWS - 1:
-                print 'Bad data'
-                sys.exit(1)
-        if re.match("(\d+)\.", IP):
-                IP = dotted(IP)
+	if index < 0 or index > FILTER_ROWS - 1:
+		print('Bad data')
+		sys.exit(1)
+	if re.match("(\d+)\.", IP):
+		IP = dotted(IP)
 	# Configuration for the Register Table (write data)
 	# |-- 						INDIRECTWRDATA 128bit						      --|
 	# |- -INDIRECTWRDATA_A_HI 32bit- -INDIRECTWRDATA_A_LOW 32bit- -INDIRECTWRDATA_B_HI 32bit- -INDIRECTWRDATA_B_LOW 32bit- -|
@@ -183,7 +183,7 @@ def add_dst_ip_filter_entry(index, IP):
 
 def invalidate_dst_ip_filter_entry(index):
 	if index < 0 or index > FILTER_ROWS-1:
-		print 'Bad data'
+		print('Bad data')
 		sys.exit(1)
 	nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTWRDATA_B_LOW(), 0)
 	nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTADDRESS(), FILTER_TABLE | index)
@@ -195,7 +195,7 @@ def invalidate_dst_ip_filter_table():
 
 def get_dst_ip_filter_entry(index):
 	if index < 0 or index > FILTER_ROWS-1:
-		print 'Bad data'
+		print('Bad data')
 		sys.exit(1)
 	# Configuration for the Register Table (read data)
 	# |-- 						INDIRECTREPLY 128bit						  --|
@@ -212,14 +212,14 @@ def get_dst_ip_filter_entry(index):
 #
 ################################################################
 def add_ARP_table_entry(index, IP, MAC):
-        if index < 0 or index > ARP_LUT_ROWS-1:
-                print 'Bad data'
-                sys.exit(1)
-        if re.match("(\d+)\.", IP):
-                IP = dotted(IP)
-        mac = MAC.split(':')
-        mac_hi = int(mac[0],16)<<8 | int(mac[1],16)
-        mac_lo = int(mac[2],16)<<24 | int(mac[3],16)<<16 | int(mac[4],16)<<8 | int(mac[5],16)
+	if index < 0 or index > ARP_LUT_ROWS-1:
+		print('Bad data')
+		sys.exit(1)
+	if re.match("(\d+)\.", IP):
+		IP = dotted(IP)
+	mac = MAC.split(':')
+	mac_hi = int(mac[0],16)<<8 | int(mac[1],16)
+	mac_lo = int(mac[2],16)<<24 | int(mac[3],16)<<16 | int(mac[4],16)<<8 | int(mac[5],16)
 
 	# Configuration for the Register Table (write data)
 	# |-- 						INDIRECTWRDATA 128bit						      --|
@@ -232,9 +232,9 @@ def add_ARP_table_entry(index, IP, MAC):
 	nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTCOMMAND(),	WR_IND_COM)
 
 def invalidate_ARP_table_entry(index):
-        if index < 0 or index > ARP_LUT_ROWS-1:
-                print 'Bad data'
-                sys.exit(1)
+	if index < 0 or index > ARP_LUT_ROWS-1:
+		print('Bad data')
+		sys.exit(1)
 	nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTWRDATA_B_LOW(),	0)
 	nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTWRDATA_A_HI(),	0)
 	nftest_regwrite(SUME_OUTPUT_PORT_LOOKUP_0_INDIRECTWRDATA_A_LOW(),	0)
@@ -248,7 +248,7 @@ def invalidate_ARP_table():
 
 def get_ARP_table_entry(index):
 	if index < 0 or index > ARP_LUT_ROWS-1:
-		print 'check_ARP_table_entry: Bad data'
+		print('check_ARP_table_entry: Bad data')
 		sys.exit(1)
 
 	# -- Configuration for the Register Table (read data)
@@ -263,11 +263,11 @@ def get_ARP_table_entry(index):
 
 	IP_str = socket.inet_ntoa(struct.pack('!L', IP))
 	mac_tmp = "%04x%08x"%(mac_hi, mac_lo)
-        grp_mac = re.search("^(..)(..)(..)(..)(..)(..)$", mac_tmp).groups()
-        str_mac = ''
-        for octet in grp_mac:
-            str_mac += octet + ":"
-        str_mac = str_mac.rstrip(':')
+	grp_mac = re.search("^(..)(..)(..)(..)(..)(..)$", mac_tmp).groups()
+	str_mac = ''
+	for octet in grp_mac:
+		str_mac += octet + ":"
+	str_mac = str_mac.rstrip(':')
 	return IP_str + '-' + str_mac
 
 

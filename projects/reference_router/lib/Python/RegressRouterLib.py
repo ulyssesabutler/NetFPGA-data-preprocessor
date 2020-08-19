@@ -48,7 +48,7 @@ import os
 ################################################################
 def nftest_set_router_MAC(ifaceName, MAC):
 	if not ifaceName.startswith('nf'):
-		print "Interface has to be an nf2cX interface"
+		print("Interface has to be an nf2cX interface")
 		sys.exit(1)
 	portNum = int(ifaceName[2:3])
 	portNum += 1
@@ -65,7 +65,7 @@ def nftest_set_router_MAC(ifaceName, MAC):
 ################################################################
 def nftest_get_router_MAC(ifaceName):
 	if not ifaceName.startswith('nf'):
-		print "Interface has to be an nf2cX interface"
+		print("Interface has to be an nf2cX interface")
 		sys.exit(1)
 	portNum = int(ifaceName[2:3])
 	portNum += 1
@@ -169,7 +169,7 @@ def nftest_add_dst_ip_filter_entry(entryIndex, destIP):
 ################################################################
 def nftest_invalidate_dst_ip_filter_table(depth):
 	for i in range(depth):
-	    invalidate_dst_ip_filter_entry(i)
+		invalidate_dst_ip_filter_entry(i)
 
 ################################################################
 # Name: nftest_invalidate_dst_ip_filter_entry
