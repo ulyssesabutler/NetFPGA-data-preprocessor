@@ -91,7 +91,7 @@ nextHopMAC	= "dd:55:dd:66:dd:77"
 sent_pkts	= []
 pkts_num	= 30
 
-print "Sending packets"
+print("Sending packets")
 
 for i in range(pkts_num):
 	sent_pkt = make_IP_pkt(src_MAC=SA, dst_MAC=DA, dst_IP=DST_IP, src_IP=SRC_IP, pkt_len=random.randint(60,1514))
