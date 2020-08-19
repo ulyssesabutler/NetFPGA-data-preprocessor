@@ -29,7 +29,8 @@ set ws "SDK_Workspace"
 set design "reference_switch_lite"
 
 setws ./$ws/$design
-app create -name app -hw $::env(NF_DESIGN_DIR)/sw/embedded/reference_switch_lite.xsa -proc nf_mbsys_mbsys_microblaze_0 -os standalone -lang C -template {Hello World}
+app create -name app -hw $::env(NF_DESIGN_DIR)/sw/embedded/$design.xsa -proc mbsys_microblaze_0 -os standalone -lang C -template {Hello World}
+#importsources -name app -path ./src/
 app build -name app
 
 exit
