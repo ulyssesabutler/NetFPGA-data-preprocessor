@@ -29,7 +29,8 @@
 #
 
 export SUME_FOLDER=${HOME}/NetFPGA-SUME-live
-export XILINX_PATH=/opt/Xilinx/Vivado/2016.4
+export XILINX_PATH=/opt/Xilinx/Vivado/2020.1
+export VITIS_PATH=/opt/Xilinx/Vitis/2020.1
 export NF_PROJECT_NAME=reference_switch
 export PROJECTS=${SUME_FOLDER}/projects
 export CONTRIB_PROJECTS=${SUME_FOLDER}/contrib-projects
