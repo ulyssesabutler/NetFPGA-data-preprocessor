@@ -30,6 +30,10 @@ set design "reference_switch"
 
 setws ./$ws/$design
 app create -name app -hw $::env(NF_DESIGN_DIR)/sw/embedded/$design.xsa -proc nf_mbsys_mbsys_microblaze_0 -os standalone -lang C -template {Hello World}
+repo -set $::env(VITIS_PATH)/data/embeddedsw/XilinxProcessorIPLib/drivers/
+bsp setdriver -ip nf_mbsys_axi_iic_0 -driver iic -ver 3.6
+bsp setdriver -ip nf_mbsys_mbsys_microblaze_0_axi_intc -driver intc -ver 3.11
+importsources -name app -path ./src/
 app build -name app
 
 exit

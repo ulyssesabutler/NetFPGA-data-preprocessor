@@ -30,7 +30,10 @@ set design "reference_nic"
 
 setws ./$ws/$design
 app create -name app -hw $::env(NF_DESIGN_DIR)/sw/embedded/$design.xsa -proc mbsys_microblaze_0 -os standalone -lang C -template {Hello World}
-#importsources -name app -path ./src/
+repo -set $::env(VITIS_PATH)/data/embeddedsw/XilinxProcessorIPLib/drivers/
+bsp setdriver -ip axi_iic_0 -driver iic -ver 3.6
+bsp setdriver -ip mbsys_microblaze_0_axi_intc -driver intc -ver 3.11
+importsources -name app -path ./src/
 projects -build
 exit
 
