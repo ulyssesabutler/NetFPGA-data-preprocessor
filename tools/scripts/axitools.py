@@ -47,7 +47,7 @@ if sys.platform.startswith('cygwin'):
     import scapy.config
     scapy.config.conf.iface = ''
 
-from scapy.layers.all import Ether
+from scapy.layers.all import Ether, raw
 
 
 class BadAXIDataException( Exception ):
@@ -70,6 +70,7 @@ def axis_dump( packets, f, bus_width, period, tuser_width = 128 ):
     and .tuser_sport and .tuser_dport, if present, will be applied (overriding)
     any .tuser.
     """
+
     def tuser_mask( partial_mask ):
         """
         Returns a full, tuser-width mask from partial_mask
@@ -118,8 +119,7 @@ def axis_dump( packets, f, bus_width, period, tuser_width = 128 ):
             tuser[0] = (tuser[0] & tuser_mask(0xff00ffffff) ) | (packet.tuser_dport << 24)
 
         # Turn into a list of bytes
-        packet = [ord(x) for x in str(packet)]
-
+        packet = [x for x in bytes(packet)]
         # Dump word-by-word
         for i in range(0, len(packet), bus_width):
             if len(packet)-i < bus_width:
@@ -129,7 +129,6 @@ def axis_dump( packets, f, bus_width, period, tuser_width = 128 ):
                 padding = 0
                 word = packet[i:i+bus_width]
             word.reverse()                            # TDATA is little-endian
-
             if i + bus_width >= len(packet):
                 terminal = '.'
             else:
@@ -226,7 +225,7 @@ def axis_load( f, period ):
                 valid_bytes = int( math.log( int( line[1], 16 ) + 1, 2 ) )
                 if valid_bytes < bus_width//8: # trim off any padding
                     del pkt_data[valid_bytes-bus_width//8:]
-                pkts.append( Ether( ''.join( [chr(x) for x in pkt_data] ) ) )
+                pkts.append(Ether(raw(pkt_data)))
                 pkts[-1].time        =  SoP_time
                 pkts[-1].tuser       =  tuser
                 pkts[-1].tuser_len   =  tuser[0] & 0xffff
