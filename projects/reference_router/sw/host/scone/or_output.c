@@ -52,7 +52,7 @@
 #include "or_nat.h"
 
 /* GENERAL PRETTY PRINT HELPER FUNCTIONS */
-inline void indent(unsigned int tab) {
+void indent(unsigned int tab) {
 	int i;
 	for(i=0; i<tab; i++) {printf("\t");}
 }
@@ -587,7 +587,7 @@ void print_packet(const uint8_t *packet, unsigned int len)
 
 /* PRETTY PRINT ETHERNET PACKET HEADER */
 
-inline void print_mac_address(char *host, unsigned char *mac_addr) {
+void print_mac_address(char *host, unsigned char *mac_addr) {
 	assert(host);
 	assert(mac_addr);
 
