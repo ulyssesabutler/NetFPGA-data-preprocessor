@@ -38,6 +38,8 @@
 
 
 PROJ = ${NF_PROJECT_NAME}
+MODE = batch
+JOBS=$(shell nproc)
 
 all:
 	@echo ""
@@ -45,7 +47,10 @@ all:
 	@echo ""
 	@echo "make TARGETS"
 	@echo "------------------------------------------------------"
-	@echo "project:         Create hardware project"
+	@echo "project:         Create, synth and impl hardware project"
+	@echo "create_project:  Create hardware project"
+	@echo "run_synth:	Run syntheis" 
+	@echo "run_impl: 	Run implementation"
 	@echo "sim:             Run project simulation"
 	@echo "export_to_sdk:   Export implemented project to sw/embedded"
 	@echo "load_elf:        Load ELF file for specified project"
@@ -54,29 +59,29 @@ all:
 	@echo "distclean:       Remove all generated projects"
 	@echo ""
 
-.PHONY: clean project export_to_sdk load_elf  
+.PHONY: clean project export_to_sdk load_elf create_project run_synth run_impl
 
-project: identifier
-	echo "Create reference project under folder /project";
-	@if test -d project/; then \
-		echo "Project already exists"; \
-	else \
-		vivado -mode batch -source tcl/${PROJ}.tcl; \
-		if [ -f patch/${PROJ}.patch ]; then \
-			patch -p1 < patch/${PROJ}.patch; \
-		fi; \
-	fi
+project: identifier create_project run_synth run_impl
 
-projectgui: identifier
-	echo "Create reference project under folder /project";
+create_project:
 	@if test -d project/; then \
-		echo "Project already exists"; \
+		echo ${PROJ} "already exists"; \
 	else \
-		vivado -mode gui -source tcl/${PROJ}.tcl; \
-		if [ -f patch/${PROJ}.patch ]; then \
-			patch -p1 < patch/${PROJ}.patch; \
-		fi; \
-	fi
+		vivado -mode ${MODE} -source \
+		tcl/create_project.tcl -tclargs ${PROJ};\
+	fi;
+
+run_synth:
+	@if test -d project/; then \
+		vivado -mode ${MODE} -source tcl/run_synth.tcl\
+		-tclargs ${PROJ} ${JOBS};\
+	fi;
+
+run_impl:
+	@if test -d project/; then \
+		vivado -mode ${MODE} -source tcl/run_impl.tcl\
+		-tclargs ${PROJ} ${JOBS};\
+	fi;
 
 export_to_sdk: identifier
 	@if test -d project; then \

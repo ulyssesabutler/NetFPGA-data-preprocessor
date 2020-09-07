@@ -29,7 +29,7 @@
 #
 
 # Vivado Launch Script
-set design reference_nic 
+set design reference_router 
 set device xc7vx690t-3-ffg1761
 set proj_dir ./project
 
@@ -43,7 +43,7 @@ set nf_10g_constraints ./constraints/nf_sume_10g_bd.xdc
 #####################################
 # Read IP Addresses and export registers
 #####################################
-source ./tcl/reference_nic_defines.tcl
+source ./tcl/reference_router_defines.tcl
 source ./tcl/export_registers.tcl
 
 create_project -name ${design} -force -dir "./${proj_dir}" -part ${device}
@@ -57,21 +57,18 @@ update_ip_catalog
 source ./create_ip/nf_10ge_interface.tcl
 create_ip -name nf_10ge_interface -vendor NetFPGA -library NetFPGA -module_name nf_10g_interface_ip
 set_property generate_synth_checkpoint false [get_files nf_10g_interface_ip.xci]
-set_property synth_checkpoint_mode None [get_files nf_10g_interface_ip.xci]
 reset_target all [get_ips nf_10g_interface_ip]
 generate_target all [get_ips nf_10g_interface_ip]
 
 source ./create_ip/nf_10ge_interface_shared.tcl
 create_ip -name nf_10ge_interface_shared -vendor NetFPGA -library NetFPGA -module_name nf_10g_interface_shared_ip
 set_property generate_synth_checkpoint false [get_files nf_10g_interface_shared_ip.xci]
-set_property synth_checkpoint_mode None [get_files nf_10g_interface_shared_ip.xci]
 reset_target all [get_ips nf_10g_interface_shared_ip]
 generate_target all [get_ips nf_10g_interface_shared_ip]
 
 create_ip -name blk_mem_gen -vendor xilinx.com -library ip -version 8.4 -module_name identifier_ip
 set_property -dict [list CONFIG.Interface_Type {AXI4} CONFIG.AXI_Type {AXI4_Lite} CONFIG.AXI_Slave_Type {Memory_Slave} CONFIG.Use_AXI_ID {false} CONFIG.Load_Init_File {true} CONFIG.Coe_File {/../../../../../../create_ip/id_rom16x32.coe} CONFIG.Fill_Remaining_Memory_Locations {true} CONFIG.Remaining_Memory_Locations {DEADDEAD} CONFIG.Memory_Type {Simple_Dual_Port_RAM} CONFIG.Use_Byte_Write_Enable {true} CONFIG.Byte_Size {8} CONFIG.Assume_Synchronous_Clk {true} CONFIG.Write_Width_A {32} CONFIG.Write_Depth_A {4096} CONFIG.Read_Width_A {32} CONFIG.Operating_Mode_A {READ_FIRST} CONFIG.Write_Width_B {32} CONFIG.Read_Width_B {32} CONFIG.Operating_Mode_B {READ_FIRST} CONFIG.Enable_B {Use_ENB_Pin} CONFIG.Register_PortA_Output_of_Memory_Primitives {false} CONFIG.Register_PortB_Output_of_Memory_Primitives {false} CONFIG.Use_RSTB_Pin {true} CONFIG.Reset_Type {ASYNC} CONFIG.Port_A_Write_Rate {50} CONFIG.Port_B_Clock {100} CONFIG.Port_B_Enable_Rate {100}] [get_ips identifier_ip]
 set_property generate_synth_checkpoint false [get_files identifier_ip.xci]
-set_property synth_checkpoint_mode None [get_files identifier_ip.xci]
 reset_target all [get_ips identifier_ip]
 generate_target all [get_ips identifier_ip]
 
@@ -86,7 +83,7 @@ create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_identifier:1.0 nf_identifier_0
 create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 sys_clock_0
 set_property -dict [list CONFIG.PRIM_IN_FREQ {200.000}] [get_bd_cells sys_clock_0]
 set_property -dict [list CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100.000}] [get_bd_cells sys_clock_0]
-set_property -dict [list CONFIG.CLKOUT2_USED {true}] [get_bd_cells sys_clock_0]
+set_property -dict [list CONFIG.CLKOUT2_USED {true} ] [get_bd_cells sys_clock_0]
 set_property -dict [list CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {160.000}] [get_bd_cells sys_clock_0]
 
 # Bug Vivado 2016.4 -- Workaround -- Start
@@ -114,6 +111,7 @@ connect_bd_intf_net [get_bd_intf_ports CLK_IN_D] [get_bd_intf_pins sysclk_buf/CL
 connect_bd_net [get_bd_pins sysclk_buf/IBUF_OUT] [get_bd_pins sys_clock_0/clk_in1]
 # Bug Vivado 2016.4 -- Workaround -- End
 
+
 # fpga system reset generator.
 create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 proc_sys_reset_0
 
@@ -122,12 +120,12 @@ set_property -dict [list CONFIG.C_GPO_WIDTH {2}] [get_bd_cells axi_iic_0]
 set_property -dict [list CONFIG.C_SCL_INERTIAL_DELAY {5}] [get_bd_cells axi_iic_0]
 set_property -dict [list CONFIG.C_SDA_INERTIAL_DELAY {5}] [get_bd_cells axi_iic_0]
 
-
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_uartlite:2.0 axi_uartlite_0
 set_property -dict [list CONFIG.C_BAUDRATE {115200}] [get_bd_cells axi_uartlite_0]
 
 create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:input_arbiter:1.0 input_arbiter_0
-create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nic_output_port_lookup:1.0 nic_output_port_lookup_0
+create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_endianess_manager:1.0 endianess_manager_0
+create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:router_output_port_lookup:1.0 router_output_port_lookup_0
 create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:output_queues:1.0 output_queues_0
 
 create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_10ge_interface_shared:1.0 nf_10g_interface_0
@@ -145,8 +143,8 @@ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnec
 set_property -dict [list CONFIG.NUM_SI {2} CONFIG.NUM_MI {12}] [get_bd_cells axi_interconnect_0]
 
 # Create external ports and make connection
-source ./tcl/reference_nic_bd_port.tcl
-source ./tcl/reference_nic_bd_connection.tcl
+source ./tcl/reference_router_bd_port.tcl
+source ./tcl/reference_router_bd_connection.tcl
 
 # Bus register map address configuration
 create_bd_addr_seg -range ${MICROBLAZE_DLMB_BRAM_SIZEADDR} -offset ${MICROBLAZE_DLMB_BRAM_BASEADDR} [get_bd_addr_spaces mbsys/microblaze_0/Data] \
@@ -173,9 +171,9 @@ create_bd_addr_seg -range ${INPUT_ARBITER_SIZEADDR} -offset ${INPUT_ARBITER_BASE
    [get_bd_addr_segs input_arbiter_0/S_AXI/reg0] SEG_input_arbiter_0_reg0
 
 create_bd_addr_seg -range ${OUTPUT_PORT_LOOKUP_SIZEADDR} -offset ${OUTPUT_PORT_LOOKUP_BASEADDR} [get_bd_addr_spaces mbsys/microblaze_0/Data] \
-   [get_bd_addr_segs nic_output_port_lookup_0/S_AXI/reg0] SEG_nic_output_port_lookup_0_reg0
+   [get_bd_addr_segs router_output_port_lookup_0/S_AXI/reg0] SEG_router_output_port_lookup_0_reg0
 create_bd_addr_seg -range ${OUTPUT_PORT_LOOKUP_SIZEADDR} -offset ${OUTPUT_PORT_LOOKUP_BASEADDR} [get_bd_addr_spaces nf_sume_dma/nf_riffa_dma_0/m_axi_lite] \
-   [get_bd_addr_segs nic_output_port_lookup_0/S_AXI/reg0] SEG_nic_output_port_lookup_0_reg0
+   [get_bd_addr_segs router_output_port_lookup_0/S_AXI/reg0] SEG_router_output_port_lookup_0_reg0
 
 create_bd_addr_seg -range ${OUTPUT_QUEUES_SIZEADDR} -offset ${OUTPUT_QUEUES_BASEADDR} [get_bd_addr_spaces mbsys/microblaze_0/Data] \
    [get_bd_addr_segs output_queues_0/S_AXI/reg0] SEG_output_queues_0_reg0
@@ -246,13 +244,4 @@ wait_on_run fifo_generator_1_9_synth_1
 set_property synth_checkpoint_mode None [get_files ./${proj_dir}/${design}.srcs/sources_1/bd/${design}/${design}.bd]
 generate_target all [get_files ./${proj_dir}/${design}.srcs/sources_1/bd/${design}/${design}.bd]
 
-#### Start synthesis and implementation
-synth_design -rtl -name rtl_1
-set_property BITSTREAM.GENERAL.COMPRESS TRUE [get_designs rtl_1]
-save_constraints
-
-set_property strategy Performance_Explore [get_runs impl_1]
-
-launch_runs impl_1 -to_step write_bitstream
-wait_on_run impl_1
 exit

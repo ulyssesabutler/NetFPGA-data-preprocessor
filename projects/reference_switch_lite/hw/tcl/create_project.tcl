@@ -133,27 +133,4 @@ read_verilog "./hdl/axi_clocking.v"
 read_verilog "./hdl/nf_datapath.v"
 read_verilog "./hdl/top.v"
 
-
-#Setting Synthesis options
-create_run -flow {Vivado Synthesis 2016} synth
-#Setting Implementation options
-create_run impl -parent_run synth -flow {Vivado Implementation 2016} 
-set_property steps.phys_opt_design.is_enabled true [get_runs impl_1]
-set_property STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE Explore [get_runs impl_1]
-set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.is_enabled true [get_runs impl_1]
-set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.ARGS.DIRECTIVE Explore [get_runs impl_1]
-# The following implementation options will increase runtime, but get the best timing results
-set_property strategy Performance_Explore [get_runs impl_1]
-### Solves synthesis crash in 2013.2
-##set_param synth.filterSetMaxDelayWithDataPathOnly true
-set_property SEVERITY {Warning} [get_drc_checks UCIO-1]
-launch_runs synth
-wait_on_run synth
-launch_runs impl_1 -to_step write_bitstream
-wait_on_run impl_1
 exit
-
-
-
-
-
