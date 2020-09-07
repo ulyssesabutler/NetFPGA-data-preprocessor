@@ -30,7 +30,7 @@
 ## -- The following two properties should be set for every design
 set_property CFGBVS GND [current_design]
 set_property CONFIG_VOLTAGE 1.8 [current_design]
-set_property BITSTREAM.GENERAL.COMPRESS FALSE [current_design]
+set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
 
 # PCIe Transceiver clock (100 MHz)
 set_property PACKAGE_PIN AB8 [get_ports sys_clkp]
