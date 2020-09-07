@@ -70,7 +70,10 @@ set_property LOC GTHE2_CHANNEL_X1Y36 [get_cells -hier -filter name=~*interface_3
 # GT Ref clk
 set_property PACKAGE_PIN E10 [get_ports sfp_refclk_p]
 set_property PACKAGE_PIN E9 [get_ports sfp_refclk_n]
-create_clock -period 6.400 -name xgemac_clk_156 [get_ports sfp_refclk_p]
+create_clock -period 6.400 [get_ports sfp_refclk_p]
+
+#create_clock -period 6.400 -name xgemac_clk_156 [get_ports sfp_refclk_p]
+
 
 # XGE TX/RX LEDs
 #   GRN - TX
@@ -89,30 +92,45 @@ set_property IOSTANDARD LVCMOS15 [get_ports {eth?_?x_led}]
 
 
 ## Timing Constraints
-create_clock -period 3.103 -name rxusrclkout0 [get_pins -hier -filter name=~*interface_0*gthe2_i/RXOUTCLK]
-create_clock -period 3.103 -name txusrclkout0 [get_pins -hier -filter name=~*interface_0*gthe2_i/TXOUTCLK]
-create_clock -period 3.103 -name rxusrclkout1 [get_pins -hier -filter name=~*interface_1*gthe2_i/RXOUTCLK]
-create_clock -period 3.103 -name txusrclkout1 [get_pins -hier -filter name=~*interface_1*gthe2_i/TXOUTCLK]
-create_clock -period 3.103 -name rxusrclkout2 [get_pins -hier -filter name=~*interface_2*gthe2_i/RXOUTCLK]
-create_clock -period 3.103 -name txusrclkout2 [get_pins -hier -filter name=~*interface_2*gthe2_i/TXOUTCLK]
-create_clock -period 3.103 -name rxusrclkout3 [get_pins -hier -filter name=~*interface_3*gthe2_i/RXOUTCLK]
-create_clock -period 3.103 -name txusrclkout3 [get_pins -hier -filter name=~*interface_3*gthe2_i/TXOUTCLK]
+#create_clock -period 3.103 -name rxusrclkout0 [get_pins -hier -filter name=~*interface_0*gthe2_i/RXOUTCLK]
+#create_clock -period 3.103 -name txusrclkout0 [get_pins -hier -filter name=~*interface_0*gthe2_i/TXOUTCLK]
+#create_clock -period 3.103 -name rxusrclkout1 [get_pins -hier -filter name=~*interface_1*gthe2_i/RXOUTCLK]
+#create_clock -period 3.103 -name txusrclkout1 [get_pins -hier -filter name=~*interface_1*gthe2_i/TXOUTCLK]
+#create_clock -period 3.103 -name rxusrclkout2 [get_pins -hier -filter name=~*interface_2*gthe2_i/RXOUTCLK]
+#create_clock -period 3.103 -name txusrclkout2 [get_pins -hier -filter name=~*interface_2*gthe2_i/TXOUTCLK]
+#create_clock -period 3.103 -name rxusrclkout3 [get_pins -hier -filter name=~*interface_3*gthe2_i/RXOUTCLK]
+#create_clock -period 3.103 -name txusrclkout3 [get_pins -hier -filter name=~*interface_3*gthe2_i/TXOUTCLK]
+
+create_clock -period 3.103 [get_pins -hier -filter name=~*interface_0*gthe2_i/RXOUTCLK]
+create_clock -period 3.103 [get_pins -hier -filter name=~*interface_0*gthe2_i/TXOUTCLK]
+create_clock -period 3.103 [get_pins -hier -filter name=~*interface_1*gthe2_i/RXOUTCLK]
+create_clock -period 3.103 [get_pins -hier -filter name=~*interface_1*gthe2_i/TXOUTCLK]
+create_clock -period 3.103 [get_pins -hier -filter name=~*interface_2*gthe2_i/RXOUTCLK]
+create_clock -period 3.103 [get_pins -hier -filter name=~*interface_2*gthe2_i/TXOUTCLK]
+create_clock -period 3.103 [get_pins -hier -filter name=~*interface_3*gthe2_i/RXOUTCLK]
+create_clock -period 3.103 [get_pins -hier -filter name=~*interface_3*gthe2_i/TXOUTCLK]
 
 
-set_false_path -from [get_clocks clk_out1_reference_router_sys_clock_0_0] -to [get_clocks xgemac_clk_156]
-set_false_path -from [get_clocks xgemac_clk_156] -to [get_clocks clk_out1_reference_router_sys_clock_0_0]
+#set_false_path -from [get_clocks clk_out1_reference_router_sys_clock_0_0] -to [get_clocks xgemac_clk_156]
+#set_false_path -from [get_clocks xgemac_clk_156] -to [get_clocks clk_out1_reference_router_sys_clock_0_0]
 
-set_false_path -from [get_clocks clk_out2_reference_router_sys_clock_0_0] -to [get_clocks xgemac_clk_156]
-set_false_path -from [get_clocks xgemac_clk_156] -to [get_clocks clk_out2_reference_router_sys_clock_0_0]
+#set_false_path -from [get_clocks clk_out2_reference_router_sys_clock_0_0] -to [get_clocks xgemac_clk_156]
+#set_false_path -from [get_clocks xgemac_clk_156] -to [get_clocks clk_out2_reference_router_sys_clock_0_0]
+
+set_false_path -from [get_clocks clk_out1_reference_router_sys_clock_0_0] -to [get_clocks sfp_refclk_p]
+set_false_path -from [get_clocks sfp_refclk_p] -to [get_clocks clk_out1_reference_router_sys_clock_0_0]
+
+set_false_path -from [get_clocks clk_out2_reference_router_sys_clock_0_0] -to [get_clocks sfp_refclk_p]
+set_false_path -from [get_clocks sfp_refclk_p] -to [get_clocks clk_out2_reference_router_sys_clock_0_0]
 
 set_false_path -from [get_clocks clk_out1_reference_router_sys_clock_0_0] -to [get_clocks clk_out2_reference_router_sys_clock_0_0]
 set_false_path -from [get_clocks clk_out2_reference_router_sys_clock_0_0] -to [get_clocks clk_out1_reference_router_sys_clock_0_0]
 
-set_false_path -from [get_clocks rxusrclkout?] -to [get_clocks xgemac_clk_156]
-set_false_path -from [get_clocks xgemac_clk_156] -to [get_clocks rxusrclkout?]
+#set_false_path -from [get_clocks rxusrclkout?] -to [get_clocks xgemac_clk_156]
+#set_false_path -from [get_clocks xgemac_clk_156] -to [get_clocks rxusrclkout?]
 
-set_false_path -from [get_clocks txusrclkout?] -to [get_clocks xgemac_clk_156]
-set_false_path -from [get_clocks xgemac_clk_156] -to [get_clocks txusrclkout?]
+#set_false_path -from [get_clocks txusrclkout?] -to [get_clocks xgemac_clk_156]
+#set_false_path -from [get_clocks xgemac_clk_156] -to [get_clocks txusrclkout?]
 
 set_false_path -from [get_clocks userclk1] -to [get_clocks clk_out1_reference_router_sys_clock_0_0]
 set_false_path -from [get_clocks clk_out1_reference_router_sys_clock_0_0] -to [get_clocks userclk1]
@@ -120,8 +138,11 @@ set_false_path -from [get_clocks clk_out1_reference_router_sys_clock_0_0] -to [g
 set_false_path -from [get_clocks userclk1] -to [get_clocks pcie_sys_clk]
 set_false_path -from [get_clocks pcie_sys_clk] -to [get_clocks userclk1]
 
-set_false_path -from [get_clocks userclk1] -to [get_clocks xgemac_clk_156]
-set_false_path -from [get_clocks xgemac_clk_156] -to [get_clocks userclk1]
+#set_false_path -from [get_clocks userclk1] -to [get_clocks xgemac_clk_156]
+#set_false_path -from [get_clocks xgemac_clk_156] -to [get_clocks userclk1]
+
+set_false_path -from [get_clocks userclk1] -to [get_clocks sfp_refclk_p]
+set_false_path -from [get_clocks sfp_refclk_p] -to [get_clocks userclk1]
 
 set_false_path -from [get_clocks userclk1] -to [get_clocks clk_out1_reference_router_sys_clock_0_0]
 set_false_path -from [get_clocks clk_out1_reference_router_sys_clock_0_0] -to [get_clocks userclk1]
@@ -129,5 +150,10 @@ set_false_path -from [get_clocks clk_out1_reference_router_sys_clock_0_0] -to [g
 set_false_path -from [get_clocks userclk1] -to [get_clocks clk_out2_reference_router_sys_clock_0_0]
 set_false_path -from [get_clocks clk_out2_reference_router_sys_clock_0_0] -to [get_clocks userclk1]
 
+set_false_path -from [get_clocks -filter name=~*interface_*gthe2_i/RXOUTCLK] -to [get_clocks sfp_refclk_p]
+set_false_path -from [get_clocks sfp_refclk_p] -to [get_clocks -filter name=~*interface_*gthe2_i/RXOUTCLK]
+
+set_false_path -from [get_clocks  -filter name=~*interface_*gthe2_i/TXOUTCLK] -to [get_clocks sfp_refclk_p]
+set_false_path -from [get_clocks sfp_refclk_p] -to [get_clocks -filter name=~*interface_*gthe2_i/TXOUTCLK]
 
 
