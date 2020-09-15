@@ -105,12 +105,12 @@ export_to_sdk:
 			echo "******************************************";\
 			echo "* Export ${PROJ} project to SDK";\
 			echo "******************************************\n";\
-#			vivado -mode batch -source tcl/nf_sume_export_hardware.tcl -tclargs nf_sume_${PROJ};\
-			if test -d ../sw/embedded/nf_sume_${PROJ}; then \
-				rm -rf ../sw/embedded/nf_sume_${PROJ}/; \
-			fi; \
-			mkdir ../sw/embedded/nf_sume_${PROJ}/; \
-			find project/nf_sume_${PROJ}_ex/ -name "*.sysdef" -exec cp -f {} ../sw/embedded/nf_sume_${PROJ}/nf_sume_${PROJ}.hdf  \; ;\
+			vivado -mode batch -source tcl/nf_sume_export_hardware.tcl -tclargs nf_sume_${PROJ};\
+#			if test -d ../sw/embedded/nf_sume_${PROJ}; then \
+#				rm -rf ../sw/embedded/nf_sume_${PROJ}/; \
+#			fi; \
+#			mkdir ../sw/embedded/nf_sume_${PROJ}/; \
+#			find project/nf_sume_${PROJ}_ex/ -name "*.sysdef" -exec cp -f {} ../sw/embedded/nf_sume_${PROJ}/nf_sume_${PROJ}.hdf  \; ;\
 		else \
 			echo "Acceptance test ${PROJ} does not exists.";\
 			echo "Please run \"make PROJ=${PROJ} project compile\" to create and build the project first";\
