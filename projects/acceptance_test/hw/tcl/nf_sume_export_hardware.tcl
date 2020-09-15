@@ -47,10 +47,9 @@ open_project project/${project_name}_ex/${project_name}_ex.xpr
 puts "\nOpening $project_name Implementation design\n"
 open_run impl_1
 
-puts "\nCopying $project_name.sysdef\n"
+puts "\nExporting $project_name.xsa file\n"
 file mkdir ../sw/embedded/${project_name}
-file copy -force project/${project_name}_ex/${project_name}_ex.runs/impl_1/example_top.sysdef ../sw/embedded/${project_name}/$project_name.hdf
-
+write_hw_platform -fixed -include_bit -force -file ../sw/embedded/${project_name}/$project_name.xsa
 exit
 
 
