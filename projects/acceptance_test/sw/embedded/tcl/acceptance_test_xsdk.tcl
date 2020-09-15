@@ -29,11 +29,14 @@ set WS "SDK_Workspace"
 set design [lindex $argv 0]
 
 setws ./nf_sume_$design/$WS
-createhw -name hw_platform_0 -hwspec ./nf_sume_$design/nf_sume_$design.hdf
-createbsp -name bsp -hwproject hw_platform_0 -proc mbsys_microblaze_0 -os standalone
-createapp -name acceptance_test -hwproject hw_platform_0 -proc mbsys_microblaze_0 -os standalone -lang C -app {Hello World} -bsp bsp
-createapp -name acceptance_test_sim -hwproject hw_platform_0 -proc mbsys_microblaze_0 -os standalone -lang C -app {Hello World} -bsp bsp
+repo -set $::env(VITIS_PATH)/data/embeddedsw/XilinxProcessorIPLib/drivers/
 
-projects -build -type all
+app create -name acceptance_test -hw $::env(NF_DESIGN_DIR)/sw/embedded/nf_sume_$design/nf_sume_$design.xsa -proc mbsys_microblaze_0 -os standalone -lang C -template {Hello World}
+importsources -name acceptance_test -path ./src/nf_sume_$design/
+app build -name acceptance_test
+
+app create -name acceptance_test_sim -hw $::env(NF_DESIGN_DIR)/sw/embedded/nf_sume_$design/nf_sume_$design.xsa -proc mbsys_microblaze_0 -os standalone -lang C -template {Hello World}
+importsources -name acceptance_test_sim -path ./src/nf_sume_$design/
+app build -name acceptance_test_sim
+
 exit
-
