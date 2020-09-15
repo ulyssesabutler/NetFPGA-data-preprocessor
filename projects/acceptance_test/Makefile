@@ -48,7 +48,6 @@ ddr3A ddr3B qdrA qdrB qdrC pcie fmc_ibert fmc_gtwizard qth_ibert qth_gtwizard pc
 	make -C hw PROJ=$@ compile
 	make -C hw PROJ=$@ export_to_sdk
 	make -C sw/embedded PROJ=$@ project
-	make -C sw/embedded PROJ=$@ compile
 	make -C hw PROJ=$@ load_elf
 
 test:
