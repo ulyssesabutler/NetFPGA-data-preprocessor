@@ -51,7 +51,7 @@ ddr3A ddr3B qdrA qdrB qdrC pcie fmc_ibert fmc_gtwizard qth_ibert qth_gtwizard pc
 	make -C hw PROJ=$@ load_elf
 
 test:
-	python sw/host/script/NfSumeTest.py
+	python2 sw/host/script/NfSumeTest.py
 
 cores:
 	for lib in $(LIB_HW_DIR_INSTANCES) ; do\
