@@ -57,3 +57,5 @@ cp readme/verilog-pcie.md ${SUME_HOME}/README.md
 
 # patch makefile
 patch -p2 -d verilog-pcie < patch/Makefile-pcie.patch
+# patch driver 
+patch -p2 -d verilog-pcie < patch/example_driver-verilog-pcie.patch

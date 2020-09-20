@@ -62,3 +62,6 @@ cp readme/corundum.md ${SUME_HOME}/README.md
 patch -p2 -d corundum < patch/Makefile-corundum.patch
 # patch pcie3_7x ip with device ID 1001 
 patch -p2 -d corundum < patch/pcie3_7x_0.xci.patch
+# patch driver 
+patch -p2 -d corundum < patch/mqnic_main-corundum.patch
+

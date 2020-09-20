@@ -1,0 +1,10 @@
+--- a/corundum/modules/mqnic/mqnic_main.c	2020-09-20 21:30:14.688188349 +0100
++++ b/corundum/modules/mqnic/mqnic_main.c	2020-09-20 21:31:43.731397049 +0100
+@@ -33,7 +33,6 @@
+ 
+ #include "mqnic.h"
+ #include <linux/module.h>
+-#include <linux/pci-aspm.h>
+ #include <linux/delay.h>
+ 
+ MODULE_DESCRIPTION("mqnic driver");

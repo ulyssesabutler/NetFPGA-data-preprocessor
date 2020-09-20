@@ -1,0 +1,10 @@
+--- a/verilog-pcie/example/NetFPGA_SUME/fpga_axi/driver/example_driver.c	2020-09-20 22:48:02.278055068 +0100
++++ b/verilog-pcie/example/NetFPGA_SUME/fpga_axi/driver/example_driver.c	2020-09-20 22:47:20.958431962 +0100
+@@ -25,7 +25,6 @@
+ #include "example_driver.h"
+ #include <linux/module.h>
+ #include <linux/pci.h>
+-#include <linux/pci-aspm.h>
+ #include <linux/delay.h>
+ 
+ MODULE_DESCRIPTION("verilog-pcie example driver");
