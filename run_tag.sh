@@ -29,9 +29,11 @@
 #
 
 tag_name=`grep GIT ../../../RELEASE_NOTES`
-tag_length=${#tag_name}
-tag_a=${tag_name:12:1}
-tag_b=${tag_name:14:1}
-tag_c=${tag_name:16:1}
+
+tag_version=`echo "${tag_name}" | awk '{print $3}'`
+tag_a=`echo ${tag_version} | awk -F . '{print $1}' | xargs printf %x`
+tag_b=`echo ${tag_version} | awk -F . '{print $2}' | xargs printf %x`
+tag_c=`echo ${tag_version} | awk -F . '{print $3}' | xargs printf %x`
 
 echo ${tag_a}${tag_b}${tag_c}
+
