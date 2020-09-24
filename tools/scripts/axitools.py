@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #
 # Copyright (C) 2010, 2011 The Board of Trustees of The Leland Stanford
 #                          Junior University

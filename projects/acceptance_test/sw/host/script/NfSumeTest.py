@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 #
 # Copyright (c) 2015 Digilent Inc.
 # Copyright (c) 2015 Tinghui Wang (Steve)
