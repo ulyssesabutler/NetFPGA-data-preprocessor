@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #
 # Copyright (c) 2018 Murali Ramanujam
 # All rights reserved.
@@ -63,7 +64,7 @@ comments_col = 10
 
 with open(inputFileName, 'rb') as csvfile:
 	reader = csv.reader(csvfile, delimiter=',', quotechar='"')
-	headers = list(reader.next())
+	headers = list(next(reader))
 	result = [list(row) for row in reader]
 
 

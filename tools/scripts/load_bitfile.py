@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 #
 # Copyright (c) 2015 Neelakandan Manihatty Bojan
@@ -43,30 +43,30 @@ def main(argv):
     input_filename = ''
 
     try:
-	opts, args = getopt.getopt(sys.argv[1:], 'i:v', ['input='])
+        opts, args = getopt.getopt(sys.argv[1:], 'i:v', ['input='])
 
     except getopt.GetoptError:          
-        print 'Usage : python load_bitfile -i <bitfile>'	                        
+        print('Usage : python load_bitfile -i <bitfile>')	                        
         sys.exit(2)   
 
     for opt, arg in opts:
-    	if opt in ('-i', '--input'):
-        	input_filename = arg
-    print 'INPUT    :', input_filename
+        if opt in ('-i', '--input'):
+            input_filename = arg
+    print('INPUT    :', input_filename)
 
 #   Scanning for the FPGA index
-    p = Popen(['djtgcfg', 'init', '-d', 'NetSUME'], stdout=PIPE, bufsize = 1)
+    p = Popen(['djtgcfg', 'init', '-d', 'NetSUME'], stdout=PIPE)
     for line in iter(p.stdout.readline, b''):
         tokens = line.split()
-        for i in xrange(len(tokens)):
+        for i in range(len(tokens)):
             if tokens[i] == 'XC7VX690T':
                 fpgaIndex = tokens[i - 1].split(':')[0]
-		print fpgaIndex;
+                print(fpgaIndex)
     p.stdout.close()
     print('FPGA JTAG Index: %s' % fpgaIndex)
 
     # Program FPGA with bitfile
-    k = Popen(['vivado', '-nolog', '-nojournal', '-mode', 'batch', '-source', 'download.tcl', '-tclargs', fpgaIndex, input_filename], stdout=PIPE, bufsize = 1)
+    k = Popen(['vivado', '-nolog', '-nojournal', '-mode', 'batch', '-source', 'download.tcl', '-tclargs', fpgaIndex, input_filename], stdout=PIPE)
     sys.stdout.write(k.stdout.readline())
 
 if __name__ == "__main__":

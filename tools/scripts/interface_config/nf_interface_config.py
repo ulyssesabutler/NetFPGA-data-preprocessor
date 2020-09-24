@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 # Copyright (c) 2015 Neelakandan Manihatty Bojan
 # All rights reserved.
@@ -43,52 +43,51 @@ eth_interfaces = []
 nf_interfaces = []
 
 def dumpConfig():
-   ifconfig_file = open("ifconfig_dump", "w+")
-   p = subprocess.Popen('ifconfig -a', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-   for line in p.stdout.readlines():
-       ifconfig_file.write(line)
-   ifconfig_file.close()
+  ifconfig_file = open("ifconfig_dump", "w+")
+  p = subprocess.Popen('ifconfig -a', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+  for line in p.stdout.readlines():
+    ifconfig_file.write(line)
+  ifconfig_file.close()
 
 def processInterfaces():
-   ifconfig_file = open("ifconfig_dump", "r+")
-   log_file = open("log", "w")
-   for line in ifconfig_file:
-       match_eth_interfaces = re.match(r'\s*eth([0-9]+)', line)
-       match_nf_interfaces = re.match(r'\s*nf([0-9]+)', line)
-    	
-       if match_eth_interfaces:
-          eth_interfaces.append(match_eth_interfaces.group(0))
-          newline1= "\nFound %s\n" % (match_eth_interfaces.group(0))
-   	  log_file.write(newline1)
-       elif match_nf_interfaces:
-   	  nf_interfaces.append(match_nf_interfaces.group(0))
-          newline1= "\nFound %s\n" % (match_nf_interfaces.group(0))
-   	  log_file.write(newline1)
-       else:
-   	  newline1="No interface found"
+  ifconfig_file = open("ifconfig_dump", "r+")
+  log_file = open("log", "w")
+  for line in ifconfig_file:
+    match_eth_interfaces = re.match(r'\s*eth([0-9]+)', line)
+    match_nf_interfaces = re.match(r'\s*nf([0-9]+)', line)
+    if match_eth_interfaces:
+      eth_interfaces.append(match_eth_interfaces.group(0))
+      newline1= "\nFound %s\n" % (match_eth_interfaces.group(0))
+      log_file.write(newline1)
+    elif match_nf_interfaces:
+      nf_interfaces.append(match_nf_interfaces.group(0))
+      newline1= "\nFound %s\n" % (match_nf_interfaces.group(0))
+      log_file.write(newline1)
+    else:
+      newline1="No interface found"
    
-   print"Following are the ethX interfaces found in your machine:"
-   for i in eth_interfaces:
-       print "%s" %i	
+  print("Following are the ethX interfaces found in your machine:")
+  for i in eth_interfaces:
+    print("%s" %i)	
 
 def getConfiguration():
-   global first_interface
-   global second_interface
+  global first_interface
+  global second_interface
 
-   print"The hardware tests requires two interfaces, please choose your interfaces below:"
-   first_interface =  raw_input("Enter your first interface : ").strip()
-   second_interface = raw_input("Enter your second interface : ").strip()
+  print("The hardware tests requires two interfaces, please choose your interfaces below:")
+  first_interface =  input("Enter your first interface : ").strip()
+  second_interface = input("Enter your second interface : ").strip()
 
 
 def checkInterfaces(first_interface,second_interface):
-   global result
+  global result
 
-   found_first  = first_interface in eth_interfaces
-   found_second = second_interface in eth_interfaces
-   result = found_first and found_second
+  found_first  = first_interface in eth_interfaces
+  found_second = second_interface in eth_interfaces
+  result = found_first and found_second
 
 def createHeader():
-    return "#\n\
+  return "#\n\
 # Copyright (c) 2015 Neelakandan Manihatty Bojan\n\
 # All rights reserved.\n\
 #\n\
@@ -119,8 +118,8 @@ def createHeader():
 "
 
 def createSetup(first_interface,second_interface):
-    with open("setup","w") as f:
-        f.write("#!/usr/bin/env python\n" + createHeader() +
+  with open("setup","w") as f:
+    f.write("#!/usr/bin/env python\n" + createHeader() +
 "\n\
 \n\
 from subprocess import Popen, PIPE\n\
@@ -135,8 +134,8 @@ proc = Popen([\"ifconfig\",\"nf3\",\"192.168.203.1\"], stdout=PIPE)\n\
 ")
 
 def createConn(first_interface,second_interface):
-    with open("conn","w") as f:
-        f.write(createHeader() +
+  with open("conn","w") as f:
+    f.write(createHeader() +
 "\n\
 nf0:"+first_interface+"\n\
 nf1:"+second_interface+"\n\
@@ -150,12 +149,8 @@ processInterfaces()
 getConfiguration()
 checkInterfaces(first_interface,second_interface)
 if (result):
-   createSetup(first_interface,second_interface)
-   createConn(first_interface,second_interface)
+  createSetup(first_interface,second_interface)
+  createConn(first_interface,second_interface)
 else:
-   print "Your desired interfaces doesn't match with the available interfaces. Please try again"
-
-
-
-
+  print("Your desired interfaces doesn't match with the available interfaces. Please try again")
 
