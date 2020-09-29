@@ -104,7 +104,7 @@ proc create_hier_cell_nf_sume_datapath { parentCell coreName tdataWidth} {
    set_property -dict [list CONFIG.C_M_AXIS_DATA_WIDTH $tdataWidth] $nic_output_port_lookup_0
    set_property -dict [list CONFIG.C_S_AXIS_DATA_WIDTH $tdataWidth] $nic_output_port_lookup_0
 
-   set output_queues_0 [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:output_queues:1.0 output_queues_0]
+   set output_queues_0 [create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nic_output_queues:1.0 output_queues_0]
    set_property -dict [list CONFIG.C_M_AXIS_DATA_WIDTH $tdataWidth] $output_queues_0
    set_property -dict [list CONFIG.C_S_AXIS_DATA_WIDTH $tdataWidth] $output_queues_0
  

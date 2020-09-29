@@ -128,7 +128,7 @@ set_property -dict [list CONFIG.C_BAUDRATE {115200}] [get_bd_cells axi_uartlite_
 
 create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:input_arbiter:1.0 input_arbiter_0
 create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nic_output_port_lookup:1.0 nic_output_port_lookup_0
-create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:output_queues:1.0 output_queues_0
+create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nic_output_queues:1.0 output_queues_0
 
 create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_10ge_interface_shared:1.0 nf_10g_interface_0
 create_bd_cell -type ip -vlnv NetFPGA:NetFPGA:nf_10ge_interface:1.0 nf_10g_interface_1
