@@ -7,6 +7,7 @@
 //        10g ethernet tx queue with backpressure.
 //        ported from nf10 (Virtex-5 based) interface.
 //
+//        (Stay in IDLE version)
 //
 // This software was developed by
 // Stanford University and the University of Cambridge Computer Laboratory
@@ -97,8 +98,8 @@ module tx_queue
 
     ////////////////////////////////////////////////
     ////////////////////////////////////////////////
-    assign fifo_wr_en  = (i_tvalid & i_tready);    
-    assign i_tready    = ~fifo_almost_full & ~info_fifo_full;
+    assign fifo_wr_en  = (reset) ? 1'b0 : (i_tvalid & i_tready) ? 1'b1 : 1'b0; 
+    assign i_tready    = ~fifo_almost_full; // disconnected info_fifo_full
     assign tlast_axi_i = i_tlast;
 
       		 
@@ -106,7 +107,7 @@ module tx_queue
       // 36Kb FIFO (First-In-First-Out) Block RAM Memory primitive V7  
       // IMPORTANT: RST should stay high for at least 5 clks, RDEN & WREN should stay 1'b0;
       FIFO36E1 #(        
-        .ALMOST_FULL_OFFSET         (9'hA), 
+        .ALMOST_FULL_OFFSET         (9'h100), // Ethernet frame 1518 / 6 =~ 256 = 0x100
         .ALMOST_EMPTY_OFFSET        (9'hA),
         .DO_REG                     (1),
         .EN_ECC_READ                ("FALSE"),
@@ -144,7 +145,7 @@ module tx_queue
         .INJECTDBITERR              (),
         .INJECTSBITERR              (),    
       
-        .RST                        (areset_clk156),
+        .RST                        (reset),
         .RSTREG                     (), 
         .REGCE                      ()     
       );
@@ -158,9 +159,9 @@ module tx_queue
 		.rd_en			(info_fifo_rd_en					),
 		.rd_clk			(clk156							),
 		
-		.full 			(info_fifo_full							),
+		.full 			(info_fifo_full						),
 		.empty 			(info_fifo_empty					),
- 		.rst			(areset_clk156							)
+ 		.rst			(reset							)
 	);	
 	 
 
@@ -199,7 +200,7 @@ module tx_queue
       // Sideband INFO 
       // pkt enq FSM comb
       always @(*) begin 
-          state1_next             = METADATA;
+          state1_next             = state1;
               
           tx_pkts_enqueued_signal = 0;
           tx_bytes_enqueued       = 0;
@@ -214,7 +215,6 @@ module tx_queue
               end
        
               EOP: begin
-                  state1_next = EOP;
                   if(i_tvalid & i_tlast & i_tready) begin
                       state1_next = METADATA;
                   end
@@ -233,12 +233,9 @@ module tx_queue
       end
            
       // write en on pkt
-      always @(posedge clk)
-         if (reset)
-            info_fifo_wr_en   <= 0;
-         else
-            info_fifo_wr_en <= i_tlast & i_tvalid & i_tready;
-        
+      always @(posedge clk) begin
+          info_fifo_wr_en <= i_tlast & i_tvalid & i_tready;
+      end
  
       //////////////////////////////////////////////////////////
       //////////////////////////////////////////////////////////
@@ -248,7 +245,7 @@ module tx_queue
       assign tx_dequeued_pkt = tx_dequeued_pkt_next; 
 
       always @(*) begin
-          state_next            = IDLE;
+          state_next            = state;
           
           // axi
           o_tkeep               = tkeep_decoded_o;
@@ -267,37 +264,48 @@ module tx_queue
           case(state)
               IDLE: begin
                   o_tkeep = 8'b0;
-                  if( ~info_fifo_empty & ~fifo_empty) begin
+                  if( ~info_fifo_empty) begin // Wait until we have at least a full packet in our queue
                       // pkt is stored already
-                      info_fifo_rd_en = 1'b1;
+                      info_fifo_rd_en = 1'b1; // Dequeue one packet
                       be              = 'b0;                      
                       state_next      = SEND_PKT;                     
                   end
               end
 
-              SEND_PKT: begin 
+              SEND_PKT: begin
                 // very important: 
                 // tvalid to go first: pg157, v3.0, pp. 109.
                 o_tvalid = 1'b1;
-                state_next  = SEND_PKT;
-                if (o_tready & ~fifo_empty) begin                
+                if (o_tready & ~fifo_empty) begin // This is backpressure from MAC & empty from CDC FIFO            
                     fifo_rd_en            = 1'b1;
                   
                     be                    = 1'b1;
                     tx_dequeued_pkt_next  = 1'b1; 
-                                                         
-                    if (tlast_axi_o) begin
+
+                    if (tlast_axi_o) begin // This is TLAST coming from CDC FIFO
                          o_tlast    = 1'b1;
                          be         = 1'b1;    
-                         state_next = IDLE;                       
+//                         state_next = (info_fifo_empty) ? IDLE : SEND_PKT;  // Leave TVALID high if there are more buffered frames
+                         if (info_fifo_empty) begin
+                             state_next = IDLE;
+                             info_fifo_rd_en = 'd0;
+                         end 
+                         else begin
+                             state_next = SEND_PKT;
+                             info_fifo_rd_en = 'd1;
+                         end
                     end               
-                end                 
+                end
+              end
+
+              default : begin
+                  state_next = IDLE;
               end
           endcase
       end
  
       always @(posedge clk156) begin
-          if(areset_clk156) state <= IDLE;
+          if(reset) state <= IDLE;
           else      state <= state_next;         
       end 
  endmodule
