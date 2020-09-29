@@ -164,9 +164,8 @@ set_property top_lib xil_defaultlib [get_filesets sim_1]
 update_compile_order -fileset sim_1
 
 # workaround to avoid invoking default python2 in vivado
-#unset env(PYTHONPATH)
 unset env(PYTHONHOME)
-set output [exec python $::env(NF_DESIGN_DIR)/test/${test_name}/run.py]
+set output [exec python3 $::env(NF_DESIGN_DIR)/test/${test_name}/run.py]
 puts $output
 
 launch_simulation -simset sim_1 -mode behavioral
