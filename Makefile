@@ -96,6 +96,7 @@ sume:
 	make -C $(LIB_HW_DIR)/std/cores/nf_10ge_attachment_v1_0_0/
 	make -C $(LIB_HW_DIR)/std/cores/nf_10ge_interface_shared_v1_0_0/
 	make -C $(LIB_HW_DIR)/std/cores/nf_10ge_interface_v1_0_0/
+	make -C $(LIB_HW_DIR)/std/cores/nic_output_queues_v1_0_0/
 #	make -C $(LIB_HW_DIR)/contrib/cores/nfmac_10ge_interface_shared_v1_0_0/
 #	make -C $(LIB_HW_DIR)/contrib/cores/nfmac_10ge_interface_v1_0_0/
 #	make -C $(LIB_HW_DIR)/contrib/cores/nfmac_10ge_interface_shared_v1_0_0/
