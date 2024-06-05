@@ -201,6 +201,13 @@ module nf_datapath #(
     wire                                     s_axis_opl_tvalid;
     wire                                     s_axis_opl_tready;
     wire                                     s_axis_opl_tlast;
+
+    wire [C_M_AXIS_DATA_WIDTH - 1:0]         processed_packet_axis_tdata;
+    wire [((C_M_AXIS_DATA_WIDTH / 8)) - 1:0] processed_packet_axis_tkeep;
+    wire [C_M_AXIS_TUSER_WIDTH-1:0]          processed_packet_axis_tuser;
+    wire                                     processed_packet_axis_tvalid;
+    wire                                     processed_packet_axis_tready;
+    wire                                     processed_packet_axis_tlast;
    
   //Input Arbiter
   input_arbiter_ip 
@@ -307,19 +314,55 @@ module nf_datapath #(
 
 
     );
-    
-       
+
+
+
+    network_packet_processor packet_processor
+    (
+        .axis_aclk(axis_aclk), 
+        .axis_resetn(axis_resetn), 
+
+        // Output to output queues
+        .m_axis_tdata   (processed_packet_axis_tdata),
+        .m_axis_tkeep   (processed_packet_axis_tkeep),
+        .m_axis_tuser   (processed_packet_axis_tuser),
+        .m_axis_tvalid  (processed_packet_axis_tvalid),
+        .m_axis_tready  (processed_packet_axis_tready),
+        .m_axis_tlast   (processed_packet_axis_tlast),
+
+        // Input from output port lookup
+        .s_axis_tdata   (m_axis_opl_tdata), 
+        .s_axis_tkeep   (m_axis_opl_tkeep), 
+        .s_axis_tuser   (m_axis_opl_tuser), 
+        .s_axis_tvalid  (m_axis_opl_tvalid), 
+        .s_axis_tready  (m_axis_opl_tready), 
+        .s_axis_tlast   (m_axis_opl_tlast)
+    );
+
+
+
       //Output queues
        output_queues_ip  
      bram_output_queues_1 (
       .axis_aclk(axis_aclk), 
       .axis_resetn(axis_resetn), 
+
+      .s_axis_tdata   (processed_packet_axis_tdata),
+      .s_axis_tkeep   (processed_packet_axis_tkeep),
+      .s_axis_tuser   (processed_packet_axis_tuser),
+      .s_axis_tvalid  (processed_packet_axis_tvalid),
+      .s_axis_tready  (processed_packet_axis_tready),
+      .s_axis_tlast   (processed_packet_axis_tlast),
+
+      /*
       .s_axis_tdata   (m_axis_opl_tdata), 
       .s_axis_tkeep   (m_axis_opl_tkeep), 
       .s_axis_tuser   (m_axis_opl_tuser), 
       .s_axis_tvalid  (m_axis_opl_tvalid), 
       .s_axis_tready  (m_axis_opl_tready), 
       .s_axis_tlast   (m_axis_opl_tlast), 
+      */
+
       .m_axis_0_tdata (m_axis_0_tdata), 
       .m_axis_0_tkeep (m_axis_0_tkeep), 
       .m_axis_0_tuser (m_axis_0_tuser), 
@@ -386,8 +429,47 @@ module nf_datapath #(
       .S_AXI_ARESETN(axi_resetn)
     ); 
     
-    
-    
-    
 endmodule
 
+module network_packet_processor
+#(
+  // AXI Stream Data Width
+  parameter TDATA_WIDTH        = 256,
+  parameter TUSER_WIDTH        = 128,
+
+  // NETWORK PACKET HEADER SIZES
+  parameter ETH_HDR_SIZE_BYTES = 14,
+  parameter IP_HDR_SIZE_BYTES  = 20
+)
+(
+  // Global Ports
+  input                              axis_aclk,
+  input                              axis_resetn,
+
+  // Master Stream Ports (The output of this module)
+  output [TDATA_WIDTH - 1:0]         m_axis_tdata,
+  output [((TDATA_WIDTH / 8)) - 1:0] m_axis_tkeep,
+  output [TUSER_WIDTH-1:0]           m_axis_tuser,
+  output                             m_axis_tvalid,
+  input                              m_axis_tready,
+  output                             m_axis_tlast,
+
+  // Slave Stream Ports (The input of this module)
+  input [TDATA_WIDTH - 1:0]          s_axis_tdata,
+  input [((TDATA_WIDTH / 8)) - 1:0]  s_axis_tkeep,
+  input [TUSER_WIDTH-1:0]            s_axis_tuser,
+  input                              s_axis_tvalid,
+  output                             s_axis_tready,
+  input                              s_axis_tlast
+);  
+
+  assign m_axis_tdata  = (s_axis_tdata[16 * 8 - 1:14 * 8] == 16'h0045) ? s_axis_tdata : {s_axis_tdata[TDATA_WIDTH-1:32], 16'hAAAA, s_axis_tdata[15:0]};
+
+  assign m_axis_tkeep  = s_axis_tkeep;
+  assign m_axis_tuser  = s_axis_tuser;
+  assign m_axis_tvalid = s_axis_tvalid;
+  assign m_axis_tlast  = s_axis_tlast;
+
+  assign s_axis_tready = m_axis_tready;
+
+endmodule
