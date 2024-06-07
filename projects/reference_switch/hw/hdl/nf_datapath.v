@@ -463,13 +463,243 @@ module network_packet_processor
   input                              s_axis_tlast
 );  
 
-  assign m_axis_tdata  = (s_axis_tdata[16 * 8 - 1:14 * 8] == 16'h0045) ? s_axis_tdata : {s_axis_tdata[TDATA_WIDTH-1:32], 16'hAAAA, s_axis_tdata[15:0]};
+  /*************************************************************************************************\
+  |* PACKET PROCESSING DATA
+  \*************************************************************************************************/
 
-  assign m_axis_tkeep  = s_axis_tkeep;
-  assign m_axis_tuser  = s_axis_tuser;
-  assign m_axis_tvalid = s_axis_tvalid;
-  assign m_axis_tlast  = s_axis_tlast;
+  // CURRENT NETWORK PACKET INFORMATION
+  reg        is_current_network_packet_read; // This flag will be true once the entire network packet has been fed into this module. I.e., after we see TLAST, this is true.
+  reg [31:0] bmp_pixel_packet_offset; // Where do the pixels start in the bitmap? I.e., how many bytes are the ETH, IP, and BMP headers, combined.
 
-  assign s_axis_tready = m_axis_tready;
+  // FSM INFORMATION
+  localparam STATE_INFORMATION_COLLECTION = 0;
+  localparam STATE_PACKET_PROCESSING      = 1;
 
+  reg [31:0] axi_packets_read;
+  reg [31:0] bytes_processed_before_current_axi_packet; // How many bytes are already written to the output queue? I.e., should be number of packet * 32.
+  reg [0:0]  state; // This is just a 1 bit integer for now, but might be expanded in the future
+
+  always @(posedge axis_aclk) begin
+    if (~axis_resetn) begin
+      axi_packets_read                          <= 0;
+      is_current_network_packet_read            <= 0;
+      bmp_pixel_packet_offset                   <= 0;
+      bytes_processed_before_current_axi_packet <= 0;
+      state                                     <= STATE_INFORMATION_COLLECTION;
+    end
+  end
+
+  /*************************************************************************************************\
+  |* INPUT QUEUE
+  \*************************************************************************************************/
+
+  // VARIABLES
+  wire [TDATA_WIDTH - 1:0]         input_fifo_head_tdata;
+  wire [((TDATA_WIDTH / 8)) - 1:0] input_fifo_head_tkeep;
+  wire [TUSER_WIDTH-1:0]           input_fifo_head_tuser;
+  wire                             input_fifo_head_tlast;
+
+  wire                             input_fifo_nearly_full;
+  wire                             input_fifo_empty;
+
+  wire                             write_to_input_queue;
+  wire                             read_from_input_queue;
+
+  // INPUT QUEUE MODULE
+  fallthrough_small_fifo
+  #(
+    .WIDTH(TDATA_WIDTH+TUSER_WIDTH+TDATA_WIDTH/8+1), // Fit the whole AXIS packet
+    .MAX_DEPTH_BITS(4)
+  )
+  input_fifo
+  (
+    .din         ({s_axis_tdata, s_axis_tkeep, s_axis_tuser, s_axis_tlast}), // Pass the packet heads as input directly to the queue
+    .wr_en       (write_to_input_queue), // Write enable
+    .rd_en       (read_from_input_queue), // Read enabled
+    .dout        ({input_fifo_head_tdata, input_fifo_head_tkeep, input_fifo_head_tuser, input_fifo_head_tlast}), // Return TLAST, TKEEP, and TUSER directly to the next stage. Write TDATA to a wire for processing
+    .full        (),
+    .prog_full   (),
+    .nearly_full (input_fifo_nearly_full),
+    .empty       (input_fifo_empty),
+    .reset       (~axis_resetn),
+    .clk         (axis_aclk)
+  );
+
+  // LOGIC
+  assign s_axis_tready = ~input_fifo_nearly_full & ~is_current_network_packet_read; // There is room in the queue and we're processing the current packet
+  assign write_to_input_queue = s_axis_tready & s_axis_tvalid;
+
+  /*************************************************************************************************\
+  |* OUTPUT QUEUE
+  \*************************************************************************************************/
+
+  // VARIABLES
+  reg [TDATA_WIDTH - 1:0]         output_fifo_tdata;
+  reg [((TDATA_WIDTH / 8)) - 1:0] output_fifo_tkeep;
+  reg [TUSER_WIDTH-1:0]           output_fifo_tuser;
+  reg                             output_fifo_tlast;
+
+  wire                            output_fifo_nearly_full;
+  wire                            output_fifo_empty;
+
+  reg                             write_to_output_queue;
+  wire                            read_from_output_queue;
+
+  // OUTPUT QUEUE MODULE
+  fallthrough_small_fifo
+  #(
+    .WIDTH(TDATA_WIDTH+TUSER_WIDTH+TDATA_WIDTH/8+1), // Fit the whole AXIS packet
+    .MAX_DEPTH_BITS(4)
+  )
+  output_fifo
+  (
+    .din         ({output_fifo_tdata, output_fifo_tkeep, output_fifo_tuser, output_fifo_tlast}), // Pass the packet heads as input directly to the queue
+    .wr_en       (write_to_output_queue), // Write enable
+    .rd_en       (read_from_output_queue), // Read enabled
+    .dout        ({m_axis_tdata, m_axis_tkeep, m_axis_tuser, m_axis_tlast}), // Return TLAST, TKEEP, and TUSER directly to the next stage. Write TDATA to a wire for processing
+    .full        (),
+    .prog_full   (),
+    .nearly_full (output_fifo_nearly_full),
+    .empty       (output_fifo_empty),
+    .reset       (~axis_resetn),
+    .clk         (axis_aclk)
+  );
+
+  // LOGIC
+  assign m_axis_tvalid = ~output_fifo_empty;
+  assign read_from_output_queue = m_axis_tvalid & m_axis_tready;
+
+  /*************************************************************************************************\
+  |* INPUT PACKET READER
+  |* ===================
+  |* Process data while it's being placed in the queue
+  \*************************************************************************************************/
+
+  always @(posedge axis_aclk) begin
+    if (write_to_input_queue) begin // While we are writing data to the input queue, collect information about the packet
+      if (state == STATE_INFORMATION_COLLECTION) begin
+        case (axi_packets_read)
+
+          1: begin
+            // ETH Header + IP Header + BMP Offset (TODO)
+            bmp_pixel_packet_offset <= 14 + 20;
+            state                   <= STATE_PACKET_PROCESSING;
+          end
+
+        endcase
+      end
+
+      axi_packets_read <= axi_packets_read + 1;
+
+      // We always want to check to see if we've reached the last AXIS packet of this network packet
+      if (s_axis_tlast) is_current_network_packet_read <= 1;
+
+    end
+  end
+
+  /*************************************************************************************************\
+  |* PACKET PROCESSOR
+  |* ================
+  |* Once we're in a packet processing state, mutate the data as we move it from the input queue to
+  |* the output queue.
+  \*************************************************************************************************/
+
+  // BODY PROCESSING
+  reg  [(TDATA_WIDTH / 8) - 1:0] body_processing_byte_mask;
+  wire [31:0]                    body_processing_bytes_in_current_axi_packet;
+  wire [TDATA_WIDTH - 1:0]       processed_output_tdata;
+
+  assign body_processing_bytes_in_current_axi_packet = (bmp_pixel_packet_offset - bytes_processed_before_current_axi_packet);
+
+  always @(*) begin
+      // If we're already past the offset point, keep all non-null bytes
+      if (bytes_processed_before_current_axi_packet > bmp_pixel_packet_offset)
+        body_processing_byte_mask <= input_fifo_head_tkeep;
+      else
+        body_processing_byte_mask <= (input_fifo_head_tkeep >> body_processing_bytes_in_current_axi_packet) << body_processing_bytes_in_current_axi_packet;
+  end
+
+  // PACKET PROCESSING
+  assign read_from_input_queue = ~input_fifo_empty & ~output_fifo_nearly_full & (state == STATE_PACKET_PROCESSING);
+  image_processor image_pixel_processor
+  (
+    .data_in(input_fifo_head_tdata),
+    .byte_mask(body_processing_byte_mask),
+    .data_out(processed_output_tdata)
+  );
+
+
+  always @(posedge axis_aclk) begin
+    if (read_from_input_queue) begin // While we are writing data to the input queue, collect information about the packet
+      output_fifo_tdata <= processed_output_tdata;
+      output_fifo_tkeep <= input_fifo_head_tkeep;
+      output_fifo_tuser <= input_fifo_head_tuser;
+      output_fifo_tlast <= input_fifo_head_tlast;
+
+      write_to_output_queue <= 1;
+
+      if (~input_fifo_head_tlast) begin
+        // TODO: Replace with a population count of TKEEP
+        bytes_processed_before_current_axi_packet <= bytes_processed_before_current_axi_packet + 32;
+      end else begin
+        axi_packets_read                          <= 0;
+        bytes_processed_before_current_axi_packet <= 0;
+        is_current_network_packet_read            <= 0;
+        state                                     <= STATE_INFORMATION_COLLECTION;
+      end
+    end else begin
+      write_to_output_queue <= 0;
+    end
+  end
+
+endmodule
+
+module image_processor
+#(parameter TDATA_WIDTH = 256)
+(
+  input  [TDATA_WIDTH - 1:0]         data_in,
+  input  [((TDATA_WIDTH / 8)) - 1:0] byte_mask,
+
+  output [TDATA_WIDTH - 1:0]         data_out
+);
+
+  // WIRES
+  wire [TDATA_WIDTH - 1:0] raw_processed_data;
+
+  wire [TDATA_WIDTH - 1:0] bit_mask;
+
+  wire [TDATA_WIDTH - 1:0] processed_data;
+  wire [TDATA_WIDTH - 1:0] unprocessed_data;
+
+  // HERE'S WHERE THE MAGIC HAPPENS!
+  assign raw_processed_data = ~data_in; // Dummy operation
+
+  // ONLY PROCESS THE MASKED BYTES
+  byte_to_bit_mask bit_mask_generator
+  (
+    .byte_mask(byte_mask),
+    .bit_mask(bit_mask)
+  );
+
+  assign processed_data   = raw_processed_data & bit_mask;
+  assign unprocessed_data = data_in & ~bit_mask;
+
+  // RETURN
+  assign data_out = processed_data | unprocessed_data;
+
+endmodule
+
+module byte_to_bit_mask
+#(parameter BYTE_MASK_WIDTH = 32)
+(
+  input [BYTE_MASK_WIDTH - 1:0] byte_mask,
+  output reg [(BYTE_MASK_WIDTH * 8) - 1:0] bit_mask
+);
+  integer i;
+  
+  always @(*) begin
+    for (i = 0; i < BYTE_MASK_WIDTH; i = i + 1) begin
+      bit_mask[i*8 +: 8] = {8{byte_mask[i]}};
+    end
+  end
 endmodule
