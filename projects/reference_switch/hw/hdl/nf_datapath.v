@@ -464,6 +464,17 @@ module network_packet_processor
 );  
 
   /*************************************************************************************************\
+  |* FSM
+  \*************************************************************************************************/
+
+  localparam STATE_BUFFERING  = 0;
+  localparam STATE_PROCESSING = 1;
+
+  reg [0:0]  state;
+  reg [31:0] axis_packets_read;
+  reg        net_packet_reading_complete;
+
+  /*************************************************************************************************\
   |* INPUT QUEUE
   \*************************************************************************************************/
 
@@ -501,7 +512,7 @@ module network_packet_processor
 
   // LOGIC
   assign s_axis_tready = ~input_fifo_nearly_full; // There is room in the queue and we're processing the current packet
-  assign write_to_input_queue = s_axis_tready & s_axis_tvalid;
+  assign write_to_input_queue = s_axis_tready & s_axis_tvalid & ~net_packet_reading_complete;
 
   /*************************************************************************************************\
   |* OUTPUT QUEUE
@@ -544,6 +555,32 @@ module network_packet_processor
   assign read_from_output_queue = m_axis_tvalid & m_axis_tready;
 
   /*************************************************************************************************\
+  |* INPUT PROCESSOR
+  \*************************************************************************************************/
+
+  always @(posedge axis_aclk) begin
+    if (~axis_resetn) begin
+      state             <= STATE_BUFFERING;
+      axis_packets_read <= 0;
+      net_packet_reading_complete <= 0;
+    end else begin
+      if (write_to_input_queue) begin
+        axis_packets_read <= axis_packets_read + 1;
+
+        if (s_axis_tlast) begin
+          net_packet_reading_complete <= 1;
+          axis_packets_read           <= 0;
+        end
+
+        // If we're on the second packet, we can move to the 
+        if (state == STATE_BUFFERING) begin
+          if (axis_packets_read >= 1) state <= STATE_PROCESSING;
+        end
+      end
+    end
+  end
+
+  /*************************************************************************************************\
   |* PACKET PROCESSOR
   |* ================
   |* Once we're in a packet processing state, mutate the data as we move it from the input queue to
@@ -551,7 +588,7 @@ module network_packet_processor
   \*************************************************************************************************/
 
   // PACKET PROCESSING
-  assign read_from_input_queue = ~input_fifo_empty & ~output_fifo_nearly_full;
+  assign read_from_input_queue = ~input_fifo_empty & ~output_fifo_nearly_full & (state == STATE_PROCESSING);
 
   always @(posedge axis_aclk) begin
     if (read_from_input_queue) begin // While we are writing data to the input queue, collect information about the packet
@@ -559,6 +596,11 @@ module network_packet_processor
       output_fifo_tkeep <= input_fifo_head_tkeep;
       output_fifo_tuser <= input_fifo_head_tuser;
       output_fifo_tlast <= input_fifo_head_tlast;
+
+      if (input_fifo_head_tlast) begin
+        state                       <= STATE_BUFFERING;
+        net_packet_reading_complete <= 0;
+      end
 
       write_to_output_queue <= 1;
     end else begin
