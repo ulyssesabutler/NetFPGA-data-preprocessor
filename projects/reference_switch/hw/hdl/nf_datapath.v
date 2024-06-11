@@ -593,8 +593,9 @@ module network_packet_processor
 
   reg [31:0] axis_packet_reading_count;
 
-  // Track which registers we've loaded
+  // Track our progresss
   reg        are_registers_loaded;
+  reg        is_last_packet_read;
 
   // Packet info
   reg [31:0] body_offset;
@@ -606,19 +607,19 @@ module network_packet_processor
     else
       axis_packet_reading_count = axis_packet_already_read_count;
 
-    // If we're moving to an info collection state, then reset the read packet count.
+    // If we're moving from an info collection state, then reset the read packet count.
     if (finished_info_collection)
       next_axis_packet_already_read_count = 0;
     else
       next_axis_packet_already_read_count = axis_packet_reading_count;
 
-    if (state == STATE_INFO_COLLECTION)
-      net_packet_reading_complete = 0;
-    else if (write_to_input_queue & s_axis_tlast)
-      net_packet_reading_complete = 1;
+    // Determine whether or not the last AXI packet has already been read for this network packet.
+    if (write_to_input_queue & s_axis_tlast)
+      is_last_packet_read = 1;
+    else if (finished_packet_processing)
+      is_last_packet_read = 0;
     else
-      net_packet_reading_complete = net_packet_reading_complete;
-
+      is_last_packet_read = net_packet_reading_complete;
 
     // This is where we actually collect the info, depending on what part of the packet we're currently processing
     if (state == STATE_INFO_COLLECTION) begin
@@ -648,8 +649,13 @@ module network_packet_processor
   end
 
   always @(posedge axis_aclk) begin
-    if (~axis_resetn) axis_packet_already_read_count <= 0;
-    else              axis_packet_already_read_count <= next_axis_packet_already_read_count;
+    if (~axis_resetn) begin
+      axis_packet_already_read_count <= 0;
+      net_packet_reading_complete    <= 0;
+    end else begin
+      axis_packet_already_read_count <= next_axis_packet_already_read_count;
+      net_packet_reading_complete    <= is_last_packet_read;
+    end
   end
 
   /*************************************************************************************************\
