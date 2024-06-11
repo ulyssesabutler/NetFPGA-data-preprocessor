@@ -464,17 +464,6 @@ module network_packet_processor
 );  
 
   /*************************************************************************************************\
-  |* FSM
-  \*************************************************************************************************/
-
-  localparam STATE_BUFFERING  = 0;
-  localparam STATE_PROCESSING = 1;
-
-  reg [0:0]  state;
-  reg [31:0] axis_packets_read;
-  reg        net_packet_reading_complete;
-
-  /*************************************************************************************************\
   |* INPUT QUEUE
   \*************************************************************************************************/
 
@@ -511,8 +500,10 @@ module network_packet_processor
   );
 
   // LOGIC
-  assign s_axis_tready = ~input_fifo_nearly_full; // There is room in the queue and we're processing the current packet
-  assign write_to_input_queue = s_axis_tready & s_axis_tvalid & ~net_packet_reading_complete;
+  reg    net_packet_reading_complete;
+
+  assign s_axis_tready = ~input_fifo_nearly_full & ~net_packet_reading_complete; // There is room in the queue and we're processing the current packet
+  assign write_to_input_queue = s_axis_tready & s_axis_tvalid;
 
   /*************************************************************************************************\
   |* OUTPUT QUEUE
@@ -555,29 +546,110 @@ module network_packet_processor
   assign read_from_output_queue = m_axis_tvalid & m_axis_tready;
 
   /*************************************************************************************************\
+  |* FSM
+  \*************************************************************************************************/
+
+  // Define the states
+  localparam STATE_INFO_COLLECTION   = 0;
+  localparam STATE_PACKET_PROCESSING = 1;
+
+  // Store the current and next state
+  reg [0:0]  state;
+  reg [0:0]  next_state;
+
+  // The info collector and packet processor will use these flags to signal state transitions
+  reg        finished_info_collection;
+  reg        finished_packet_processing;
+
+  // State transition logic
+  always @(*) begin
+    case (state)
+
+      STATE_INFO_COLLECTION: begin
+        if (finished_info_collection)   next_state <= STATE_PACKET_PROCESSING;
+        else                            next_state <= state;
+      end
+
+      STATE_PACKET_PROCESSING: begin
+        if (finished_packet_processing) next_state <= STATE_INFO_COLLECTION;
+        else                            next_state <= state;
+      end
+
+    endcase
+  end
+
+  always @(posedge axis_aclk) begin
+    if (~axis_resetn) state <= STATE_INFO_COLLECTION;
+    else              state <= next_state;
+  end
+
+  /*************************************************************************************************\
   |* INPUT PROCESSOR
   \*************************************************************************************************/
 
-  always @(posedge axis_aclk) begin
-    if (~axis_resetn) begin
-      state             <= STATE_BUFFERING;
-      axis_packets_read <= 0;
-      net_packet_reading_complete <= 0;
-    end else begin
-      if (write_to_input_queue) begin
-        axis_packets_read <= axis_packets_read + 1;
+  // Keeps track of which axis packet we're currently on, starting at 0 for each network packet
+  reg [31:0] axis_packet_already_read_count;
+  reg [31:0] next_axis_packet_already_read_count;
 
-        if (s_axis_tlast) begin
-          net_packet_reading_complete <= 1;
-          axis_packets_read           <= 0;
+  reg [31:0] axis_packet_reading_count;
+
+  // Track which registers we've loaded
+  reg        are_registers_loaded;
+
+  // Packet info
+  reg [31:0] body_offset;
+
+  always @(*) begin
+    // If we're currently writting a packet to the input queue, we're reading 1 more packet than we've read
+    if (write_to_input_queue)
+      axis_packet_reading_count = axis_packet_already_read_count + 1;
+    else
+      axis_packet_reading_count = axis_packet_already_read_count;
+
+    // If we're moving to an info collection state, then reset the read packet count.
+    if (finished_info_collection)
+      next_axis_packet_already_read_count = 0;
+    else
+      next_axis_packet_already_read_count = axis_packet_reading_count;
+
+    if (state == STATE_INFO_COLLECTION)
+      net_packet_reading_complete = 0;
+    else if (write_to_input_queue & s_axis_tlast)
+      net_packet_reading_complete = 1;
+    else
+      net_packet_reading_complete = net_packet_reading_complete;
+
+
+    // This is where we actually collect the info, depending on what part of the packet we're currently processing
+    if (state == STATE_INFO_COLLECTION) begin
+      case (axis_packet_reading_count)
+
+        // This is the second packet
+        2: begin
+          // We will collect the BMP offset in the future. For now, we're just writing a constant value as a placeholder
+          body_offset = 34;
+
+          // For now, that's all the data we need
+          are_registers_loaded = 1;
         end
 
-        // If we're on the second packet, we can move to the 
-        if (state == STATE_BUFFERING) begin
-          if (axis_packets_read >= 1) state <= STATE_PROCESSING;
+        default: begin
+          are_registers_loaded = 0;
         end
-      end
+
+      endcase
     end
+
+    // Finally, we need to decide whether or not to signal that the info collection is complete
+    if (state == STATE_INFO_COLLECTION & are_registers_loaded)
+      finished_info_collection = 1;
+    else
+      finished_info_collection = 0;
+  end
+
+  always @(posedge axis_aclk) begin
+    if (~axis_resetn) axis_packet_already_read_count <= 0;
+    else              axis_packet_already_read_count <= next_axis_packet_already_read_count;
   end
 
   /*************************************************************************************************\
@@ -587,25 +659,72 @@ module network_packet_processor
   |* the output queue.
   \*************************************************************************************************/
 
-  // PACKET PROCESSING
-  assign read_from_input_queue = ~input_fifo_empty & ~output_fifo_nearly_full & (state == STATE_PROCESSING);
+  // Packet Processing Timing Control
+  assign read_from_input_queue = ~input_fifo_empty & ~output_fifo_nearly_full & (state == STATE_PACKET_PROCESSING);
 
+  // Body Processing
+  reg  [(TDATA_WIDTH / 8) - 1:0] body_processing_byte_mask;
+  wire [TDATA_WIDTH - 1:0]       processed_output_tdata;
+
+  image_processor image_pixel_processor
+  (
+    .data_in(input_fifo_head_tdata),
+    .byte_mask(body_processing_byte_mask),
+    .data_out(processed_output_tdata)
+  );
+
+  // Body Processing Mask
+  wire [31:0] body_processing_bytes_in_current_axi_packet;
+  assign      body_processing_bytes_in_current_axi_packet = (body_offset - bytes_processed_before_current_axi_packet);
+
+  always @(*) begin
+    // If we're already past the offset point, keep all non-null bytes
+    if (bytes_processed_before_current_axi_packet > body_offset)
+      body_processing_byte_mask <= input_fifo_head_tkeep;
+    else
+      body_processing_byte_mask <= (input_fifo_head_tkeep >> body_processing_bytes_in_current_axi_packet) << body_processing_bytes_in_current_axi_packet;
+  end
+
+  // Processed bytes tracking
+  reg [31:0] bytes_processed_before_current_axi_packet;
+  reg [31:0] next_bytes_processed_before_current_axi_packet;
+
+  always @(*) begin
+    case (state)
+
+      STATE_INFO_COLLECTION: begin
+        next_bytes_processed_before_current_axi_packet = 0;
+      end
+
+      STATE_PACKET_PROCESSING: begin
+        if (read_from_input_queue)
+          // TODO: Replace with population could of TKEEP
+          next_bytes_processed_before_current_axi_packet = bytes_processed_before_current_axi_packet + 32;
+        else
+          next_bytes_processed_before_current_axi_packet = bytes_processed_before_current_axi_packet;
+      end
+
+    endcase
+  end
+
+  // Signal end of processing
+  always @(*) begin
+    if (read_from_output_queue & input_fifo_head_tlast)
+      finished_packet_processing = 1;
+    else
+      finished_packet_processing = 0;
+  end
+
+  // Output
   always @(posedge axis_aclk) begin
-    if (read_from_input_queue) begin // While we are writing data to the input queue, collect information about the packet
-      output_fifo_tdata <= (input_fifo_head_tdata[16 * 8 - 1:14 * 8] == 16'h0045) ? input_fifo_head_tdata : {input_fifo_head_tdata[TDATA_WIDTH-1:32], 16'hBBBB, input_fifo_head_tdata[15:0]};
+      output_fifo_tdata <= processed_output_tdata;
       output_fifo_tkeep <= input_fifo_head_tkeep;
       output_fifo_tuser <= input_fifo_head_tuser;
       output_fifo_tlast <= input_fifo_head_tlast;
 
-      if (input_fifo_head_tlast) begin
-        state                       <= STATE_BUFFERING;
-        net_packet_reading_complete <= 0;
-      end
+      bytes_processed_before_current_axi_packet <= next_bytes_processed_before_current_axi_packet;
 
-      write_to_output_queue <= 1;
-    end else begin
-      write_to_output_queue <= 0;
-    end
+      write_to_output_queue <= read_from_input_queue;
   end
 
 endmodule
