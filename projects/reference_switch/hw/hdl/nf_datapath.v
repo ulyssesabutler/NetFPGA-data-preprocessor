@@ -555,7 +555,7 @@ module network_packet_processor
 
   // Store the current and next state
   reg [0:0]  state;
-  reg [0:0]  next_state;
+  reg [0:0]  state_next;
 
   // The info collector and packet processor will use these flags to signal state transitions
   reg        finished_info_collection;
@@ -563,16 +563,16 @@ module network_packet_processor
 
   // State transition logic
   always @(*) begin
+    state_next = state;
+
     case (state)
 
       STATE_INFO_COLLECTION: begin
-        if (finished_info_collection)   next_state <= STATE_PACKET_PROCESSING;
-        else                            next_state <= state;
+        if (finished_info_collection)   state_next = STATE_PACKET_PROCESSING;
       end
 
       STATE_PACKET_PROCESSING: begin
-        if (finished_packet_processing) next_state <= STATE_INFO_COLLECTION;
-        else                            next_state <= state;
+        if (finished_packet_processing) state_next = STATE_INFO_COLLECTION;
       end
 
     endcase
@@ -580,7 +580,7 @@ module network_packet_processor
 
   always @(posedge axis_aclk) begin
     if (~axis_resetn) state <= STATE_INFO_COLLECTION;
-    else              state <= next_state;
+    else              state <= state_next;
   end
 
   /*************************************************************************************************\
@@ -589,37 +589,38 @@ module network_packet_processor
 
   // Keeps track of which axis packet we're currently on, starting at 0 for each network packet
   reg [31:0] axis_packet_already_read_count;
-  reg [31:0] next_axis_packet_already_read_count;
+  reg [31:0] axis_packet_already_read_count_next;
 
   reg [31:0] axis_packet_reading_count;
 
   // Track our progresss
   reg        are_registers_loaded;
-  reg        is_last_packet_read;
+  reg        net_packet_reading_complete_next;
 
   // Packet info
   reg [31:0] body_offset;
+  reg [31:0] body_offset_next;
 
   always @(*) begin
-    // If we're currently writting a packet to the input queue, we're reading 1 more packet than we've read
-    if (write_to_input_queue)
-      axis_packet_reading_count = axis_packet_already_read_count + 1;
-    else
-      axis_packet_reading_count = axis_packet_already_read_count;
+    axis_packet_reading_count           = axis_packet_already_read_count;
+    axis_packet_already_read_count_next = axis_packet_already_read_count;
+    net_packet_reading_complete_next    = net_packet_reading_complete;
+    body_offset_next                    = body_offset;
 
-    // If we're moving from an info collection state, then reset the read packet count.
-    if (finished_info_collection)
-      next_axis_packet_already_read_count = 0;
-    else
-      next_axis_packet_already_read_count = axis_packet_reading_count;
+    are_registers_loaded                = 0;
+    finished_info_collection            = 0;
+
+    // If we're currently writting a packet to the input queue, we're reading 1 more packet than we've read
+    if (write_to_input_queue) begin
+      axis_packet_reading_count           = axis_packet_already_read_count + 1;
+      axis_packet_already_read_count_next = axis_packet_already_read_count + 1;
+    end
 
     // Determine whether or not the last AXI packet has already been read for this network packet.
     if (write_to_input_queue & s_axis_tlast)
-      is_last_packet_read = 1;
+      net_packet_reading_complete_next = 1;
     else if (finished_packet_processing)
-      is_last_packet_read = 0;
-    else
-      is_last_packet_read = net_packet_reading_complete;
+      net_packet_reading_complete_next = 0;
 
     // This is where we actually collect the info, depending on what part of the packet we're currently processing
     if (state == STATE_INFO_COLLECTION) begin
@@ -628,33 +629,32 @@ module network_packet_processor
         // This is the second packet
         2: begin
           // We will collect the BMP offset in the future. For now, we're just writing a constant value as a placeholder
-          body_offset = 34;
+          body_offset_next = 34;
 
           // For now, that's all the data we need
           are_registers_loaded = 1;
-        end
-
-        default: begin
-          are_registers_loaded = 0;
         end
 
       endcase
     end
 
     // Finally, we need to decide whether or not to signal that the info collection is complete
-    if (state == STATE_INFO_COLLECTION & are_registers_loaded)
+    if (state == STATE_INFO_COLLECTION & are_registers_loaded) begin
       finished_info_collection = 1;
-    else
-      finished_info_collection = 0;
+      // If we're moving from an info collection state, then reset the read packet count.
+      axis_packet_already_read_count_next = 0;
+    end
   end
 
   always @(posedge axis_aclk) begin
     if (~axis_resetn) begin
       axis_packet_already_read_count <= 0;
       net_packet_reading_complete    <= 0;
+      body_offset                    <= 0;
     end else begin
-      axis_packet_already_read_count <= next_axis_packet_already_read_count;
-      net_packet_reading_complete    <= is_last_packet_read;
+      axis_packet_already_read_count <= axis_packet_already_read_count_next;
+      net_packet_reading_complete    <= net_packet_reading_complete_next;
+      body_offset                    <= body_offset_next;
     end
   end
 
@@ -686,28 +686,29 @@ module network_packet_processor
   always @(*) begin
     // If we're already past the offset point, keep all non-null bytes
     if (bytes_processed_before_current_axi_packet > body_offset)
-      body_processing_byte_mask <= input_fifo_head_tkeep;
+      body_processing_byte_mask = input_fifo_head_tkeep;
     else
-      body_processing_byte_mask <= (input_fifo_head_tkeep >> body_processing_bytes_in_current_axi_packet) << body_processing_bytes_in_current_axi_packet;
+      body_processing_byte_mask = (input_fifo_head_tkeep >> body_processing_bytes_in_current_axi_packet) << body_processing_bytes_in_current_axi_packet;
   end
 
   // Processed bytes tracking
   reg [31:0] bytes_processed_before_current_axi_packet;
-  reg [31:0] next_bytes_processed_before_current_axi_packet;
+  reg [31:0] bytes_processed_before_current_axi_packet_next;
 
   always @(*) begin
+    bytes_processed_before_current_axi_packet_next = bytes_processed_before_current_axi_packet;
+
     case (state)
 
       STATE_INFO_COLLECTION: begin
-        next_bytes_processed_before_current_axi_packet = 0;
+        // If we're in the info collection state, we haven't processed any AXI packets, so make sure this is reset.
+        bytes_processed_before_current_axi_packet_next = 0;
       end
 
       STATE_PACKET_PROCESSING: begin
         if (read_from_input_queue)
           // TODO: Replace with population could of TKEEP
-          next_bytes_processed_before_current_axi_packet = bytes_processed_before_current_axi_packet + 32;
-        else
-          next_bytes_processed_before_current_axi_packet = bytes_processed_before_current_axi_packet;
+          bytes_processed_before_current_axi_packet_next = bytes_processed_before_current_axi_packet + 32;
       end
 
     endcase
@@ -728,7 +729,7 @@ module network_packet_processor
       output_fifo_tuser <= input_fifo_head_tuser;
       output_fifo_tlast <= input_fifo_head_tlast;
 
-      bytes_processed_before_current_axi_packet <= next_bytes_processed_before_current_axi_packet;
+      bytes_processed_before_current_axi_packet <= bytes_processed_before_current_axi_packet_next;
 
       write_to_output_queue <= read_from_input_queue;
   end
