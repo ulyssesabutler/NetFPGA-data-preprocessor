@@ -507,16 +507,24 @@ module network_packet_processor
   \*************************************************************************************************/
 
   // VARIABLES
-  reg [TDATA_WIDTH - 1:0]         output_fifo_tdata;
-  reg [((TDATA_WIDTH / 8)) - 1:0] output_fifo_tkeep;
-  reg [TUSER_WIDTH-1:0]           output_fifo_tuser;
-  reg                             output_fifo_tlast;
+  reg  [TDATA_WIDTH - 1:0]         output_fifo_tdata;
+  reg  [((TDATA_WIDTH / 8)) - 1:0] output_fifo_tkeep;
+  reg  [TUSER_WIDTH-1:0]           output_fifo_tuser;
+  reg                              output_fifo_tlast;
 
-  wire                            output_fifo_nearly_full;
-  wire                            output_fifo_empty;
+  wire [TDATA_WIDTH - 1:0]         output_fifo_head_tdata;
+  wire [((TDATA_WIDTH / 8)) - 1:0] output_fifo_head_tkeep;
+  wire [TUSER_WIDTH-1:0]           output_fifo_head_tuser;
+  wire                             output_fifo_head_tlast;
 
-  reg                             write_to_output_queue;
-  wire                            read_from_output_queue;
+  wire                             output_tready;
+  wire                             output_tvalid;
+
+  wire                             output_fifo_nearly_full;
+  wire                             output_fifo_empty;
+
+  reg                              write_to_output_queue;
+  wire                             read_from_output_queue;
 
   // OUTPUT QUEUE MODULE
   fallthrough_small_fifo
@@ -526,10 +534,10 @@ module network_packet_processor
   )
   output_fifo
   (
-    .din         ({output_fifo_tdata, output_fifo_tkeep, output_fifo_tuser, output_fifo_tlast}), // Pass the packet heads as input directly to the queue
+    .din         ({output_fifo_tdata, output_fifo_tkeep, output_fifo_tuser, output_fifo_tlast}),
     .wr_en       (write_to_output_queue), // Write enable
     .rd_en       (read_from_output_queue), // Read enabled
-    .dout        ({m_axis_tdata, m_axis_tkeep, m_axis_tuser, m_axis_tlast}), // Return TLAST, TKEEP, and TUSER directly to the next stage. Write TDATA to a wire for processing
+    .dout        ({output_fifo_head_tdata, output_fifo_head_tkeep, output_fifo_head_tuser, output_fifo_head_tlast}),
     .full        (),
     .prog_full   (),
     .nearly_full (output_fifo_nearly_full),
@@ -539,8 +547,30 @@ module network_packet_processor
   );
 
   // LOGIC
-  assign m_axis_tvalid = ~output_fifo_empty;
-  assign read_from_output_queue = m_axis_tvalid & m_axis_tready;
+  assign output_tvalid = ~output_fifo_empty;
+  assign read_from_output_queue = output_tready & output_tvalid;
+
+  // Flatten output
+  axis_flattener output_flattener
+  (
+    .axis_aclk(axis_aclk),
+    .axis_resetn(axis_resetn),
+
+    .axis_original_tdata(output_fifo_head_tdata),
+    .axis_original_tkeep(output_fifo_head_tkeep),
+    .axis_original_tuser(output_fifo_head_tuser),
+    .axis_original_tvalid(output_tvalid),
+    .axis_original_tready(output_tready),
+    .axis_original_tlast(output_fifo_head_tlast),
+
+    .axis_flattened_tdata(m_axis_tdata),
+    .axis_flattened_tkeep(m_axis_tkeep),
+    .axis_flattened_tuser(m_axis_tuser),
+    .axis_flattened_tvalid(m_axis_tvalid),
+    .axis_flattened_tready(m_axis_tready),
+    .axis_flattened_tlast(m_axis_tlast)
+  );
+
 
   /*************************************************************************************************\
   |* FSM
@@ -1026,6 +1056,61 @@ module small_axis_image_to_tensor_scaler
   assign axis_tensor_tlast  = axis_image_tlast;
 
 endmodule
+
+module axis_flattener 
+#(
+  // AXI Stream Data Width
+  parameter TDATA_WIDTH = 256,
+  parameter TUSER_WIDTH = 128
+)
+(
+  // Global Ports
+  input                              axis_aclk,
+  input                              axis_resetn,
+
+  input  [TDATA_WIDTH - 1:0]         axis_original_tdata,
+  input  [((TDATA_WIDTH / 8)) - 1:0] axis_original_tkeep,
+  input  [TUSER_WIDTH-1:0]           axis_original_tuser,
+  input                              axis_original_tvalid,
+  output                             axis_original_tready,
+  input                              axis_original_tlast,
+
+  output [TDATA_WIDTH - 1:0]         axis_flattened_tdata,
+  output [((TDATA_WIDTH / 8)) - 1:0] axis_flattened_tkeep,
+  output [TUSER_WIDTH - 1:0]         axis_flattened_tuser,
+  output                             axis_flattened_tvalid,
+  input                              axis_flattened_tready,
+  output                             axis_flattened_tlast
+);
+
+  axis_data_width_converter
+  #(
+    .IN_TDATA_WIDTH(TDATA_WIDTH),
+    .OUT_TDATA_WIDTH(TDATA_WIDTH),
+    .TUSER_WIDTH(TUSER_WIDTH)
+  )
+  flattener
+  (
+    .axis_aclk(axis_aclk),
+    .axis_resetn(axis_resetn),
+
+    .axis_original_tdata(axis_original_tdata),
+    .axis_original_tkeep(axis_original_tkeep),
+    .axis_original_tuser(axis_original_tuser),
+    .axis_original_tvalid(axis_original_tvalid),
+    .axis_original_tready(axis_original_tready),
+    .axis_original_tlast(axis_original_tlast),
+
+    .axis_resize_tdata(axis_flattened_tdata),
+    .axis_resize_tkeep(axis_flattened_tkeep),
+    .axis_resize_tuser(axis_flattened_tuser),
+    .axis_resize_tvalid(axis_flattened_tvalid),
+    .axis_resize_tready(axis_flattened_tready),
+    .axis_resize_tlast(axis_flattened_tlast)
+  );
+
+endmodule
+
 
 module axis_data_width_converter
 #(
