@@ -611,7 +611,7 @@ module network_packet_processor
     finished_info_collection            = 0;
 
     // If we're currently writting a packet to the input queue, we're reading 1 more packet than we've read
-    if (write_to_input_queue) begin
+    if (write_to_input_queue & state == STATE_INFO_COLLECTION) begin
       axis_packet_reading_count           = axis_packet_already_read_count + 1;
       axis_packet_already_read_count_next = axis_packet_already_read_count + 1;
     end
