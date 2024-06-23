@@ -127,10 +127,11 @@ set_property generate_synth_checkpoint false [get_files identifier_ip.xci]
 reset_target all [get_ips identifier_ip]
 generate_target all [get_ips identifier_ip]
 
-
-
 read_verilog "./hdl/axi_clocking.v"
+read_verilog "./hdl/axis_data_width_converter.v"
 read_verilog "./hdl/nf_datapath.v"
 read_verilog "./hdl/top.v"
+
+update_compile_order -fileset update_compile_order
 
 exit
