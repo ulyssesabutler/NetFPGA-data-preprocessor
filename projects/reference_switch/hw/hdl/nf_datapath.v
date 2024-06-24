@@ -428,6 +428,12 @@ module nf_datapath
     
 endmodule
 
+/*************************************************************************************************\
+|* Packet Processor
+|* =======================
+|* The data width converter and AXI Stream flattener.
+\*************************************************************************************************/
+
 module network_packet_processor
 #(
   // AXI Stream Data Width
@@ -463,66 +469,537 @@ module network_packet_processor
   input                              s_axis_tlast
 );  
 
-  wire [SMALL_TDATA_WIDTH - 1:0]         small_axis_tdata;
-  wire [((SMALL_TDATA_WIDTH / 8)) - 1:0] small_axis_tkeep;
-  wire [TUSER_WIDTH-1:0]                 small_axis_tuser;
-  wire                                   small_axis_tvalid;
-  wire                                   small_axis_tready;
-  wire                                   small_axis_tlast;
+  // Intermediate Connections
+  wire [TDATA_WIDTH - 1:0]         axis_header_tdata;
+  wire [((TDATA_WIDTH / 8)) - 1:0] axis_header_tkeep;
+  wire [TUSER_WIDTH-1:0]           axis_header_tuser;
+  wire                             axis_header_tvalid;
+  wire                             axis_header_tready;
+  wire                             axis_header_tlast;
 
-  axis_data_width_converter
-  #(
-    .IN_TDATA_WIDTH(TDATA_WIDTH),
-    .OUT_TDATA_WIDTH(SMALL_TDATA_WIDTH),
-    .TUSER_WIDTH(TUSER_WIDTH)
-  )
-  shrinker
+  wire [TDATA_WIDTH - 1:0]         axis_body_tdata;
+  wire [((TDATA_WIDTH / 8)) - 1:0] axis_body_tkeep;
+  wire [TUSER_WIDTH-1:0]           axis_body_tuser;
+  wire                             axis_body_tvalid;
+  wire                             axis_body_tready;
+  wire                             axis_body_tlast;
+
+  // Splitter
+  packet_splitter splitter
   (
     .axis_aclk(axis_aclk),
     .axis_resetn(axis_resetn),
 
-    .axis_original_tdata(s_axis_tdata),
-    .axis_original_tkeep(s_axis_tkeep),
-    .axis_original_tuser(s_axis_tuser),
-    .axis_original_tvalid(s_axis_tvalid),
-    .axis_original_tready(s_axis_tready),
-    .axis_original_tlast(s_axis_tlast),
+    .axis_in_tdata(s_axis_tdata),
+    .axis_in_tkeep(s_axis_tkeep),
+    .axis_in_tuser(s_axis_tuser),
+    .axis_in_tvalid(s_axis_tvalid),
+    .axis_in_tready(s_axis_tready),
+    .axis_in_tlast(s_axis_tlast),
 
-    .axis_resize_tdata(small_axis_tdata),
-    .axis_resize_tkeep(small_axis_tkeep),
-    .axis_resize_tuser(small_axis_tuser),
-    .axis_resize_tvalid(small_axis_tvalid),
-    .axis_resize_tready(small_axis_tready),
-    .axis_resize_tlast(small_axis_tlast)
+    .axis_out_header_tdata(axis_header_tdata),
+    .axis_out_header_tkeep(axis_header_tkeep),
+    .axis_out_header_tuser(axis_header_tuser),
+    .axis_out_header_tvalid(axis_header_tvalid),
+    .axis_out_header_tready(axis_header_tready),
+    .axis_out_header_tlast(axis_header_tlast),
+
+    .axis_out_body_tdata(axis_body_tdata),
+    .axis_out_body_tkeep(axis_body_tkeep),
+    .axis_out_body_tuser(axis_body_tuser),
+    .axis_out_body_tvalid(axis_body_tvalid),
+    .axis_out_body_tready(axis_body_tready),
+    .axis_out_body_tlast(axis_body_tlast)
   );
 
-  axis_data_width_converter
-  #(
-    .IN_TDATA_WIDTH(SMALL_TDATA_WIDTH),
-    .OUT_TDATA_WIDTH(TDATA_WIDTH),
-    .TUSER_WIDTH(TUSER_WIDTH)
-  )
-  expander
+  packet_combiner combiner
   (
     .axis_aclk(axis_aclk),
     .axis_resetn(axis_resetn),
 
-    .axis_original_tdata(small_axis_tdata),
-    .axis_original_tkeep(small_axis_tkeep),
-    .axis_original_tuser(small_axis_tuser),
-    .axis_original_tvalid(small_axis_tvalid),
-    .axis_original_tready(small_axis_tready),
-    .axis_original_tlast(small_axis_tlast),
+    .axis_in_header_tdata(axis_header_tdata),
+    .axis_in_header_tkeep(axis_header_tkeep),
+    .axis_in_header_tuser(axis_header_tuser),
+    .axis_in_header_tvalid(axis_header_tvalid),
+    .axis_in_header_tready(axis_header_tready),
+    .axis_in_header_tlast(axis_header_tlast),
 
-    .axis_resize_tdata(m_axis_tdata),
-    .axis_resize_tkeep(m_axis_tkeep),
-    .axis_resize_tuser(m_axis_tuser),
-    .axis_resize_tvalid(m_axis_tvalid),
-    .axis_resize_tready(m_axis_tready),
-    .axis_resize_tlast(m_axis_tlast)
+    .axis_in_body_tdata(axis_body_tdata),
+    .axis_in_body_tkeep(axis_body_tkeep),
+    .axis_in_body_tuser(axis_body_tuser),
+    .axis_in_body_tvalid(axis_body_tvalid),
+    .axis_in_body_tready(axis_body_tready),
+    .axis_in_body_tlast(axis_body_tlast),
+
+    .axis_out_tdata(m_axis_tdata),
+    .axis_out_tkeep(m_axis_tkeep),
+    .axis_out_tuser(m_axis_tuser),
+    .axis_out_tvalid(m_axis_tvalid),
+    .axis_out_tready(m_axis_tready),
+    .axis_out_tlast(m_axis_tlast)
   );
 
 endmodule
+
+module packet_splitter
+#(
+  // AXI Stream Data Width
+  parameter TDATA_WIDTH         = 256,
+  parameter TUSER_WIDTH         = 128,
+  localparam PACKET_BODY_OFFSET = 34 // TODO: Replace with input parameter
+)
+(
+  input                              axis_aclk,
+  input                              axis_resetn,
+
+  input  [TDATA_WIDTH - 1:0]         axis_in_tdata,
+  input  [((TDATA_WIDTH / 8)) - 1:0] axis_in_tkeep,
+  input  [TUSER_WIDTH-1:0]           axis_in_tuser,
+  input                              axis_in_tvalid,
+  output                             axis_in_tready,
+  input                              axis_in_tlast,
+
+  output [TDATA_WIDTH - 1:0]         axis_out_header_tdata,
+  output [((TDATA_WIDTH / 8)) - 1:0] axis_out_header_tkeep,
+  output [TUSER_WIDTH-1:0]           axis_out_header_tuser,
+  output                             axis_out_header_tvalid,
+  input                              axis_out_header_tready,
+  output                             axis_out_header_tlast,
+
+  output [TDATA_WIDTH - 1:0]         axis_out_body_tdata,
+  output [((TDATA_WIDTH / 8)) - 1:0] axis_out_body_tkeep,
+  output [TUSER_WIDTH-1:0]           axis_out_body_tuser,
+  output                             axis_out_body_tvalid,
+  input                              axis_out_body_tready,
+  output                             axis_out_body_tlast
+);
+
+  // Output Header Queue
+  reg  [TDATA_WIDTH - 1:0]          output_header_queue_input_tdata;
+  reg  [((TDATA_WIDTH / 8)) - 1:0]  output_header_queue_input_tkeep;
+  reg  [TUSER_WIDTH-1:0]            output_header_queue_input_tuser;
+  reg                               output_header_queue_input_tlast;
+
+  reg                               write_to_output_header_queue;
+  wire                              read_from_output_header_queue;
+
+  wire                              output_header_queue_nearly_full;
+  wire                              output_header_queue_empty;
+
+  fallthrough_small_fifo
+  #(
+    .WIDTH(TDATA_WIDTH+TUSER_WIDTH+TDATA_WIDTH/8+1), // Fit the whole AXIS packet and the headers
+    .MAX_DEPTH_BITS(4)
+  )
+  output_header_queue
+  (
+    .din         ({output_header_queue_input_tdata, output_header_queue_input_tkeep, output_header_queue_input_tuser, output_header_queue_input_tlast}),
+    .wr_en       (write_to_output_header_queue),
+    .rd_en       (read_from_output_header_queue),
+    .dout        ({axis_out_header_tdata, axis_out_header_tkeep, axis_out_header_tuser, axis_out_header_tlast}),
+    .full        (),
+    .prog_full   (),
+    .nearly_full (output_header_queue_nearly_full),
+    .empty       (output_header_queue_empty),
+    .reset       (~axis_resetn),
+    .clk         (axis_aclk)
+  );
+
+  assign read_from_output_header_queue = axis_out_header_tvalid & axis_out_header_tready;
+  assign axis_out_header_tvalid = ~output_header_queue_empty;
+
+  // Output Body Queue
+  reg  [TDATA_WIDTH - 1:0]          output_body_queue_input_tdata;
+  reg  [((TDATA_WIDTH / 8)) - 1:0]  output_body_queue_input_tkeep;
+  reg  [TUSER_WIDTH-1:0]            output_body_queue_input_tuser;
+  reg                               output_body_queue_input_tlast;
+
+  reg                               write_to_output_body_queue;
+  wire                              read_from_output_body_queue;
+
+  wire                              output_body_queue_nearly_full;
+  wire                              output_body_queue_empty;
+
+  fallthrough_small_fifo
+  #(
+    .WIDTH(TDATA_WIDTH+TUSER_WIDTH+TDATA_WIDTH/8+1), // Fit the whole AXIS packet and the headers
+    .MAX_DEPTH_BITS(4)
+  )
+  output_body_queue
+  (
+    .din         ({output_body_queue_input_tdata, output_body_queue_input_tkeep, output_body_queue_input_tuser, output_body_queue_input_tlast}),
+    .wr_en       (write_to_output_body_queue),
+    .rd_en       (read_from_output_body_queue),
+    .dout        ({axis_out_body_tdata, axis_out_body_tkeep, axis_out_body_tuser, axis_out_body_tlast}),
+    .full        (),
+    .prog_full   (),
+    .nearly_full (output_body_queue_nearly_full),
+    .empty       (output_body_queue_empty),
+    .reset       (~axis_resetn),
+    .clk         (axis_aclk)
+  );
+
+  assign read_from_output_body_queue = axis_out_body_tvalid & axis_out_body_tready;
+  assign axis_out_body_tvalid = ~output_body_queue_empty;
+
+  // AXI Packet Input
+  assign axis_in_tready = ~output_header_queue_nearly_full & ~output_body_queue_nearly_full;
+  wire reading_axis_packet = axis_in_tvalid & axis_in_tready;
+
+  // Packet tracking
+  reg [31:0] axis_packets_byte_reading_complete_count;
+  reg [31:0] axis_packets_byte_reading_complete_count_next;
+
+  always @(*) begin
+    axis_packets_byte_reading_complete_count_next = axis_packets_byte_reading_complete_count;
+
+    if (reading_axis_packet) begin
+      if (~axis_in_tlast)
+        axis_packets_byte_reading_complete_count_next = axis_packets_byte_reading_complete_count + 32;
+      else
+        axis_packets_byte_reading_complete_count_next = 0;
+    end
+  end
+
+  always @(posedge axis_aclk) begin
+    if (~axis_resetn)
+      axis_packets_byte_reading_complete_count = 0;
+    else
+      axis_packets_byte_reading_complete_count = axis_packets_byte_reading_complete_count_next;
+  end
+
+  wire [31:0] axis_packets_byte_reading_complete_after_current_count = axis_packets_byte_reading_complete_count + (reading_axis_packet ? 32 : 0);
+  wire [31:0] header_bytes_in_current_packet = PACKET_BODY_OFFSET - axis_packets_byte_reading_complete_count;
+
+  // Packet Splitting Header
+  reg  [TDATA_WIDTH - 1:0]          output_header_queue_input_tdata_next;
+  reg  [((TDATA_WIDTH / 8)) - 1:0]  output_header_queue_input_tkeep_next;
+  reg  [TUSER_WIDTH-1:0]            output_header_queue_input_tuser_next;
+  reg                               output_header_queue_input_tlast_next;
+
+  reg                               write_to_output_header_queue_next;
+
+  always @(*) begin
+    output_header_queue_input_tdata_next = 0;
+    output_header_queue_input_tkeep_next = 0;
+    output_header_queue_input_tuser_next = 0;
+    output_header_queue_input_tlast_next = 0;
+
+    write_to_output_header_queue_next = 0;
+
+    if (reading_axis_packet) begin
+      if (axis_packets_byte_reading_complete_after_current_count <= PACKET_BODY_OFFSET) begin // Read in the entire packet as the header
+        output_header_queue_input_tdata_next = axis_in_tdata;
+        output_header_queue_input_tkeep_next = axis_in_tkeep;
+        output_header_queue_input_tuser_next = axis_in_tuser;
+        output_header_queue_input_tlast_next = axis_packets_byte_reading_complete_after_current_count == PACKET_BODY_OFFSET;
+
+        write_to_output_header_queue_next = 1;
+      end else if (axis_packets_byte_reading_complete_count < PACKET_BODY_OFFSET) begin
+        output_header_queue_input_tdata_next = axis_in_tdata & ((1 << (header_bytes_in_current_packet * 8)) - 1);
+        output_header_queue_input_tkeep_next = axis_in_tkeep & ((1 << header_bytes_in_current_packet) - 1);
+        output_header_queue_input_tuser_next = axis_in_tuser;
+        output_header_queue_input_tlast_next = 1;
+
+        write_to_output_header_queue_next = 1;
+      end
+    end
+  end
+
+  always @(posedge axis_aclk) begin
+    output_header_queue_input_tdata = output_header_queue_input_tdata_next;
+    output_header_queue_input_tkeep = output_header_queue_input_tkeep_next;
+    output_header_queue_input_tuser = output_header_queue_input_tuser_next;
+    output_header_queue_input_tlast = output_header_queue_input_tlast_next;
+
+    write_to_output_header_queue = write_to_output_header_queue_next;
+  end
+
+  // Packet Splitting Body
+  reg  [TDATA_WIDTH - 1:0]          output_body_queue_input_tdata_next;
+  reg  [((TDATA_WIDTH / 8)) - 1:0]  output_body_queue_input_tkeep_next;
+  reg  [TUSER_WIDTH-1:0]            output_body_queue_input_tuser_next;
+  reg                               output_body_queue_input_tlast_next;
+
+  reg                               write_to_output_body_queue_next;
+
+  always @(*) begin
+    output_body_queue_input_tdata_next = 0;
+    output_body_queue_input_tkeep_next = 0;
+    output_body_queue_input_tuser_next = 0;
+    output_body_queue_input_tlast_next = 0;
+
+    write_to_output_body_queue_next = 0;
+
+    if (reading_axis_packet) begin
+      if (axis_packets_byte_reading_complete_count > PACKET_BODY_OFFSET) begin // Read the entire packet as the body
+        output_body_queue_input_tdata_next = axis_in_tdata;
+        output_body_queue_input_tkeep_next = axis_in_tkeep;
+        output_body_queue_input_tuser_next = axis_in_tuser;
+        output_body_queue_input_tlast_next = axis_in_tlast;
+
+        write_to_output_body_queue_next = 1;
+      end else if (axis_packets_byte_reading_complete_after_current_count > PACKET_BODY_OFFSET) begin
+        output_body_queue_input_tdata_next = axis_in_tdata >> (header_bytes_in_current_packet * 8);
+        output_body_queue_input_tkeep_next = axis_in_tkeep >> header_bytes_in_current_packet;
+        output_body_queue_input_tuser_next = axis_in_tuser;
+        output_body_queue_input_tlast_next = axis_in_tlast;
+
+        write_to_output_body_queue_next = 1;
+      end
+    end
+  end
+
+  always @(posedge axis_aclk) begin
+    output_body_queue_input_tdata = output_body_queue_input_tdata_next;
+    output_body_queue_input_tkeep = output_body_queue_input_tkeep_next;
+    output_body_queue_input_tuser = output_body_queue_input_tuser_next;
+    output_body_queue_input_tlast = output_body_queue_input_tlast_next;
+
+    write_to_output_body_queue = write_to_output_body_queue_next;
+  end
+
+endmodule
+
+module packet_constructor
+#(
+  // AXI Stream Data Width
+  parameter TDATA_WIDTH         = 256,
+  parameter TUSER_WIDTH         = 128
+)
+(
+  input                              axis_aclk,
+  input                              axis_resetn,
+
+  input  [TDATA_WIDTH - 1:0]         axis_in_header_tdata,
+  input  [((TDATA_WIDTH / 8)) - 1:0] axis_in_header_tkeep,
+  input  [TUSER_WIDTH-1:0]           axis_in_header_tuser,
+  input                              axis_in_header_tvalid,
+  output                             axis_in_header_tready,
+  input                              axis_in_header_tlast,
+
+  input  [TDATA_WIDTH - 1:0]         axis_in_body_tdata,
+  input  [((TDATA_WIDTH / 8)) - 1:0] axis_in_body_tkeep,
+  input  [TUSER_WIDTH-1:0]           axis_in_body_tuser,
+  input                              axis_in_body_tvalid,
+  output                             axis_in_body_tready,
+  input                              axis_in_body_tlast,
+
+  output [TDATA_WIDTH - 1:0]         axis_out_tdata,
+  output [((TDATA_WIDTH / 8)) - 1:0] axis_out_tkeep,
+  output [TUSER_WIDTH-1:0]           axis_out_tuser,
+  output                             axis_out_tvalid,
+  input                              axis_out_tready,
+  output                             axis_out_tlast
+);
+
+  wire [TDATA_WIDTH - 1:0]         unflattened_tdata;
+  wire [((TDATA_WIDTH / 8)) - 1:0] unflattened_tkeep;
+  wire [TUSER_WIDTH-1:0]           unflattened_tuser;
+  wire                             unflattened_tvalid;
+  wire                             unflattened_tready;
+  wire                             unflattened_tlast;
+
+  packet_combiner combiner
+  (
+    .axis_aclk(axis_aclk),
+    .axis_resetn(axis_resetn),
+
+    .axis_in_header_tdata(axis_in_header_tdata),
+    .axis_in_header_tkeep(axis_in_header_tkeep),
+    .axis_in_header_tuser(axis_in_header_tuser),
+    .axis_in_header_tvalid(axis_in_header_tvalid),
+    .axis_in_header_tready(axis_in_header_tready),
+    .axis_in_header_tlast(axis_in_header_tlast),
+
+    .axis_in_body_tdata(axis_in_body_tdata),
+    .axis_in_body_tkeep(axis_in_body_tkeep),
+    .axis_in_body_tuser(axis_in_body_tuser),
+    .axis_in_body_tvalid(axis_in_body_tvalid),
+    .axis_in_body_tready(axis_in_body_tready),
+    .axis_in_body_tlast(axis_in_body_tlast),
+
+    .axis_out_tdata(unflattened_tdata),
+    .axis_out_tkeep(unflattened_tkeep),
+    .axis_out_tuser(unflattened_tuser),
+    .axis_out_tvalid(unflattened_tvalid),
+    .axis_out_tready(unflattened_tready),
+    .axis_out_tlast(unflattened_tlast)
+  );
+
+  axis_flattener flattener
+  (
+    .axis_aclk(axis_aclk),
+    .axis_resetn(axis_resetn),
+
+    .axis_original_tdata(unflattened_tdata),
+    .axis_original_tkeep(unflattened_tkeep),
+    .axis_original_tuser(unflattened_tuser),
+    .axis_original_tvalid(unflattened_tvalid),
+    .axis_original_tready(unflattened_tready),
+    .axis_original_tlast(unflattened_tlast),
+
+    .axis_flattened_tdata(axis_out_tdata),
+    .axis_flattened_tkeep(axis_out_tkeep),
+    .axis_flattened_tuser(axis_out_tuser),
+    .axis_flattened_tvalid(axis_out_tvalid),
+    .axis_flattened_tready(axis_out_tready),
+    .axis_flattened_tlast(axis_out_tlast)
+  );
+
+endmodule
+
+module packet_combiner
+#(
+  // AXI Stream Data Width
+  parameter TDATA_WIDTH         = 256,
+  parameter TUSER_WIDTH         = 128
+)
+(
+  input                              axis_aclk,
+  input                              axis_resetn,
+
+  input  [TDATA_WIDTH - 1:0]         axis_in_header_tdata,
+  input  [((TDATA_WIDTH / 8)) - 1:0] axis_in_header_tkeep,
+  input  [TUSER_WIDTH-1:0]           axis_in_header_tuser,
+  input                              axis_in_header_tvalid,
+  output                             axis_in_header_tready,
+  input                              axis_in_header_tlast,
+
+  input  [TDATA_WIDTH - 1:0]         axis_in_body_tdata,
+  input  [((TDATA_WIDTH / 8)) - 1:0] axis_in_body_tkeep,
+  input  [TUSER_WIDTH-1:0]           axis_in_body_tuser,
+  input                              axis_in_body_tvalid,
+  output                             axis_in_body_tready,
+  input                              axis_in_body_tlast,
+
+  output [TDATA_WIDTH - 1:0]         axis_out_tdata,
+  output [((TDATA_WIDTH / 8)) - 1:0] axis_out_tkeep,
+  output [TUSER_WIDTH-1:0]           axis_out_tuser,
+  output                             axis_out_tvalid,
+  input                              axis_out_tready,
+  output                             axis_out_tlast
+);
+  
+  // Output Queue
+  reg  [TDATA_WIDTH - 1:0]          output_queue_input_tdata;
+  reg  [((TDATA_WIDTH / 8)) - 1:0]  output_queue_input_tkeep;
+  reg  [TUSER_WIDTH-1:0]            output_queue_input_tuser;
+  reg                               output_queue_input_tlast;
+
+  reg                               write_to_output_queue;
+  wire                              read_from_output_queue;
+
+  wire                              output_queue_nearly_full;
+  wire                              output_queue_empty;
+
+  fallthrough_small_fifo
+  #(
+    .WIDTH(TDATA_WIDTH+TUSER_WIDTH+TDATA_WIDTH/8+1), // Fit the whole AXIS packet and the headers
+    .MAX_DEPTH_BITS(4)
+  )
+  output_queue
+  (
+    .din         ({output_queue_input_tdata, output_queue_input_tkeep, output_queue_input_tuser, output_queue_input_tlast}),
+    .wr_en       (write_to_output_queue),
+    .rd_en       (read_from_output_queue),
+    .dout        ({axis_out_tdata, axis_out_tkeep, axis_out_tuser, axis_out_tlast}),
+    .full        (),
+    .prog_full   (),
+    .nearly_full (output_queue_nearly_full),
+    .empty       (output_queue_empty),
+    .reset       (~axis_resetn),
+    .clk         (axis_aclk)
+  );
+
+  assign read_from_output_queue = axis_out_tvalid & axis_out_tready;
+  assign axis_out_tvalid = ~output_queue_empty;
+
+  // AXI Packet Input
+  wire [TDATA_WIDTH - 1:0]         axis_in_tdata;
+  wire [((TDATA_WIDTH / 8)) - 1:0] axis_in_tkeep;
+  wire [TUSER_WIDTH-1:0]           axis_in_tuser;
+  wire                             axis_in_tvalid;
+  wire                             axis_in_tready;
+  wire                             axis_in_tlast;
+
+  wire reading_axis_packet = axis_in_tvalid & axis_in_tready;
+  assign axis_in_tready = ~output_queue_nearly_full;
+
+  // FSM
+  localparam STATE_HEADER = 0;
+  localparam STATE_BODY   = 1;
+
+  reg [0:0] state;
+  reg [0:0] state_next;
+
+  assign axis_in_tdata = state == STATE_HEADER ? axis_in_header_tdata : axis_in_body_tdata;
+  assign axis_in_tkeep = state == STATE_HEADER ? axis_in_header_tkeep : axis_in_body_tkeep;
+  assign axis_in_tuser = state == STATE_HEADER ? axis_in_header_tuser : axis_in_body_tuser;
+  assign axis_in_tlast = state == STATE_HEADER ? axis_in_header_tlast : axis_in_body_tlast;
+
+  assign axis_in_tvalid = state == STATE_HEADER ? axis_in_header_tvalid : axis_in_body_tvalid;
+
+  assign axis_in_header_tready = state == STATE_HEADER ? axis_in_tready : 0;
+  assign axis_in_body_tready   = state == STATE_BODY   ? axis_in_tready : 0;
+
+  always @(*) begin
+    state_next = state;
+
+    if (reading_axis_packet & axis_in_tlast) begin
+      case (state)
+        STATE_HEADER: state_next = STATE_BODY;
+        STATE_BODY:   state_next = STATE_HEADER;
+      endcase
+    end
+  end
+
+  always @(posedge axis_aclk) begin
+    if (~axis_resetn)
+      state = STATE_HEADER;
+    else
+      state = state_next;
+  end
+
+  // AXI Packet Output
+  reg  [TDATA_WIDTH - 1:0]          output_queue_input_tdata_next;
+  reg  [((TDATA_WIDTH / 8)) - 1:0]  output_queue_input_tkeep_next;
+  reg  [TUSER_WIDTH-1:0]            output_queue_input_tuser_next;
+  reg                               output_queue_input_tlast_next;
+
+  reg                               write_to_output_queue_next;
+
+  always @(*) begin
+    output_queue_input_tdata_next = axis_in_tdata;
+    output_queue_input_tkeep_next = axis_in_tkeep;
+    output_queue_input_tuser_next = axis_in_tuser;
+
+    if (state == STATE_HEADER)
+      output_queue_input_tlast_next = 0;
+    else
+      output_queue_input_tlast_next = axis_in_tlast;
+
+    write_to_output_queue_next = 0;
+
+    if (reading_axis_packet) write_to_output_queue_next = 1;
+  end
+
+  always @(posedge axis_aclk) begin
+    output_queue_input_tdata = output_queue_input_tdata_next;
+    output_queue_input_tkeep = output_queue_input_tkeep_next;
+    output_queue_input_tuser = output_queue_input_tuser_next;
+    output_queue_input_tlast = output_queue_input_tlast_next;
+
+    write_to_output_queue = write_to_output_queue_next;
+  end
+ 
+endmodule
+
+/*************************************************************************************************\
+|* AXI Stream Manipulation
+|* =======================
+|* The data width converter and AXI Stream flattener.
+\*************************************************************************************************/
 
 module axis_flattener 
 #(
