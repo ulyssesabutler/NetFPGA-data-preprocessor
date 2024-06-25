@@ -477,12 +477,19 @@ module network_packet_processor
   wire                             axis_header_tready;
   wire                             axis_header_tlast;
 
-  wire [TDATA_WIDTH - 1:0]         axis_body_tdata;
-  wire [((TDATA_WIDTH / 8)) - 1:0] axis_body_tkeep;
-  wire [TUSER_WIDTH-1:0]           axis_body_tuser;
-  wire                             axis_body_tvalid;
-  wire                             axis_body_tready;
-  wire                             axis_body_tlast;
+  wire [TDATA_WIDTH - 1:0]         axis_unprocessed_body_tdata;
+  wire [((TDATA_WIDTH / 8)) - 1:0] axis_unprocessed_body_tkeep;
+  wire [TUSER_WIDTH-1:0]           axis_unprocessed_body_tuser;
+  wire                             axis_unprocessed_body_tvalid;
+  wire                             axis_unprocessed_body_tready;
+  wire                             axis_unprocessed_body_tlast;
+
+  wire [TDATA_WIDTH - 1:0]         axis_processed_body_tdata;
+  wire [((TDATA_WIDTH / 8)) - 1:0] axis_processed_body_tkeep;
+  wire [TUSER_WIDTH-1:0]           axis_processed_body_tuser;
+  wire                             axis_processed_body_tvalid;
+  wire                             axis_processed_body_tready;
+  wire                             axis_processed_body_tlast;
 
   // Splitter
   packet_splitter splitter
@@ -504,14 +511,36 @@ module network_packet_processor
     .axis_out_header_tready(axis_header_tready),
     .axis_out_header_tlast(axis_header_tlast),
 
-    .axis_out_body_tdata(axis_body_tdata),
-    .axis_out_body_tkeep(axis_body_tkeep),
-    .axis_out_body_tuser(axis_body_tuser),
-    .axis_out_body_tvalid(axis_body_tvalid),
-    .axis_out_body_tready(axis_body_tready),
-    .axis_out_body_tlast(axis_body_tlast)
+    .axis_out_body_tdata(axis_unprocessed_body_tdata),
+    .axis_out_body_tkeep(axis_unprocessed_body_tkeep),
+    .axis_out_body_tuser(axis_unprocessed_body_tuser),
+    .axis_out_body_tvalid(axis_unprocessed_body_tvalid),
+    .axis_out_body_tready(axis_unprocessed_body_tready),
+    .axis_out_body_tlast(axis_unprocessed_body_tlast)
   );
 
+  // Normalize
+  image_to_tensor_scaler scaler
+  (
+    .axis_aclk(axis_aclk),
+    .axis_resetn(axis_resetn),
+
+    .axis_image_tdata(axis_unprocessed_body_tdata),
+    .axis_image_tkeep(axis_unprocessed_body_tkeep),
+    .axis_image_tuser(axis_unprocessed_body_tuser),
+    .axis_image_tvalid(axis_unprocessed_body_tvalid),
+    .axis_image_tready(axis_unprocessed_body_tready),
+    .axis_image_tlast(axis_unprocessed_body_tlast),
+
+    .axis_tensor_tdata(axis_processed_body_tdata),
+    .axis_tensor_tkeep(axis_processed_body_tkeep),
+    .axis_tensor_tuser(axis_processed_body_tuser),
+    .axis_tensor_tvalid(axis_processed_body_tvalid),
+    .axis_tensor_tready(axis_processed_body_tready),
+    .axis_tensor_tlast(axis_processed_body_tlast)
+  );
+
+  // Recombine
   packet_constructor constructor
   (
     .axis_aclk(axis_aclk),
@@ -524,12 +553,12 @@ module network_packet_processor
     .axis_in_header_tready(axis_header_tready),
     .axis_in_header_tlast(axis_header_tlast),
 
-    .axis_in_body_tdata(axis_body_tdata),
-    .axis_in_body_tkeep(axis_body_tkeep),
-    .axis_in_body_tuser(axis_body_tuser),
-    .axis_in_body_tvalid(axis_body_tvalid),
-    .axis_in_body_tready(axis_body_tready),
-    .axis_in_body_tlast(axis_body_tlast),
+    .axis_in_body_tdata(axis_processed_body_tdata),
+    .axis_in_body_tkeep(axis_processed_body_tkeep),
+    .axis_in_body_tuser(axis_processed_body_tuser),
+    .axis_in_body_tvalid(axis_processed_body_tvalid),
+    .axis_in_body_tready(axis_processed_body_tready),
+    .axis_in_body_tlast(axis_processed_body_tlast),
 
     .axis_out_tdata(m_axis_tdata),
     .axis_out_tkeep(m_axis_tkeep),
@@ -1297,6 +1326,7 @@ module byte_to_bit_mask
   input [BYTE_MASK_WIDTH - 1:0] byte_mask,
   output reg [(BYTE_MASK_WIDTH * 8) - 1:0] bit_mask
 );
+
   integer i;
   
   always @(*) begin
@@ -1304,6 +1334,7 @@ module byte_to_bit_mask
       bit_mask[i*8 +: 8] = {8{byte_mask[i]}};
     end
   end
+
 endmodule
 
 module copy_into_empty
@@ -1368,6 +1399,446 @@ module first_null_index
         found_non_null_index = 1;
       else if (~found_non_null_index)
         index = i;
+    end
+  end
+
+endmodule
+
+/*************************************************************************************************\
+|* SCALING
+|* =======
+|* Part of toTensor() is to map the pixel intensity values (from 0 to 255) to a percentage
+|* (0 to 1). For our purposes, this essentially means converting an 8-bit int to a float.
+\*************************************************************************************************/
+
+module image_to_tensor_scaler
+#(
+  // AXI Stream Data Width
+  parameter TDATA_WIDTH        = 256,
+  parameter TUSER_WIDTH        = 128,
+  
+  localparam SMALL_TDATA_WIDTH = TDATA_WIDTH / 4
+)
+(
+  // Global Ports
+  input                              axis_aclk,
+  input                              axis_resetn,
+
+  input  [TDATA_WIDTH - 1:0]         axis_image_tdata,
+  input  [((TDATA_WIDTH / 8)) - 1:0] axis_image_tkeep,
+  input  [TUSER_WIDTH-1:0]           axis_image_tuser,
+  input                              axis_image_tvalid,
+  output                             axis_image_tready,
+  input                              axis_image_tlast,
+
+  output [TDATA_WIDTH - 1:0]         axis_tensor_tdata,
+  output [((TDATA_WIDTH / 8)) - 1:0] axis_tensor_tkeep,
+  output [TUSER_WIDTH-1:0]           axis_tensor_tuser,
+  output                             axis_tensor_tvalid,
+  input                              axis_tensor_tready,
+  output                             axis_tensor_tlast
+);
+
+  // Internal Connectivity
+  wire [SMALL_TDATA_WIDTH - 1:0]         axis_smaller_tdata;
+  wire [((SMALL_TDATA_WIDTH / 8)) - 1:0] axis_smaller_tkeep;
+  wire [TUSER_WIDTH - 1:0]               axis_smaller_tuser;
+  wire                                   axis_smaller_tvalid;
+  wire                                   axis_smaller_tready;
+  wire                                   axis_smaller_tlast;
+
+  axis_data_width_converter
+  #(
+    .IN_TDATA_WIDTH(TDATA_WIDTH),
+    .OUT_TDATA_WIDTH(SMALL_TDATA_WIDTH),
+    .TUSER_WIDTH(TUSER_WIDTH)
+  )
+  data_width_shrinker
+  (
+    .axis_aclk(axis_aclk),
+    .axis_resetn(axis_resetn),
+
+    .axis_original_tdata(axis_image_tdata),
+    .axis_original_tkeep(axis_image_tkeep),
+    .axis_original_tuser(axis_image_tuser),
+    .axis_original_tvalid(axis_image_tvalid),
+    .axis_original_tready(axis_image_tready),
+    .axis_original_tlast(axis_image_tlast),
+
+    .axis_resize_tdata(axis_smaller_tdata),
+    .axis_resize_tkeep(axis_smaller_tkeep),
+    .axis_resize_tuser(axis_smaller_tuser),
+    .axis_resize_tvalid(axis_smaller_tvalid),
+    .axis_resize_tready(axis_smaller_tready),
+    .axis_resize_tlast(axis_smaller_tlast)
+  );
+
+  small_axis_image_to_tensor_scaler scaler
+  (
+    .axis_aclk(axis_aclk),
+    .axis_resetn(axis_resetn),
+
+    .axis_image_tdata(axis_smaller_tdata),
+    .axis_image_tkeep(axis_smaller_tkeep),
+    .axis_image_tuser(axis_smaller_tuser),
+    .axis_image_tvalid(axis_smaller_tvalid),
+    .axis_image_tready(axis_smaller_tready),
+    .axis_image_tlast(axis_smaller_tlast),
+
+    .axis_tensor_tdata(axis_tensor_tdata),
+    .axis_tensor_tkeep(axis_tensor_tkeep),
+    .axis_tensor_tuser(axis_tensor_tuser),
+    .axis_tensor_tvalid(axis_tensor_tvalid),
+    .axis_tensor_tready(axis_tensor_tready),
+    .axis_tensor_tlast(axis_tensor_tlast)
+  );
+
+endmodule
+
+module small_axis_image_to_tensor_scaler
+#(
+  // AXI Stream Data Width
+  parameter TDATA_WIDTH        = 256,
+  parameter TUSER_WIDTH        = 128,
+
+  localparam SMALL_TDATA_WIDTH = TDATA_WIDTH / 4
+)
+(
+  // Global Ports
+  input                              axis_aclk,
+  input                              axis_resetn,
+
+  // Master Stream Ports (The output of this module)
+  input  [SMALL_TDATA_WIDTH - 1:0]         axis_image_tdata,
+  input  [((SMALL_TDATA_WIDTH / 8)) - 1:0] axis_image_tkeep,
+  input  [TUSER_WIDTH - 1:0]               axis_image_tuser,
+  input                                    axis_image_tvalid,
+  output                                   axis_image_tready,
+  input                                    axis_image_tlast,
+
+  // Slave Stream Ports (The input of this module)
+  output [TDATA_WIDTH - 1:0]               axis_tensor_tdata,
+  output [((TDATA_WIDTH / 8)) - 1:0]       axis_tensor_tkeep,
+  output [TUSER_WIDTH-1:0]                 axis_tensor_tuser,
+  output                                   axis_tensor_tvalid,
+  input                                    axis_tensor_tready,
+  output                                   axis_tensor_tlast
+);
+
+  genvar i;
+
+  generate
+    for (i = 0; i < SMALL_TDATA_WIDTH; i = i + 8) begin
+      uint8_to_float32 scaling_lookup_table
+      (
+        .uint8(axis_image_tdata[i + 7:i]),
+        .float32(axis_tensor_tdata[4*i + 31:4*i]),
+        .axis_aclk(axis_aclk),
+        .axis_resetn(axis_resetn)
+      );
+    end
+  endgenerate
+    
+  genvar j;
+  
+  generate
+    for (i = 0; i < (SMALL_TDATA_WIDTH / 8); i = i + 1) begin
+      assign axis_tensor_tkeep[4*i+3:4*i] = {4{axis_image_tkeep[i]}};
+    end
+  endgenerate
+
+  assign axis_tensor_tuser  = axis_image_tuser;
+  assign axis_tensor_tvalid = axis_image_tvalid;
+  assign axis_image_tready  = axis_tensor_tready;
+  assign axis_tensor_tlast  = axis_image_tlast;
+
+endmodule
+
+module uint8_to_float32
+(
+  input      [7:0]  uint8,
+  output reg [31:0] float32,
+
+  input             axis_aclk,
+  input             axis_resetn
+);
+
+  reg [31:0] float_table [0:255];
+
+  always @(uint8) begin
+    float32 = float_table[uint8];
+  end
+
+  always @(posedge axis_aclk) begin
+    /*
+    import struct
+
+    def float_to_hex(f):
+      hex_value = struct.unpack('<I', struct.pack('>f', f))[0]
+      return hex_value
+
+    for i in range(256):
+      f = i / 255.0
+      hex_value = float_to_hex(f)
+      print(f"float_table[{i}] = 32'h{hex_value:08x}; // {f}")
+    */
+    if (~axis_resetn) begin
+      float_table[0]   = 32'h00000000; // 0.0
+      float_table[1]   = 32'h8180803b; // 0.00392156862745098
+      float_table[2]   = 32'h8180003c; // 0.00784313725490196
+      float_table[3]   = 32'hc1c0403c; // 0.011764705882352941
+      float_table[4]   = 32'h8180803c; // 0.01568627450980392
+      float_table[5]   = 32'ha1a0a03c; // 0.0196078431372549
+      float_table[6]   = 32'hc1c0c03c; // 0.023529411764705882
+      float_table[7]   = 32'he1e0e03c; // 0.027450980392156862
+      float_table[8]   = 32'h8180003d; // 0.03137254901960784
+      float_table[9]   = 32'h9190103d; // 0.03529411764705882
+      float_table[10]  = 32'ha1a0203d; // 0.0392156862745098
+      float_table[11]  = 32'hb1b0303d; // 0.043137254901960784
+      float_table[12]  = 32'hc1c0403d; // 0.047058823529411764
+      float_table[13]  = 32'hd1d0503d; // 0.050980392156862744
+      float_table[14]  = 32'he1e0603d; // 0.054901960784313725
+      float_table[15]  = 32'hf1f0703d; // 0.058823529411764705
+      float_table[16]  = 32'h8180803d; // 0.06274509803921569
+      float_table[17]  = 32'h8988883d; // 0.06666666666666667
+      float_table[18]  = 32'h9190903d; // 0.07058823529411765
+      float_table[19]  = 32'h9998983d; // 0.07450980392156863
+      float_table[20]  = 32'ha1a0a03d; // 0.0784313725490196
+      float_table[21]  = 32'ha9a8a83d; // 0.08235294117647059
+      float_table[22]  = 32'hb1b0b03d; // 0.08627450980392157
+      float_table[23]  = 32'hb9b8b83d; // 0.09019607843137255
+      float_table[24]  = 32'hc1c0c03d; // 0.09411764705882353
+      float_table[25]  = 32'hc9c8c83d; // 0.09803921568627451
+      float_table[26]  = 32'hd1d0d03d; // 0.10196078431372549
+      float_table[27]  = 32'hd9d8d83d; // 0.10588235294117647
+      float_table[28]  = 32'he1e0e03d; // 0.10980392156862745
+      float_table[29]  = 32'he9e8e83d; // 0.11372549019607843
+      float_table[30]  = 32'hf1f0f03d; // 0.11764705882352941
+      float_table[31]  = 32'hf9f8f83d; // 0.12156862745098039
+      float_table[32]  = 32'h8180003e; // 0.12549019607843137
+      float_table[33]  = 32'h8584043e; // 0.12941176470588237
+      float_table[34]  = 32'h8988083e; // 0.13333333333333333
+      float_table[35]  = 32'h8d8c0c3e; // 0.13725490196078433
+      float_table[36]  = 32'h9190103e; // 0.1411764705882353
+      float_table[37]  = 32'h9594143e; // 0.1450980392156863
+      float_table[38]  = 32'h9998183e; // 0.14901960784313725
+      float_table[39]  = 32'h9d9c1c3e; // 0.15294117647058825
+      float_table[40]  = 32'ha1a0203e; // 0.1568627450980392
+      float_table[41]  = 32'ha5a4243e; // 0.1607843137254902
+      float_table[42]  = 32'ha9a8283e; // 0.16470588235294117
+      float_table[43]  = 32'hadac2c3e; // 0.16862745098039217
+      float_table[44]  = 32'hb1b0303e; // 0.17254901960784313
+      float_table[45]  = 32'hb5b4343e; // 0.17647058823529413
+      float_table[46]  = 32'hb9b8383e; // 0.1803921568627451
+      float_table[47]  = 32'hbdbc3c3e; // 0.1843137254901961
+      float_table[48]  = 32'hc1c0403e; // 0.18823529411764706
+      float_table[49]  = 32'hc5c4443e; // 0.19215686274509805
+      float_table[50]  = 32'hc9c8483e; // 0.19607843137254902
+      float_table[51]  = 32'hcdcc4c3e; // 0.2
+      float_table[52]  = 32'hd1d0503e; // 0.20392156862745098
+      float_table[53]  = 32'hd5d4543e; // 0.20784313725490197
+      float_table[54]  = 32'hd9d8583e; // 0.21176470588235294
+      float_table[55]  = 32'hdddc5c3e; // 0.21568627450980393
+      float_table[56]  = 32'he1e0603e; // 0.2196078431372549
+      float_table[57]  = 32'he5e4643e; // 0.2235294117647059
+      float_table[58]  = 32'he9e8683e; // 0.22745098039215686
+      float_table[59]  = 32'hedec6c3e; // 0.23137254901960785
+      float_table[60]  = 32'hf1f0703e; // 0.23529411764705882
+      float_table[61]  = 32'hf5f4743e; // 0.23921568627450981
+      float_table[62]  = 32'hf9f8783e; // 0.24313725490196078
+      float_table[63]  = 32'hfdfc7c3e; // 0.24705882352941178
+      float_table[64]  = 32'h8180803e; // 0.25098039215686274
+      float_table[65]  = 32'h8382823e; // 0.2549019607843137
+      float_table[66]  = 32'h8584843e; // 0.25882352941176473
+      float_table[67]  = 32'h8786863e; // 0.2627450980392157
+      float_table[68]  = 32'h8988883e; // 0.26666666666666666
+      float_table[69]  = 32'h8b8a8a3e; // 0.27058823529411763
+      float_table[70]  = 32'h8d8c8c3e; // 0.27450980392156865
+      float_table[71]  = 32'h8f8e8e3e; // 0.2784313725490196
+      float_table[72]  = 32'h9190903e; // 0.2823529411764706
+      float_table[73]  = 32'h9392923e; // 0.28627450980392155
+      float_table[74]  = 32'h9594943e; // 0.2901960784313726
+      float_table[75]  = 32'h9796963e; // 0.29411764705882354
+      float_table[76]  = 32'h9998983e; // 0.2980392156862745
+      float_table[77]  = 32'h9b9a9a3e; // 0.30196078431372547
+      float_table[78]  = 32'h9d9c9c3e; // 0.3058823529411765
+      float_table[79]  = 32'h9f9e9e3e; // 0.30980392156862746
+      float_table[80]  = 32'ha1a0a03e; // 0.3137254901960784
+      float_table[81]  = 32'ha3a2a23e; // 0.3176470588235294
+      float_table[82]  = 32'ha5a4a43e; // 0.3215686274509804
+      float_table[83]  = 32'ha7a6a63e; // 0.3254901960784314
+      float_table[84]  = 32'ha9a8a83e; // 0.32941176470588235
+      float_table[85]  = 32'habaaaa3e; // 0.3333333333333333
+      float_table[86]  = 32'hadacac3e; // 0.33725490196078434
+      float_table[87]  = 32'hafaeae3e; // 0.3411764705882353
+      float_table[88]  = 32'hb1b0b03e; // 0.34509803921568627
+      float_table[89]  = 32'hb3b2b23e; // 0.34901960784313724
+      float_table[90]  = 32'hb5b4b43e; // 0.35294117647058826
+      float_table[91]  = 32'hb7b6b63e; // 0.3568627450980392
+      float_table[92]  = 32'hb9b8b83e; // 0.3607843137254902
+      float_table[93]  = 32'hbbbaba3e; // 0.36470588235294116
+      float_table[94]  = 32'hbdbcbc3e; // 0.3686274509803922
+      float_table[95]  = 32'hbfbebe3e; // 0.37254901960784315
+      float_table[96]  = 32'hc1c0c03e; // 0.3764705882352941
+      float_table[97]  = 32'hc3c2c23e; // 0.3803921568627451
+      float_table[98]  = 32'hc5c4c43e; // 0.3843137254901961
+      float_table[99]  = 32'hc7c6c63e; // 0.38823529411764707
+      float_table[100] = 32'hc9c8c83e; // 0.39215686274509803
+      float_table[101] = 32'hcbcaca3e; // 0.396078431372549
+      float_table[102] = 32'hcdcccc3e; // 0.4
+      float_table[103] = 32'hcfcece3e; // 0.403921568627451
+      float_table[104] = 32'hd1d0d03e; // 0.40784313725490196
+      float_table[105] = 32'hd3d2d23e; // 0.4117647058823529
+      float_table[106] = 32'hd5d4d43e; // 0.41568627450980394
+      float_table[107] = 32'hd7d6d63e; // 0.4196078431372549
+      float_table[108] = 32'hd9d8d83e; // 0.4235294117647059
+      float_table[109] = 32'hdbdada3e; // 0.42745098039215684
+      float_table[110] = 32'hdddcdc3e; // 0.43137254901960786
+      float_table[111] = 32'hdfdede3e; // 0.43529411764705883
+      float_table[112] = 32'he1e0e03e; // 0.4392156862745098
+      float_table[113] = 32'he3e2e23e; // 0.44313725490196076
+      float_table[114] = 32'he5e4e43e; // 0.4470588235294118
+      float_table[115] = 32'he7e6e63e; // 0.45098039215686275
+      float_table[116] = 32'he9e8e83e; // 0.4549019607843137
+      float_table[117] = 32'hebeaea3e; // 0.4588235294117647
+      float_table[118] = 32'hedecec3e; // 0.4627450980392157
+      float_table[119] = 32'hefeeee3e; // 0.4666666666666667
+      float_table[120] = 32'hf1f0f03e; // 0.47058823529411764
+      float_table[121] = 32'hf3f2f23e; // 0.4745098039215686
+      float_table[122] = 32'hf5f4f43e; // 0.47843137254901963
+      float_table[123] = 32'hf7f6f63e; // 0.4823529411764706
+      float_table[124] = 32'hf9f8f83e; // 0.48627450980392156
+      float_table[125] = 32'hfbfafa3e; // 0.49019607843137253
+      float_table[126] = 32'hfdfcfc3e; // 0.49411764705882355
+      float_table[127] = 32'hfffefe3e; // 0.4980392156862745
+      float_table[128] = 32'h8180003f; // 0.5019607843137255
+      float_table[129] = 32'h8281013f; // 0.5058823529411764
+      float_table[130] = 32'h8382023f; // 0.5098039215686274
+      float_table[131] = 32'h8483033f; // 0.5137254901960784
+      float_table[132] = 32'h8584043f; // 0.5176470588235295
+      float_table[133] = 32'h8685053f; // 0.5215686274509804
+      float_table[134] = 32'h8786063f; // 0.5254901960784314
+      float_table[135] = 32'h8887073f; // 0.5294117647058824
+      float_table[136] = 32'h8988083f; // 0.5333333333333333
+      float_table[137] = 32'h8a89093f; // 0.5372549019607843
+      float_table[138] = 32'h8b8a0a3f; // 0.5411764705882353
+      float_table[139] = 32'h8c8b0b3f; // 0.5450980392156862
+      float_table[140] = 32'h8d8c0c3f; // 0.5490196078431373
+      float_table[141] = 32'h8e8d0d3f; // 0.5529411764705883
+      float_table[142] = 32'h8f8e0e3f; // 0.5568627450980392
+      float_table[143] = 32'h908f0f3f; // 0.5607843137254902
+      float_table[144] = 32'h9190103f; // 0.5647058823529412
+      float_table[145] = 32'h9291113f; // 0.5686274509803921
+      float_table[146] = 32'h9392123f; // 0.5725490196078431
+      float_table[147] = 32'h9493133f; // 0.5764705882352941
+      float_table[148] = 32'h9594143f; // 0.5803921568627451
+      float_table[149] = 32'h9695153f; // 0.5843137254901961
+      float_table[150] = 32'h9796163f; // 0.5882352941176471
+      float_table[151] = 32'h9897173f; // 0.592156862745098
+      float_table[152] = 32'h9998183f; // 0.596078431372549
+      float_table[153] = 32'h9a99193f; // 0.6
+      float_table[154] = 32'h9b9a1a3f; // 0.6039215686274509
+      float_table[155] = 32'h9c9b1b3f; // 0.6078431372549019
+      float_table[156] = 32'h9d9c1c3f; // 0.611764705882353
+      float_table[157] = 32'h9e9d1d3f; // 0.615686274509804
+      float_table[158] = 32'h9f9e1e3f; // 0.6196078431372549
+      float_table[159] = 32'ha09f1f3f; // 0.6235294117647059
+      float_table[160] = 32'ha1a0203f; // 0.6274509803921569
+      float_table[161] = 32'ha2a1213f; // 0.6313725490196078
+      float_table[162] = 32'ha3a2223f; // 0.6352941176470588
+      float_table[163] = 32'ha4a3233f; // 0.6392156862745098
+      float_table[164] = 32'ha5a4243f; // 0.6431372549019608
+      float_table[165] = 32'ha6a5253f; // 0.6470588235294118
+      float_table[166] = 32'ha7a6263f; // 0.6509803921568628
+      float_table[167] = 32'ha8a7273f; // 0.6549019607843137
+      float_table[168] = 32'ha9a8283f; // 0.6588235294117647
+      float_table[169] = 32'haaa9293f; // 0.6627450980392157
+      float_table[170] = 32'habaa2a3f; // 0.6666666666666666
+      float_table[171] = 32'hacab2b3f; // 0.6705882352941176
+      float_table[172] = 32'hadac2c3f; // 0.6745098039215687
+      float_table[173] = 32'haead2d3f; // 0.6784313725490196
+      float_table[174] = 32'hafae2e3f; // 0.6823529411764706
+      float_table[175] = 32'hb0af2f3f; // 0.6862745098039216
+      float_table[176] = 32'hb1b0303f; // 0.6901960784313725
+      float_table[177] = 32'hb2b1313f; // 0.6941176470588235
+      float_table[178] = 32'hb3b2323f; // 0.6980392156862745
+      float_table[179] = 32'hb4b3333f; // 0.7019607843137254
+      float_table[180] = 32'hb5b4343f; // 0.7058823529411765
+      float_table[181] = 32'hb6b5353f; // 0.7098039215686275
+      float_table[182] = 32'hb7b6363f; // 0.7137254901960784
+      float_table[183] = 32'hb8b7373f; // 0.7176470588235294
+      float_table[184] = 32'hb9b8383f; // 0.7215686274509804
+      float_table[185] = 32'hbab9393f; // 0.7254901960784313
+      float_table[186] = 32'hbbba3a3f; // 0.7294117647058823
+      float_table[187] = 32'hbcbb3b3f; // 0.7333333333333333
+      float_table[188] = 32'hbdbc3c3f; // 0.7372549019607844
+      float_table[189] = 32'hbebd3d3f; // 0.7411764705882353
+      float_table[190] = 32'hbfbe3e3f; // 0.7450980392156863
+      float_table[191] = 32'hc0bf3f3f; // 0.7490196078431373
+      float_table[192] = 32'hc1c0403f; // 0.7529411764705882
+      float_table[193] = 32'hc2c1413f; // 0.7568627450980392
+      float_table[194] = 32'hc3c2423f; // 0.7607843137254902
+      float_table[195] = 32'hc4c3433f; // 0.7647058823529411
+      float_table[196] = 32'hc5c4443f; // 0.7686274509803922
+      float_table[197] = 32'hc6c5453f; // 0.7725490196078432
+      float_table[198] = 32'hc7c6463f; // 0.7764705882352941
+      float_table[199] = 32'hc8c7473f; // 0.7803921568627451
+      float_table[200] = 32'hc9c8483f; // 0.7843137254901961
+      float_table[201] = 32'hcac9493f; // 0.788235294117647
+      float_table[202] = 32'hcbca4a3f; // 0.792156862745098
+      float_table[203] = 32'hcccb4b3f; // 0.796078431372549
+      float_table[204] = 32'hcdcc4c3f; // 0.8
+      float_table[205] = 32'hcecd4d3f; // 0.803921568627451
+      float_table[206] = 32'hcfce4e3f; // 0.807843137254902
+      float_table[207] = 32'hd0cf4f3f; // 0.8117647058823529
+      float_table[208] = 32'hd1d0503f; // 0.8156862745098039
+      float_table[209] = 32'hd2d1513f; // 0.8196078431372549
+      float_table[210] = 32'hd3d2523f; // 0.8235294117647058
+      float_table[211] = 32'hd4d3533f; // 0.8274509803921568
+      float_table[212] = 32'hd5d4543f; // 0.8313725490196079
+      float_table[213] = 32'hd6d5553f; // 0.8352941176470589
+      float_table[214] = 32'hd7d6563f; // 0.8392156862745098
+      float_table[215] = 32'hd8d7573f; // 0.8431372549019608
+      float_table[216] = 32'hd9d8583f; // 0.8470588235294118
+      float_table[217] = 32'hdad9593f; // 0.8509803921568627
+      float_table[218] = 32'hdbda5a3f; // 0.8549019607843137
+      float_table[219] = 32'hdcdb5b3f; // 0.8588235294117647
+      float_table[220] = 32'hdddc5c3f; // 0.8627450980392157
+      float_table[221] = 32'hdedd5d3f; // 0.8666666666666667
+      float_table[222] = 32'hdfde5e3f; // 0.8705882352941177
+      float_table[223] = 32'he0df5f3f; // 0.8745098039215686
+      float_table[224] = 32'he1e0603f; // 0.8784313725490196
+      float_table[225] = 32'he2e1613f; // 0.8823529411764706
+      float_table[226] = 32'he3e2623f; // 0.8862745098039215
+      float_table[227] = 32'he4e3633f; // 0.8901960784313725
+      float_table[228] = 32'he5e4643f; // 0.8941176470588236
+      float_table[229] = 32'he6e5653f; // 0.8980392156862745
+      float_table[230] = 32'he7e6663f; // 0.9019607843137255
+      float_table[231] = 32'he8e7673f; // 0.9058823529411765
+      float_table[232] = 32'he9e8683f; // 0.9098039215686274
+      float_table[233] = 32'heae9693f; // 0.9137254901960784
+      float_table[234] = 32'hebea6a3f; // 0.9176470588235294
+      float_table[235] = 32'heceb6b3f; // 0.9215686274509803
+      float_table[236] = 32'hedec6c3f; // 0.9254901960784314
+      float_table[237] = 32'heeed6d3f; // 0.9294117647058824
+      float_table[238] = 32'hefee6e3f; // 0.9333333333333333
+      float_table[239] = 32'hf0ef6f3f; // 0.9372549019607843
+      float_table[240] = 32'hf1f0703f; // 0.9411764705882353
+      float_table[241] = 32'hf2f1713f; // 0.9450980392156862
+      float_table[242] = 32'hf3f2723f; // 0.9490196078431372
+      float_table[243] = 32'hf4f3733f; // 0.9529411764705882
+      float_table[244] = 32'hf5f4743f; // 0.9568627450980393
+      float_table[245] = 32'hf6f5753f; // 0.9607843137254902
+      float_table[246] = 32'hf7f6763f; // 0.9647058823529412
+      float_table[247] = 32'hf8f7773f; // 0.9686274509803922
+      float_table[248] = 32'hf9f8783f; // 0.9725490196078431
+      float_table[249] = 32'hfaf9793f; // 0.9764705882352941
+      float_table[250] = 32'hfbfa7a3f; // 0.9803921568627451
+      float_table[251] = 32'hfcfb7b3f; // 0.984313725490196
+      float_table[252] = 32'hfdfc7c3f; // 0.9882352941176471
+      float_table[253] = 32'hfefd7d3f; // 0.9921568627450981
+      float_table[254] = 32'hfffe7e3f; // 0.996078431372549
+      float_table[255] = 32'h0000803f; // 1.0
     end
   end
 
