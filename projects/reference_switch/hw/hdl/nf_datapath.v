@@ -512,7 +512,7 @@ module network_packet_processor
     .axis_out_body_tlast(axis_body_tlast)
   );
 
-  packet_combiner combiner
+  packet_constructor constructor
   (
     .axis_aclk(axis_aclk),
     .axis_resetn(axis_resetn),
@@ -1055,8 +1055,267 @@ module axis_flattener
 
 endmodule
 
-
 module axis_data_width_converter
+#(
+  // AXI Stream Data Width
+  parameter IN_TDATA_WIDTH  = 256,
+  parameter OUT_TDATA_WIDTH = IN_TDATA_WIDTH / 4,
+  parameter TUSER_WIDTH     = 128,
+
+  localparam BUFFER_WIDTH   = IN_TDATA_WIDTH + OUT_TDATA_WIDTH
+)
+(
+  // Global Ports
+  input                                  axis_aclk,
+  input                                  axis_resetn,
+
+  input  [IN_TDATA_WIDTH - 1:0]          axis_original_tdata,
+  input  [((IN_TDATA_WIDTH / 8)) - 1:0]  axis_original_tkeep,
+  input  [TUSER_WIDTH-1:0]               axis_original_tuser,
+  input                                  axis_original_tvalid,
+  output                                 axis_original_tready,
+  input                                  axis_original_tlast,
+
+  output [OUT_TDATA_WIDTH - 1:0]         axis_resize_tdata,
+  output [((OUT_TDATA_WIDTH / 8)) - 1:0] axis_resize_tkeep,
+  output [TUSER_WIDTH - 1:0]             axis_resize_tuser,
+  output                                 axis_resize_tvalid,
+  input                                  axis_resize_tready,
+  output                                 axis_resize_tlast
+);
+
+  // Output Queue
+  reg [OUT_TDATA_WIDTH - 1:0]            output_queue_tdata;
+  reg [(OUT_TDATA_WIDTH / 8) - 1:0]      output_queue_tkeep;
+  reg [TUSER_WIDTH - 1:0]                output_queue_tuser;
+  reg                                    output_queue_tlast;
+  
+  reg                                    write_to_output_queue;
+  wire                                   output_queue_nearly_full;
+  wire                                   output_queue_empty;
+
+  fallthrough_small_fifo
+  #(
+    .WIDTH(OUT_TDATA_WIDTH+TUSER_WIDTH+OUT_TDATA_WIDTH/8+1),
+    .MAX_DEPTH_BITS(4)
+  )
+  output_fifo
+  (
+    .din         ({output_queue_tdata, output_queue_tkeep, output_queue_tuser, output_queue_tlast}),
+    .wr_en       (write_to_output_queue),
+    .rd_en       (send_from_module),
+    .dout        ({axis_resize_tdata, axis_resize_tkeep, axis_resize_tuser, axis_resize_tlast}),
+    .full        (),
+    .prog_full   (),
+    .nearly_full (output_queue_nearly_full),
+    .empty       (output_queue_empty),
+    .reset       (~axis_resetn),
+    .clk         (axis_aclk)
+  );
+
+  assign send_from_module   = axis_resize_tvalid & axis_resize_tready;
+  assign axis_resize_tvalid = ~output_queue_empty;
+
+  // Buffer
+  reg  [BUFFER_WIDTH - 1:0]       buffer_tdata;
+  reg  [(BUFFER_WIDTH / 8) - 1:0] buffer_tkeep;
+  reg  [TUSER_WIDTH - 1:0]        buffer_tuser;
+  reg                             buffer_tlast;
+
+  // Step 1: Move from input to buffer
+  wire [BUFFER_WIDTH - 1:0]       buffer_tdata_after_write;
+  wire [(BUFFER_WIDTH / 8) - 1:0] buffer_tkeep_after_write;
+
+  copy_into_empty
+  #(
+    .SRC_DATA_WIDTH(IN_TDATA_WIDTH),
+    .DEST_DATA_WIDTH(BUFFER_WIDTH)
+  )
+  copy_from_input_to_write_buffer
+  (
+    .src_data_in(axis_original_tdata),
+    .src_keep_in(axis_original_tkeep),
+
+    .dest_data_in(buffer_tdata),
+    .dest_keep_in(buffer_tkeep),
+
+    .dest_data_out(buffer_tdata_after_write),
+    .dest_keep_out(buffer_tkeep_after_write)
+  );
+
+  wire   should_move_data_to_buffer = axis_original_tready & axis_original_tvalid;
+  assign axis_original_tready = ~buffer_tkeep[OUT_TDATA_WIDTH / 8] & ~buffer_tlast;
+
+  // Step 2: Move from buffer to output
+
+  //    Part 1: Assuming write occurred
+  wire [BUFFER_WIDTH - 1:0]          buffer_tdata_with_write_after_read;
+  wire [(BUFFER_WIDTH / 8) - 1:0]    buffer_tkeep_with_write_after_read;
+
+  wire [OUT_TDATA_WIDTH - 1:0]       output_queue_tdata_with_write_after_read;
+  wire [(OUT_TDATA_WIDTH / 8) - 1:0] output_queue_tkeep_with_write_after_read;
+
+  copy_into_empty 
+  #(
+    .SRC_DATA_WIDTH(BUFFER_WIDTH),
+    .DEST_DATA_WIDTH(OUT_TDATA_WIDTH)
+  )
+  copy_from_buffer_to_output_with_write
+  (
+    .src_data_in(buffer_tdata_after_write),
+    .src_keep_in(buffer_tkeep_after_write),
+
+    .dest_data_in(0),
+    .dest_keep_in(0),
+
+    .src_data_out(buffer_tdata_with_write_after_read),
+    .src_keep_out(buffer_tkeep_with_write_after_read),
+
+    .dest_data_out(output_queue_tdata_with_write_after_read),
+    .dest_keep_out(output_queue_tkeep_with_write_after_read)
+  );
+
+  wire will_buffer_be_empty_with_write_after_read                = ~|buffer_tkeep_with_write_after_read;
+  wire will_current_network_packet_be_read_with_write_after_read = will_buffer_be_empty_with_write_after_read & buffer_tlast;
+  wire should_move_data_to_output_with_write_after_read          = ((&output_queue_tkeep_with_write_after_read) | will_current_network_packet_be_read_with_write_after_read) & ~output_queue_nearly_full;
+
+  //    Part 2: Assuming write did not occur
+  wire [BUFFER_WIDTH - 1:0]          buffer_tdata_without_write_after_read;
+  wire [(BUFFER_WIDTH / 8) - 1:0]    buffer_tkeep_without_write_after_read;
+
+  wire [OUT_TDATA_WIDTH - 1:0]       output_queue_tdata_without_write_after_read;
+  wire [(OUT_TDATA_WIDTH / 8) - 1:0] output_queue_tkeep_without_write_after_read;
+
+  copy_into_empty 
+  #(
+    .SRC_DATA_WIDTH(BUFFER_WIDTH),
+    .DEST_DATA_WIDTH(OUT_TDATA_WIDTH)
+  )
+  copy_from_buffer_to_output_without_write
+  (
+    .src_data_in(buffer_tdata),
+    .src_keep_in(buffer_tkeep),
+
+    .dest_data_in(0),
+    .dest_keep_in(0),
+
+    .src_data_out(buffer_tdata_without_write_after_read),
+    .src_keep_out(buffer_tkeep_without_write_after_read),
+
+    .dest_data_out(output_queue_tdata_without_write_after_read),
+    .dest_keep_out(output_queue_tkeep_without_write_after_read)
+  );
+
+  wire will_buffer_be_empty_without_write_after_read                = ~|buffer_tkeep_without_write_after_read;
+  wire will_current_network_packet_be_read_without_write_after_read = will_buffer_be_empty_without_write_after_read & buffer_tlast;
+  wire should_move_data_to_output_without_write_after_read          = ((&output_queue_tkeep_without_write_after_read) | will_current_network_packet_be_read_without_write_after_read) & ~output_queue_nearly_full;
+
+  // Step 3: Latch buffer
+  reg  [BUFFER_WIDTH - 1:0]       buffer_tdata_next;
+  reg  [(BUFFER_WIDTH / 8) - 1:0] buffer_tkeep_next;
+  reg  [TUSER_WIDTH - 1:0]        buffer_tuser_next;
+  reg                             buffer_tlast_next;
+
+  always @(*) begin
+    buffer_tdata_next = buffer_tdata;
+    buffer_tkeep_next = buffer_tkeep;
+    buffer_tuser_next = buffer_tuser;
+    buffer_tlast_next = buffer_tlast;
+
+    if (should_move_data_to_buffer) begin
+      if (should_move_data_to_output_with_write_after_read) begin
+        buffer_tdata_next = buffer_tdata_with_write_after_read;
+        buffer_tkeep_next = buffer_tkeep_with_write_after_read;
+        buffer_tuser_next = axis_original_tuser ? axis_original_tuser : buffer_tuser;
+        buffer_tlast_next = axis_original_tlast & ~will_buffer_be_empty_with_write_after_read;
+      end else begin
+        buffer_tdata_next = buffer_tdata_after_write;
+        buffer_tkeep_next = buffer_tkeep_after_write;
+        buffer_tuser_next = axis_original_tuser ? axis_original_tuser : buffer_tuser;
+        buffer_tlast_next = axis_original_tlast;
+      end
+    end else begin
+      if (should_move_data_to_output_without_write_after_read) begin
+        buffer_tdata_next = buffer_tdata_without_write_after_read;
+        buffer_tkeep_next = buffer_tkeep_without_write_after_read;
+        buffer_tuser_next = buffer_tuser;
+        buffer_tlast_next = buffer_tlast & ~will_buffer_be_empty_without_write_after_read;
+      end
+    end
+  end
+
+  always @(posedge axis_aclk) begin
+    if (~axis_resetn) begin
+      buffer_tdata <= 0;
+      buffer_tkeep <= 0;
+      buffer_tuser <= 0;
+      buffer_tlast <= 0;
+    end else begin
+      buffer_tdata <= buffer_tdata_next;
+      buffer_tkeep <= buffer_tkeep_next;
+      buffer_tuser <= buffer_tuser_next;
+      buffer_tlast <= buffer_tlast_next;
+    end
+  end
+
+  // Step 4: Latch the output
+  reg [OUT_TDATA_WIDTH - 1:0]            output_queue_tdata_next;
+  reg [(OUT_TDATA_WIDTH / 8) - 1:0]      output_queue_tkeep_next;
+  reg [TUSER_WIDTH - 1:0]                output_queue_tuser_next;
+  reg                                    output_queue_tlast_next;
+  
+  reg                                    write_to_output_queue_next;
+
+  always @(*) begin
+    output_queue_tdata_next = 0;
+    output_queue_tkeep_next = 0;
+    output_queue_tuser_next = 0;
+    output_queue_tlast_next = 0;
+    
+    write_to_output_queue_next = 0;
+
+    if (should_move_data_to_buffer) begin
+      if (should_move_data_to_output_with_write_after_read) begin
+        output_queue_tdata_next = output_queue_tdata_with_write_after_read;
+        output_queue_tkeep_next = output_queue_tkeep_with_write_after_read;
+        output_queue_tuser_next = axis_original_tuser ? axis_original_tuser : buffer_tuser;
+        output_queue_tlast_next = will_current_network_packet_be_read_with_write_after_read;
+        
+        write_to_output_queue_next = 1;
+      end
+    end else begin
+      if (should_move_data_to_output_without_write_after_read) begin
+        output_queue_tdata_next = output_queue_tdata_without_write_after_read;
+        output_queue_tkeep_next = output_queue_tkeep_without_write_after_read;
+        output_queue_tuser_next = axis_original_tuser ? axis_original_tuser : buffer_tuser;
+        output_queue_tlast_next = will_current_network_packet_be_read_without_write_after_read;
+        
+        write_to_output_queue_next = 1;
+      end
+    end
+  end
+
+  always @(posedge axis_aclk) begin
+    if (~axis_resetn) begin
+      output_queue_tdata <= 0;
+      output_queue_tkeep <= 0;
+      output_queue_tuser <= 0;
+      output_queue_tlast <= 0;
+      
+      write_to_output_queue <= 0;
+    end else begin
+      output_queue_tdata <= output_queue_tdata_next;
+      output_queue_tkeep <= output_queue_tkeep_next;
+      output_queue_tuser <= output_queue_tuser_next;
+      output_queue_tlast <= output_queue_tlast_next;
+      
+      write_to_output_queue <= write_to_output_queue_next;
+    end
+  end
+
+endmodule
+
+module axis_data_width_converter_pipelined_back
 #(
   // AXI Stream Data Width
   parameter IN_TDATA_WIDTH  = 256,
